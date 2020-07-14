@@ -43,8 +43,7 @@ class Coclustering(object):
         :param low_memory: if true, use a memory-conservative algorithm
         :return:
         """
-        if client is None:
-            self.client = Client()
+        self.client = client if client is not None else Client()
 
         if low_memory:
             self._dask_runs_memory()
