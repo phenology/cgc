@@ -71,12 +71,17 @@ class Coclustering(object):
                 r for r in range(self.nruns)
             }
             row_min, col_min, e_min = None, None, 0.
+            r = 0
             for future in concurrent.futures.as_completed(futures):
+                logger.info(f'Retrieving run {r} ..')
                 converged, row, col, e = future.result()
+                logger.info(f'Error = {e}')
                 if not converged:
-                    logger.warning('WARNING! Not converged')
+                    logger.warning('Run not converged, '
+                                   'increase max_iterations')
                 if e < e_min:
                     row_min, col_min, e_min = row, col, e
+                r += 1
         self.row_clusters = row_min
         self.col_clusters = col_min
         self.error = e_min
@@ -92,7 +97,7 @@ class Coclustering(object):
         self.client.scatter(self.Z)
         row_min, col_min, e_min = None, None, 0.
         for r in range(self.nruns):
-            logger.info(f'run {r}')
+            logger.info(f'Run {r} ..')
             converged, row, col, e = coclustering_dask.coclustering(
                 self.Z,
                 self.nclusters_row,
@@ -101,8 +106,10 @@ class Coclustering(object):
                 self.max_iterations,
                 self.epsilon
             )
+            logger.info(f'Error = {e}')
             if not converged:
-                logger.warning('WARNING! Not converged')
+                logger.warning('Run not converged, '
+                               'increase max_iterations')
             if e < e_min:
                 row_min, col_min, e_min = row, col, e
         self.row_clusters = row_min.compute()
@@ -124,14 +131,19 @@ class Coclustering(object):
                                       self.epsilon)
                    for r in range(self.nruns)]
         row_min, col_min, e_min = None, None, 0.
+        r = 0
         for future, result in dask.distributed.as_completed(futures,
                                                             with_results=True,
                                                             raise_errors=False):
+            logger.info(f'Retrieving run {r} ..')
             converged, row, col, e = result
+            logger.info(f'Error = {e}')
             if not converged:
-                logger.warning('WARNING! Not converged')
+                logger.warning('Run not converged, '
+                               'increase max_iterations')
             if e < e_min:
                 row_min, col_min, e_min = row, col, e
+            r += 1
         self.row_clusters = row_min.compute()
         self.col_clusters = col_min.compute()
         self.error = e_min
