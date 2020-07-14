@@ -1,11 +1,14 @@
 import concurrent.futures
 import dask.distributed
+import logging
 
 from concurrent.futures import ThreadPoolExecutor
 from dask.distributed import Client
 
 from . import coclustering_dask
 from . import coclustering_numpy
+
+logger = logging.getLogger(__name__)
 
 
 class Coclustering(object):
@@ -71,7 +74,7 @@ class Coclustering(object):
             for future in concurrent.futures.as_completed(futures):
                 converged, row, col, e = future.result()
                 if not converged:
-                    print('WARNING! Not converged')
+                    logger.warning('WARNING! Not converged')
                 if e < e_min:
                     row_min, col_min, e_min = row, col, e
         self.row_clusters = row_min
@@ -89,7 +92,7 @@ class Coclustering(object):
         self.client.scatter(self.Z)
         row_min, col_min, e_min = None, None, 0.
         for r in range(self.nruns):
-            print(f'run {r}')
+            logger.info(f'run {r}')
             converged, row, col, e = coclustering_dask.coclustering(
                 self.Z,
                 self.nclusters_row,
@@ -99,7 +102,7 @@ class Coclustering(object):
                 self.epsilon
             )
             if not converged:
-                print('WARNING! Not converged')
+                logger.warning('WARNING! Not converged')
             if e < e_min:
                 row_min, col_min, e_min = row, col, e
         self.row_clusters = row_min.compute()
@@ -126,7 +129,7 @@ class Coclustering(object):
                                                             raise_errors=False):
             converged, row, col, e = result
             if not converged:
-                print('WARNING! Not converged')
+                logger.warning('WARNING! Not converged')
             if e < e_min:
                 row_min, col_min, e_min = row, col, e
         self.row_clusters = row_min.compute()
