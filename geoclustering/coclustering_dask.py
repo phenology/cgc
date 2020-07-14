@@ -1,8 +1,7 @@
-import time
 import numpy as np
 
 import dask.array as da
-from dask.distributed import Client, get_client, secede, rejoin
+from dask.distributed import get_client, secede, rejoin
 
 
 def _distance(Z, X, Y, epsilon):
@@ -22,7 +21,7 @@ def _initialize_clusters(n_el, n_clusters):
 
 def coclustering(Z, k, l, errobj, niters, epsilon):
     """
-    Run the co-clustering
+    Run the co-clustering, Dask implementation
 
     :param Z: m x n data matrix
     :param k: num row clusters
@@ -46,19 +45,23 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
     Gavg = Z.mean()
 
     while (abs(e - old_e) > errobj) & (s <= niters):
+        # Calculate cluster based averages
         CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / (
             da.dot(da.dot(R.T, da.ones((m, n))), C) + epsilon)
 
+        # Calculate distance based on row approximation
         d_row = _distance(Z, da.ones((m, n)), da.dot(C, CoCavg.T), epsilon)
-
+        # Assign to best row cluster
         row_clusters = da.argmin(d_row, axis=1)
         R = da.eye(k, dtype=np.int32)[row_clusters]
 
+        # Calculate distance based on column approximation
         d_col = _distance(Z.T, da.ones((n, m)), da.dot(R, CoCavg), epsilon)
-
+        # Assign to best column cluster
         col_clusters = da.argmin(d_col, axis=1)
         C = da.eye(l, dtype=np.int32)[col_clusters]
 
+        # Error value (actually just the column components really)
         old_e = e
         minvals = da.min(d_col, axis=1)
         # power 1 divergence, power 2 euclidean
@@ -66,7 +69,6 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
         row_clusters, col_clusters, e = client.persist([row_clusters,
                                                         col_clusters,
                                                         e])
-
         # the following lines are a workaround for e.compute(): if the function
         # is submitted to the worker with multiple threads it raises issues
         # see https://github.com/dask/distributed/issues/3827

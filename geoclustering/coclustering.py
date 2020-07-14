@@ -90,10 +90,7 @@ class Coclustering(object):
         raise NotImplementedError
 
     def _dask_runs_memory(self):
-        """
-        Memory efficient: find minimum-e-run one by one slower because it is
-        blocking after each run.
-        """
+        """ Memory efficient Dask implementation: serial loop over runs """
         row_min, col_min, e_min = None, None, 0.
         for r in range(self.nruns):
             logger.info(f'Run {r} ..')
@@ -117,8 +114,8 @@ class Coclustering(object):
 
     def _dask_runs_performance(self):
         """
-        Performance: find minimum-e-run from all results  faster because there is
-        no blocking after each run.
+        Faster but memory-intensive Dask implementation: submit all runs to the
+        scheduler
         """
         Z = self.client.scatter(self.Z)
         futures = [self.client.submit(coclustering_dask.coclustering,

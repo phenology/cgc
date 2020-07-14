@@ -18,7 +18,7 @@ def _initialize_clusters(n_el, n_clusters):
 
 def coclustering(Z, k, l, errobj, niters, epsilon):
     """
-    Run the co-clustering
+    Run the co-clustering, Numpy-based implementation
 
     :param Z: m x n data matrix
     :param k: num row clusters
@@ -44,13 +44,13 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
         CoCavg = (np.dot(np.dot(R.T, Z), C) + Gavg * epsilon) / (
                 np.dot(np.dot(R.T, np.ones((m, n))), C) + epsilon)
 
-        # Calculate _distance based on row approximation
+        # Calculate distance based on row approximation
         d_row = _distance(Z, np.ones((m, n)), np.dot(C, CoCavg.T), epsilon)
         # Assign to best row cluster
         row_clusters = np.argmin(d_row, axis=1)
         R = np.eye(k, dtype=np.int32)[row_clusters]
 
-        # Calculate _distance based on column approximation
+        # Calculate distance based on column approximation
         d_col = _distance(Z.T, np.ones((n, m)), np.dot(R, CoCavg), epsilon)
         # Assign to best column cluster
         col_clusters = np.argmin(d_col, axis=1)
