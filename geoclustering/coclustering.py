@@ -94,7 +94,6 @@ class Coclustering(object):
         Memory efficient: find minimum-e-run one by one slower because it is
         blocking after each run.
         """
-        self.client.scatter(self.Z)
         row_min, col_min, e_min = None, None, 0.
         for r in range(self.nruns):
             logger.info(f'Run {r} ..')
@@ -121,9 +120,9 @@ class Coclustering(object):
         Performance: find minimum-e-run from all results  faster because there is
         no blocking after each run.
         """
-        self.client.scatter(self.Z)
+        Z = self.client.scatter(self.Z)
         futures = [self.client.submit(coclustering_dask.coclustering,
-                                      self.Z,
+                                      Z,
                                       self.nclusters_row,
                                       self.nclusters_col,
                                       self.conv_threshold,
