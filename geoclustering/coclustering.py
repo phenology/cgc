@@ -69,11 +69,13 @@ class Coclustering(object):
             }
             row_min, col_min, e_min = None, None, 0.
             for future in concurrent.futures.as_completed(futures):
-                row, col, e = future.result()
+                converged, row, col, e = future.result()
+                if not converged:
+                    print('WARNING! Not converged')
                 if e < e_min:
                     row_min, col_min, e_min = row, col, e
-        self.row_clusters = row_min.compute()
-        self.col_clusters = col_min.compute()
+        self.row_clusters = row_min
+        self.col_clusters = col_min
         self.error = e_min
 
     def run_serial(self):
