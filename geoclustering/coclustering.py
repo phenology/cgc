@@ -109,7 +109,7 @@ class Coclustering(object):
         Performance: find minimum-e-run from all results  faster because there is
         no blocking after each run.
         """
-        self.client.scatter(Z)
+        self.client.scatter(self.Z)
         futures = [self.client.submit(coclustering_dask.coclustering,
                                       self.Z,
                                       self.nclusters_row,
