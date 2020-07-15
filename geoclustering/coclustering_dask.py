@@ -19,7 +19,7 @@ def _initialize_clusters(n_el, n_clusters):
     return eye[cluster_idx]
 
 
-def coclustering(Z, k, l, errobj, niters, epsilon, run_on_worker=False):
+def coclustering(Z, k, l, errobj, niters, epsilon):
     """
     Run the co-clustering, Dask implementation
 
@@ -71,16 +71,16 @@ def coclustering(Z, k, l, errobj, niters, epsilon, run_on_worker=False):
         row_clusters, col_clusters, e = client.persist([row_clusters,
                                                         col_clusters,
                                                         e])
-        if run_on_worker:
-            # this is workaround for e.compute() if this function runs on a
-            # worker with multiple threads
-            # https://github.com/dask/distributed/issues/3827
-            e = client.compute(e)
-            secede()
-            e = e.result()
-            rejoin()
-        else:
-            e = e.compute()
+        # if run_on_worker:
+        #     # this is workaround for e.compute() if this function runs on a
+        #     # worker with multiple threads
+        #     # https://github.com/dask/distributed/issues/3827
+        #     e = client.compute(e)
+        #     secede()
+        #     e = e.result()
+        #     rejoin()
+        # else:
+        #     e = e.compute()
 
         converged = abs(e - old_e) < errobj
         s = s + 1
