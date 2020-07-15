@@ -41,11 +41,12 @@ def coclustering(Z, k, l, errobj, niters, epsilon, run_on_worker=False):
     C = _initialize_clusters(n, l)
 
     e, old_e = 2 * errobj, 0
-    s = 1
+    s = 0
+    converged = False
 
     Gavg = Z.mean()
 
-    while (abs(e - old_e) > errobj) & (s <= niters):
+    while (not converged) & (s < niters):
         # Calculate cluster based averages
         CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / (
             da.dot(da.dot(R.T, da.ones((m, n))), C) + epsilon)
@@ -81,7 +82,7 @@ def coclustering(Z, k, l, errobj, niters, epsilon, run_on_worker=False):
         else:
             e = e.compute()
 
+        converged = abs(e - old_e) < errobj
         s = s + 1
 
-    converged = s <= niters
-    return converged, row_clusters, col_clusters, e
+    return converged, s, row_clusters, col_clusters, e

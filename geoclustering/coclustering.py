@@ -73,12 +73,13 @@ class Coclustering(object):
             row_min, col_min, e_min = None, None, 0.
             r = 0
             for future in concurrent.futures.as_completed(futures):
-                logger.info(f'Retrieving run {r} ..')
-                converged, row, col, e = future.result()
+                logger.info(f'Waiting for run {r} ..')
+                converged, niters, row, col, e = future.result()
                 logger.info(f'Error = {e}')
-                if not converged:
-                    logger.warning('Run not converged, '
-                                   'increase max_iterations')
+                if converged:
+                    logger.info(f'Run converged in {niters} iterations')
+                else:
+                    logger.warning(f'Run not converged in {niters} iterations')
                 if e < e_min:
                     row_min, col_min, e_min = row, col, e
                 r += 1
@@ -94,7 +95,7 @@ class Coclustering(object):
         row_min, col_min, e_min = None, None, 0.
         for r in range(self.nruns):
             logger.info(f'Run {r} ..')
-            converged, row, col, e = coclustering_dask.coclustering(
+            converged, niters, row, col, e = coclustering_dask.coclustering(
                 self.Z,
                 self.nclusters_row,
                 self.nclusters_col,
@@ -103,9 +104,10 @@ class Coclustering(object):
                 self.epsilon
             )
             logger.info(f'Error = {e}')
-            if not converged:
-                logger.warning('Run not converged, '
-                               'increase max_iterations')
+            if converged:
+                logger.info(f'Run converged in {niters} iterations')
+            else:
+                logger.warning(f'Run not converged in {niters} iterations')
             if e < e_min:
                 row_min, col_min, e_min = row, col, e
         self.row_clusters = row_min.compute()
@@ -133,12 +135,14 @@ class Coclustering(object):
         for future, result in dask.distributed.as_completed(futures,
                                                             with_results=True,
                                                             raise_errors=False):
-            logger.info(f'Retrieving run {r} ..')
-            converged, row, col, e = result
+            logger.info(f'Waiting for run {r} ..')
+            converged, niters, row, col, e = result
+            e = e.compute()
             logger.info(f'Error = {e}')
-            if not converged:
-                logger.warning('Run not converged, '
-                               'increase max_iterations')
+            if converged:
+                logger.info(f'Run converged in {niters} iterations')
+            else:
+                logger.warning(f'Run not converged in {niters} iterations')
             if e < e_min:
                 row_min, col_min, e_min = row, col, e
             r += 1

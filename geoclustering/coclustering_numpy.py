@@ -35,11 +35,12 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
     C = _initialize_clusters(n, l)
 
     e, old_e = 2 * errobj, 0
-    s = 1
+    s = 0
+    converged = False
 
     Gavg = Z.mean()
 
-    while (abs(e - old_e) > errobj) & (s <= niters):
+    while (not converged) & (s < niters):
         # Calculate cluster based averages
         CoCavg = (np.dot(np.dot(R.T, Z), C) + Gavg * epsilon) / (
                 np.dot(np.dot(R.T, np.ones((m, n))), C) + epsilon)
@@ -62,7 +63,7 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
         # power 1 divergence, power 2 euclidean
         e = np.sum(np.power(minvals_da, 1))
 
+        converged = abs(e - old_e) < errobj
         s = s + 1
 
-    converged = s <= niters
-    return converged, row_clusters, col_clusters, e
+    return converged, s, row_clusters, col_clusters, e
