@@ -29,9 +29,8 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
     :param errobj: precision of obj fun for convergence
     :param niters: max iterations
     :param epsilon: precision of matrix elements
-    :param run_on_worker: whether this function is run on a Dask worker
-    :return: has converged, final row clustering, final column clustering,
-    error value
+    :return: has converged, number of iterations performed. final row and
+    column clustering, error value
     """
     client = get_client()
 
