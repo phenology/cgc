@@ -29,5 +29,7 @@ if __name__ == "__main__":
                 kmean_n_clusters = kmean_n_clusters,
                 kmean_max_iter = kmean_max_iter)
     km.compute()
+    km.cl_mean_centroids
+
     
     
