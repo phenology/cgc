@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Kmeans(object):
 
-    def __init__(self, Z, row_clusters, col_clusters, n_row_clusters, n_col_clusters, kmean_n_clusters, kmean_max_iter=100, output_dir='.'):
+    def __init__(self, Z, row_clusters, col_clusters, n_row_clusters, n_col_clusters, kmean_n_clusters, kmean_max_iter=100):
         """
 
         :param Z: m x n matrix of spatial-temporal data. Usually each row is a time-series of a spatial grid. 
@@ -27,7 +27,6 @@ class Kmeans(object):
         :param n_col_clusters: number of column clusters
         :param kmean_n_clusters: number of clusters to form in KMean, i.e. value "k"
         :param kmean_max_iter: maximum number of iterations of the KMeans
-        :param output_dir: results output directory
         """
         self.Z = Z
         self.row_clusters = row_clusters
@@ -36,7 +35,6 @@ class Kmeans(object):
         self.n_col_clusters = n_col_clusters
         self.kmean_n_clusters = kmean_n_clusters
         self.kmean_max_iter = kmean_max_iter
-        self.output_dir = output_dir
 
         if len(np.unique(row_clusters))>n_row_clusters or len(np.unique(col_clusters))>n_col_clusters:
             raise ValueError

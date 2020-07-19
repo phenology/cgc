@@ -27,8 +27,7 @@ if __name__ == "__main__":
                 n_row_clusters = k,
                 n_col_clusters = l,
                 kmean_n_clusters = kmean_n_clusters,
-                kmean_max_iter = kmean_max_iter,
-                output_dir='/mnt/c/Users/OuKu/Developments/phenology/data/test_results')
+                kmean_max_iter = kmean_max_iter)
     km.compute()
     
     
