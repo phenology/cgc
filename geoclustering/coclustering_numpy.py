@@ -16,13 +16,13 @@ def _initialize_clusters(n_el, n_clusters):
     return eye[cluster_idx]
 
 
-def coclustering(Z, k, l, errobj, niters, epsilon):
+def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon):
     """
     Run the co-clustering, Numpy-based implementation
 
     :param Z: m x n data matrix
-    :param k: num row clusters
-    :param l: num col clusters
+    :param nclusters_row: num row clusters
+    :param nclusters_col: num col clusters
     :param errobj: precision of obj fun for convergence
     :param niters: max iterations
     :param epsilon: precision of matrix elements
@@ -31,8 +31,8 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
     """
     [m, n] = Z.shape
 
-    R = _initialize_clusters(m, k)
-    C = _initialize_clusters(n, l)
+    R = _initialize_clusters(m, nclusters_row)
+    C = _initialize_clusters(n, nclusters_col)
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -49,13 +49,13 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
         d_row = _distance(Z, np.ones((m, n)), np.dot(C, CoCavg.T), epsilon)
         # Assign to best row cluster
         row_clusters = np.argmin(d_row, axis=1)
-        R = np.eye(k, dtype=np.int32)[row_clusters]
+        R = np.eye(nclusters_row, dtype=np.int32)[row_clusters]
 
         # Calculate distance based on column approximation
         d_col = _distance(Z.T, np.ones((n, m)), np.dot(R, CoCavg), epsilon)
         # Assign to best column cluster
         col_clusters = np.argmin(d_col, axis=1)
-        C = np.eye(l, dtype=np.int32)[col_clusters]
+        C = np.eye(nclusters_col, dtype=np.int32)[col_clusters]
 
         # Error value (actually just the column components really)
         old_e = e
