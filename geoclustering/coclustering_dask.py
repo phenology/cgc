@@ -15,7 +15,8 @@ def _initialize_clusters(n_el, n_clusters):
     """ Initialize cluster occupation matrix """
     cluster_idx = da.mod(da.arange(n_el), n_clusters)
     cluster_idx = da.random.permutation(cluster_idx)
-    eye = da.eye(n_clusters, dtype=np.int32)  # TODO: check if Z shape is larger than max int32?
+    # TODO: check if Z shape is larger than max int32?
+    eye = da.eye(n_clusters, dtype=np.int32)
     return eye[cluster_idx]
 
 

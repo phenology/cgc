@@ -132,9 +132,10 @@ class Coclustering(object):
                    for r in range(self.nruns)]
         row_min, col_min, e_min = None, None, 0.
         r = 0
-        for future, result in dask.distributed.as_completed(futures,
-                                                            with_results=True,
-                                                            raise_errors=False):
+        for future, result in dask.distributed.as_completed(
+                futures,
+                with_results=True,
+                raise_errors=False):
             logger.info(f'Waiting for run {r} ..')
             converged, niters, row, col, e = result
             e = e.compute()
@@ -149,4 +150,3 @@ class Coclustering(object):
         self.row_clusters = row_min.compute()
         self.col_clusters = col_min.compute()
         self.error = e_min
-
