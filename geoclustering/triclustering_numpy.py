@@ -62,7 +62,7 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         # Assign to best row cluster
         row_clusters = np.argmin(d2, axis=1)
         R = np.eye(nclusters_row)[row_clusters, :]
-        R1 = np.kron(np.ones((d, 1)), R)
+        R1 = np.tile(R, (d, 1))
 
         # Obtain all the cluster based averages
         CoCavg1 = (np.dot(np.dot(R1.T, Y1), C) + Gavg * epsilon) / (
@@ -74,7 +74,7 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         # Assign to best column cluster
         col_clusters = np.argmin(d2, axis=1)
         C = np.eye(nclusters_col)[col_clusters, :]
-        C2 = np.kron(np.ones((m, 1)), C)
+        C2 = np.tile(C, (m, 1))
 
         # Obtain all the cluster based averages
         CoCavg2 = (np.dot(np.dot(B.T, Y2), C2) + Gavg * epsilon) / (
@@ -86,7 +86,7 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         # Assign to best column cluster
         bnd_clusters = np.argmin(d2, axis=1)
         B = np.eye(nclusters_bnd)[bnd_clusters, :]
-        C1 = np.kron(np.ones((n, 1)), B)
+        C1 = np.tile(B, (n, 1))
 
         # Error value (actually just the column components really)
         old_e = e
