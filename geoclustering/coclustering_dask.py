@@ -1,7 +1,7 @@
 import numpy as np
 
 import dask.array as da
-from dask.distributed import get_client
+from dask.distributed import get_client, rejoin, secede
 
 
 def _distance(Z, X, Y, epsilon):
@@ -20,7 +20,8 @@ def _initialize_clusters(n_el, n_clusters):
     return eye[cluster_idx]
 
 
-def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon):
+def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
+                 run_on_worker=False):
     """
     Run the co-clustering, Dask implementation
 
@@ -30,6 +31,7 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon):
     :param errobj: precision of obj fun for convergence
     :param niters: max iterations
     :param epsilon: precision of matrix elements
+    :param run_on_worker: whether the function is submitted to a Dask worker
     :return: has converged, number of iterations performed. final row and
     column clustering, error value
     """
@@ -71,6 +73,16 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon):
         row_clusters, col_clusters, e = client.persist([row_clusters,
                                                         col_clusters,
                                                         e])
+        if run_on_worker:
+            # this is workaround for e.compute() for a function that runs
+            # on a worker with multiple threads
+            # https://github.com/dask/distributed/issues/3827
+            e = client.compute(e)
+            secede()
+            e = e.result()
+            rejoin()
+        else:
+            e.compute()
 
         converged = abs(e - old_e) < errobj
         s = s + 1
