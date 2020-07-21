@@ -33,17 +33,13 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
     """
     [d, m, n] = Z.shape
 
-    # get data matrix size and fixed averages(upload rows)
-    Y = np.concatenate(Z, axis=1)
+    # Setup matrices to ..
+    Y = np.concatenate(Z, axis=1)  # .. update rows
+    Y1 = np.concatenate(Z, axis=0)  # .. update columns
+    Y2 = Z.reshape(d, m*n)  # .. update bands
+
+    # Calculate average
     Gavg = Y.mean()
-
-    # get data matrix size and fixed averages(upload columns)
-    Y1 = np.concatenate(Z, axis=0)
-    Gavg1 = Y1.mean()
-
-    # get data matrix size and fixed averages(upload 3D)
-    Y2 = Z.reshape(d, m*n)
-    Gavg2 = Y2.mean()
 
     # Randomly initialize row and column clustering
     R = _initialize_clusters(m, nclusters_row)
@@ -69,7 +65,7 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         R1 = np.kron(np.ones((d, 1)), R)
 
         # Obtain all the cluster based averages
-        CoCavg1 = (np.dot(np.dot(R1.T, Y1), C) + Gavg1 * epsilon) / (
+        CoCavg1 = (np.dot(np.dot(R1.T, Y1), C) + Gavg * epsilon) / (
                 np.dot(np.dot(R1.T, np.ones((m * d, n))), C) + epsilon)
 
         # Calculate distance based on column approximation
@@ -81,7 +77,7 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         C2 = np.kron(np.ones((m, 1)), C)
 
         # Obtain all the cluster based averages
-        CoCavg2 = (np.dot(np.dot(B.T, Y2), C2) + Gavg2 * epsilon) / (
+        CoCavg2 = (np.dot(np.dot(B.T, Y2), C2) + Gavg * epsilon) / (
                 np.dot(np.dot(B.T, np.ones((d, m * n))), C2) + epsilon)
 
         # Calculate distance based on column approximation
@@ -90,7 +86,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         # Assign to best column cluster
         bnd_clusters = np.argmin(d2, axis=1)
         B = np.eye(nclusters_bnd)[bnd_clusters, :]
-
         C1 = np.kron(np.ones((n, 1)), B)
 
         # Error value (actually just the column components really)
