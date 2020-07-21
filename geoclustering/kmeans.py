@@ -1,16 +1,7 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import logging
-from osgeo import gdal
 from sklearn.cluster import KMeans
-
-import concurrent.futures
-import dask.distributed
-import logging
-
-from concurrent.futures import ThreadPoolExecutor
-from dask.distributed import Client
 
 logger = logging.getLogger(__name__)
 
