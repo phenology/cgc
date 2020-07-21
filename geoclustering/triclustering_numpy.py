@@ -16,14 +16,15 @@ def _initialize_clusters(n_el, n_clusters):
     return eye[cluster_idx]
 
 
-def triclustering(Z, k, l, z, errobj, niters, epsilon):
+def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
+                  niters, epsilon):
     """
     Run the co-clustering, Numpy-based implementation
 
     :param Z: (d x m x n) data matrix
-    :param k: num row clusters
-    :param l: num col clusters
-    :param z: num band clusters
+    :param nclusters_row: num row clusters
+    :param nclusters_col: num col clusters
+    :param nclusters_bnd: num band clusters
     :param errobj: precision of obj fun for convergence
     :param niters: max iterations
     :param epsilon: precision of matrix elements
@@ -45,10 +46,10 @@ def triclustering(Z, k, l, z, errobj, niters, epsilon):
     Gavg2 = Y2.mean()
 
     # Randomly initialize row and column clustering
-    R = _initialize_clusters(m, k)
-    C1 = _initialize_clusters(n*d, z)
-    C = _initialize_clusters(n, l)
-    Z = _initialize_clusters(d, z)
+    R = _initialize_clusters(m, nclusters_row)
+    C1 = _initialize_clusters(n * d, nclusters_bnd)
+    C = _initialize_clusters(n, nclusters_col)
+    B = _initialize_clusters(d, nclusters_bnd)
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -64,7 +65,7 @@ def triclustering(Z, k, l, z, errobj, niters, epsilon):
 
         # Assign to best row cluster
         row_clusters = np.argmin(d2, axis=1)
-        R = np.eye(k)[row_clusters, :]
+        R = np.eye(nclusters_row)[row_clusters, :]
         R1 = np.kron(np.ones((d, 1)), R)
 
         # Obtain all the cluster based averages
@@ -76,21 +77,21 @@ def triclustering(Z, k, l, z, errobj, niters, epsilon):
 
         # Assign to best column cluster
         col_clusters = np.argmin(d2, axis=1)
-        C = np.eye(l)[col_clusters, :]
+        C = np.eye(nclusters_col)[col_clusters, :]
         C2 = np.kron(np.ones((m, 1)), C)
 
         # Obtain all the cluster based averages
-        CoCavg2 = (np.dot(np.dot(Z.T, Y2), C2) + Gavg2 * epsilon) / (
-                np.dot(np.dot(Z.T, np.ones((d, m * n))), C2) + epsilon)
+        CoCavg2 = (np.dot(np.dot(B.T, Y2), C2) + Gavg2 * epsilon) / (
+                np.dot(np.dot(B.T, np.ones((d, m * n))), C2) + epsilon)
 
         # Calculate distance based on column approximation
         d2 = _distance(Y2, np.ones((d, m * n)), np.dot(C2, CoCavg2.T), epsilon)
 
         # Assign to best column cluster
         bnd_clusters = np.argmin(d2, axis=1)
-        Z = np.eye(z)[bnd_clusters, :]
+        B = np.eye(nclusters_bnd)[bnd_clusters, :]
 
-        C1 = np.kron(np.ones((n, 1)), Z)
+        C1 = np.kron(np.ones((n, 1)), B)
 
         # Error value (actually just the column components really)
         old_e = e
