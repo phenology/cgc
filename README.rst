@@ -9,7 +9,7 @@
    * - \2. License
      - |License Badge|
    * - \3. Community Registry
-     - |PyPI Badge| |Research Software Directory Badge|
+     - |PyPI Badge|
    * - \4. Enable Citation
      - |Zenodo Badge|
    * - \5. Checklist
@@ -17,9 +17,8 @@
    * - **Other best practices**
      -
    * - Continuous integration
-     - |Python Build| |PyPI Publish|
+     - |Python Build|
 
-(Customize these badges with your own links, and check https://shields.io/ or https://badgen.net/ to see which other badges are available.)
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
    :target: https://github.com/phenology/geoclustering
@@ -32,32 +31,18 @@
 .. |PyPI Badge| image:: https://img.shields.io/pypi/v/geoclustering.svg?colorB=blue
    :target: https://pypi.python.org/project/geoclustering/
    :alt: PyPI Badge
-.. |Research Software Directory Badge| image:: https://img.shields.io/badge/rsd-geoclustering-00a3e3.svg
-   :target: https://www.research-software.nl/software/geoclustering
-   :alt: Research Software Directory Badge
 
-..
-    Goto https://zenodo.org/account/settings/github/ to enable Zenodo/GitHub integration.
-    After creation of a GitHub release at https://github.com/phenology/geoclustering/releases
-    there will be a Zenodo upload created at https://zenodo.org/deposit with a DOI, this DOI can be put in the Zenodo badge urls.
-    In the README, we prefer to use the concept DOI over versioned DOI, see https://help.zenodo.org/#versioning.
 .. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/< replace with created DOI >.svg
    :target: https://doi.org/<replace with created DOI>
    :alt: Zenodo Badge
 
-..
-    A CII Best Practices project can be created at https://bestpractices.coreinfrastructure.org/en/projects/new
 .. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/< replace with created project identifier >/badge
    :target: https://bestpractices.coreinfrastructure.org/projects/< replace with created project identifier >
    :alt: CII Best Practices Badge
 
-.. |Python Build| image:: https://github.com/phenology/geoclustering/workflows/Python/badge.svg
-   :target: https://github.com/phenology/geoclustering/actions?query=workflow%3A%22Python%22
+.. |Python Build| image:: https://github.com/phenology/geoclustering/workflows/Build/badge.svg
+   :target: https://github.com/phenology/geoclustering/actions?query=workflow%3A%22Build%22
    :alt: Python Build
-
-.. |PyPI Publish| image:: https://github.com/phenology/geoclustering/workflows/PyPI/badge.svg
-   :target: https://github.com/phenology/geoclustering/actions?query=workflow%3A%22PyPI%22
-   :alt: PyPI Publish
 
 ################################################################################
 Geoclustering
