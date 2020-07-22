@@ -29,7 +29,9 @@ jobs:
           pip install -r requirements.txt
       - name: Check style against standards using prospector
         shell: bash -l {0}
-        run: prospector -o grouped -o pylint:pylint-report.txt
+        run: |
+          pip install prospector[with_pyroma] yapf isort
+          prospector -o grouped -o pylint:pylint-report.txt
       - name: Build
         shell: bash -l {0}
         run: |
@@ -37,5 +39,5 @@ jobs:
       - name: Test
         shell: bash -l {0}
         run: |
-          python setup.py test
+          pip install pytest pytest-cov pycodestyle
           pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
