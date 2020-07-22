@@ -1,24 +1,20 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import logging
-from osgeo import gdal
 from sklearn.cluster import KMeans
-
-import concurrent.futures
-import dask.distributed
-import logging
-
-from concurrent.futures import ThreadPoolExecutor
-from dask.distributed import Client
 
 logger = logging.getLogger(__name__)
 
 
 class Kmeans(object):
-
-    def __init__(self, Z, row_clusters, col_clusters, n_row_clusters,
-                 n_col_clusters, kmean_n_clusters, kmean_max_iter=100):
+    def __init__(self,
+                 Z,
+                 row_clusters,
+                 col_clusters,
+                 n_row_clusters,
+                 n_col_clusters,
+                 kmean_n_clusters,
+                 kmean_max_iter=100):
         """
 
         :param Z: m x n matrix of spatial-temporal data. Usually each row is a
@@ -39,9 +35,17 @@ class Kmeans(object):
         self.kmean_n_clusters = kmean_n_clusters
         self.kmean_max_iter = kmean_max_iter
 
-        if len(np.unique(row_clusters)) > n_row_clusters or \
-                len(np.unique(col_clusters)) > n_col_clusters:
-            raise ValueError
+        if len(np.unique(row_clusters)) > n_row_clusters:
+            print('Setting "n_row_clusters" to {}, \
+            accoding to the number of unique elements in "row_clusters".'
+                  .format(len(np.unique(row_clusters))))
+            n_row_clusters = len(np.unique(row_clusters))
+
+        if len(np.unique(col_clusters)) > n_col_clusters:
+            print('Setting "col_clusters" to {}, \
+            accoding to the number of unique elements in "col_clusters".'
+                  .format(len(np.unique(col_clusters))))
+            n_col_clusters = len(np.unique(col_clusters))
 
     def compute(self):
         self._statistic_mesures()
@@ -61,12 +65,14 @@ class Kmeans(object):
                 # All elements in Z falling into this cluster cell
                 cl_Z = self.Z[idx_rows, :][:, idx_col]
 
-                cl_stat = np.array([np.nanmean(cl_Z),
-                                    np.nanstd(cl_Z),
-                                    np.nanpercentile(cl_Z, 5),
-                                    np.nanpercentile(cl_Z, 95),
-                                    np.nanmax(cl_Z),
-                                    np.nanmin(cl_Z)])
+                cl_stat = np.array([
+                    np.nanmean(cl_Z),
+                    np.nanstd(cl_Z),
+                    np.nanpercentile(cl_Z, 5),
+                    np.nanpercentile(cl_Z, 95),
+                    np.nanmax(cl_Z),
+                    np.nanmin(cl_Z)
+                ])
 
                 self.stat_measures = np.vstack((self.stat_measures, cl_stat))
 
@@ -86,9 +92,9 @@ class Kmeans(object):
         self.stat_measures_norm = np.array(stat_measures_norm).T
 
         # Compute Kmean
-        self.kmeans_cc = KMeans(n_clusters=self.kmean_n_clusters,
-                                max_iter=self.kmean_max_iter).fit(
-                                    self.stat_measures_norm)
+        self.kmeans_cc = KMeans(
+            n_clusters=self.kmean_n_clusters,
+            max_iter=self.kmean_max_iter).fit(self.stat_measures_norm)
 
         # Get centroids of the "mean value" dimension, and scale back
         # TODO: do we need centroids of other statistic measures?
@@ -110,4 +116,4 @@ class Kmeans(object):
         for r in np.unique(self.row_clusters):
             for c in np.unique(self.col_clusters):
                 self.cl_mean_centroids[r, c] = cl_mean_centroids[idx]
-                idx = idx+1
+                idx = idx + 1
