@@ -43,6 +43,7 @@ setup(
     install_requires=[
         'numpy',
         'dask[complete]',
+        'scikit-learn',
     ],
     setup_requires=[
         # dependency for `python setup.py test`
