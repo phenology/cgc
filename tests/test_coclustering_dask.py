@@ -54,7 +54,11 @@ class TestInitializeClusters:
 
 
 class TestCoclustering:
-    def test_return_dask_array(self, dask_client):
+    """
+    Test coclustering function in Dask. We make use of the client pytest
+    fixture from distributed.utils_test, which we import in `conftest.py`.
+    """
+    def test_return_dask_array(self, client):
         Z = da.random.permutation(da.arange(4)).reshape(2, 2)
         ncl_row = 2
         ncl_col = 2
@@ -65,7 +69,7 @@ class TestCoclustering:
         assert isinstance(row_cl, da.core.Array)
         assert isinstance(col_cl, da.core.Array)
 
-    def test_small_matrix(self, dask_client):
+    def test_small_matrix(self, client):
         da.random.seed(1234)
         Z = da.random.permutation(da.arange(12)).reshape(3, 4)
         ncl_row = 2
@@ -81,7 +85,7 @@ class TestCoclustering:
                                       np.array([1, 1, 2, 0]))
         np.testing.assert_almost_equal(error, -56.457907947376775)
 
-    def test_bigger_matrix(self, dask_client):
+    def test_bigger_matrix(self, client):
         Z = da.random.randint(100, size=(20, 15)).astype('float64')
         ncl_row = 5
         ncl_col = 6
@@ -94,7 +98,7 @@ class TestCoclustering:
         np.testing.assert_array_equal(np.sort(np.unique(col_cl.compute())),
                                       np.arange(ncl_col))
 
-    def test_as_many_clusters_as_elements(self, dask_client):
+    def test_as_many_clusters_as_elements(self, client):
         # it should immediately converge (2 iterations)
         ncl_row = 8
         ncl_col = 7
@@ -106,7 +110,7 @@ class TestCoclustering:
         assert conv
         assert niterations == 2
 
-    def test_constant_col_matrix(self, dask_client):
+    def test_constant_col_matrix(self, client):
         # should give one cluster in rows
         Z = np.tile(np.arange(7), (8, 1))
         Z = da.from_array(Z)
@@ -120,7 +124,7 @@ class TestCoclustering:
         assert np.unique(row_cl.compute()).size == 1
         assert np.unique(col_cl.compute()).size == ncl_col
 
-    def test_constant_row_matrix(self, dask_client):
+    def test_constant_row_matrix(self, client):
         # should give one cluster in columns
         Z = np.repeat(np.arange(8), 7).reshape(8, 7)
         Z = da.from_array(Z)
@@ -133,7 +137,7 @@ class TestCoclustering:
         assert np.unique(row_cl.compute()).size == ncl_row
         assert np.unique(col_cl.compute()).size == 1
 
-    def test_zero_matrix(self, dask_client):
+    def test_zero_matrix(self, client):
         # special case for the error - and no nan/inf
         Z = np.zeros((8, 7))
         Z = da.from_array(Z)
