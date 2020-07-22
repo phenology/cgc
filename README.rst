@@ -88,9 +88,7 @@ Run tests (including coverage) with:
 Documentation
 *************
 
-.. _README:
-
-Include a link to your project's full documentation here.
+The project's full documentation can be found `here <https://geoclustering.readthedocs.io/en/latest/>`_.
 
 Contributing
 ************
