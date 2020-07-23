@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import logging
 from sklearn.cluster import KMeans
 
@@ -39,13 +38,13 @@ class Kmeans(object):
             print('Setting "n_row_clusters" to {}, \
             accoding to the number of unique elements in "row_clusters".'
                   .format(len(np.unique(row_clusters))))
-            n_row_clusters = len(np.unique(row_clusters))
+            self.n_row_clusters = len(np.unique(row_clusters))
 
         if len(np.unique(col_clusters)) > n_col_clusters:
             print('Setting "col_clusters" to {}, \
             accoding to the number of unique elements in "col_clusters".'
                   .format(len(np.unique(col_clusters))))
-            n_col_clusters = len(np.unique(col_clusters))
+            self.n_col_clusters = len(np.unique(col_clusters))
 
     def compute(self):
         self._statistic_mesures()

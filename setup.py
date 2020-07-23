@@ -43,6 +43,7 @@ setup(
     install_requires=[
         'numpy',
         'dask[complete]',
+        'scikit-learn',
     ],
     setup_requires=[
         # dependency for `python setup.py test`
@@ -56,8 +57,5 @@ setup(
         'pytest',
         'pytest-cov',
         'pycodestyle',
-    ],
-    extras_require={
-        'dev':  ['prospector[with_pyroma]', 'yapf', 'isort'],
-    }
+    ]
 )
