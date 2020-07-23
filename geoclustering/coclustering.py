@@ -12,18 +12,21 @@ logger = logging.getLogger(__name__)
 
 
 class Coclustering(object):
-
+    """
+    Perform the co-clustering analysis of a 2D array
+    """
     def __init__(self, Z, nclusters_row, nclusters_col, conv_threshold=1.e-5,
                  max_iterations=1, nruns=1, epsilon=1.e-8):
         """
+        Initialize the object
 
-        :param Z:
-        :param nclusters_row:
-        :param nclusters_col:
-        :param conv_threshold:
-        :param niterations:
-        :param nruns:
-        :param epsilon:
+        :param Z: m x n data matrix
+        :param nclusters_row: number of row clusters
+        :param nclusters_col: number of column clusters
+        :param conv_threshold: convergence threshold for the objective function
+        :param max_iterations: maximum number of iterations
+        :param nruns: number of differntly-initialized runs
+        :param epsilon: numerical parameter, avoids zero arguments in log
         """
         self.Z = Z
         self.nclusters_row = nclusters_row
@@ -41,10 +44,10 @@ class Coclustering(object):
 
     def run_with_dask(self, client=None, low_memory=False):
         """
+        Run the co-clustering with Dask
 
         :param client: Dask client
         :param low_memory: if true, use a memory-conservative algorithm
-        :return:
         """
         self.client = client if client is not None else Client()
 
@@ -55,9 +58,10 @@ class Coclustering(object):
 
     def run_with_threads(self, nthreads=1):
         """
+        Run the co-clustering using an algorithm based on numpy + threading
+        (only suitable for local runs)
 
-        :param nthreads:
-        :return:
+        :param nthreads: number of threads
         """
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
             futures = {
@@ -91,7 +95,7 @@ class Coclustering(object):
         raise NotImplementedError
 
     def _dask_runs_memory(self):
-        """ Memory efficient Dask implementation: serial loop over runs """
+        """ Memory efficient Dask implementation: sequential runs """
         row_min, col_min, e_min = None, None, 0.
         for r in range(self.nruns):
             logger.info(f'Run {r} ..')
@@ -117,8 +121,8 @@ class Coclustering(object):
 
     def _dask_runs_performance(self):
         """
-        Faster but memory-intensive Dask implementation: submit all runs to the
-        scheduler
+        Faster but memory-intensive Dask implementation: all runs are
+        simultaneosly submitted to the scheduler
         """
         Z = self.client.scatter(self.Z)
         futures = [self.client.submit(coclustering_dask.coclustering,

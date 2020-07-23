@@ -19,17 +19,17 @@ def _initialize_clusters(n_el, n_clusters):
 def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
                   niters, epsilon):
     """
-    Run the co-clustering, Numpy-based implementation
+    Run the tri-clustering, Numpy-based implementation
 
-    :param Z: (d x m x n) data matrix
-    :param nclusters_row: num row clusters
-    :param nclusters_col: num col clusters
-    :param nclusters_bnd: num band clusters
-    :param errobj: precision of obj fun for convergence
-    :param niters: max iterations
-    :param epsilon: precision of matrix elements
-    :return: has converged, number of iterations performed. final row, column
-    and band clustering, error value
+    :param Z: d x m x n data matrix
+    :param nclusters_row: number of row clusters
+    :param nclusters_col: number of column clusters
+    :param nclusters_bnd: number of band clusters
+    :param errobj: convergence threshold for the objective function
+    :param niters: maximum number of iterations
+    :param epsilon: numerical parameter, avoids zero arguments in log
+    :return: has converged, number of iterations performed, final row,
+    column, and band clustering, error value
     """
     [d, m, n] = Z.shape
 
