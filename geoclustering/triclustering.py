@@ -9,20 +9,23 @@ logger = logging.getLogger(__name__)
 
 
 class Triclustering(object):
-
+    """
+    Perform the tri-clustering analysis of a 3D array
+    """
     def __init__(self, Z, nclusters_row, nclusters_col, nclusters_bnd,
                  conv_threshold=1.e-5, max_iterations=1, nruns=1,
                  epsilon=1.e-8):
         """
+        Initialize the object
 
-        :param Z:
-        :param nclusters_row:
-        :param nclusters_col:
-        :param nclusters_bnd:
-        :param conv_threshold:
-        :param niterations:
-        :param nruns:
-        :param epsilon:
+        :param Z: d x m x n data matrix
+        :param nclusters_row: number of row clusters
+        :param nclusters_col: number of column clusters
+        :param nclusters_bnd: number of band clusters
+        :param conv_threshold: convergence threshold for the objective function
+        :param max_iterations: maximum number of iterations
+        :param nruns: number of differntly-initialized runs
+        :param epsilon: numerical parameter, avoids zero arguments in log
         """
         self.Z = Z
         self.nclusters_row = nclusters_row
@@ -42,9 +45,10 @@ class Triclustering(object):
 
     def run_with_threads(self, nthreads=1):
         """
+        Run the tri-clustering using an algorithm based on numpy + threading
+        (only suitable for local runs)
 
-        :param nthreads:
-        :return:
+        :param nthreads: number of threads
         """
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
             futures = {
