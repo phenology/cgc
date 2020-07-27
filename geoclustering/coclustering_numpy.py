@@ -7,12 +7,23 @@ def _distance(Z, X, Y, epsilon):
     d = np.dot(X, Y) - np.dot(Z, np.log(Y))
     return d
 
+
 def _distance_lowmem(Z, vec, cc, epsilon):
     """ Distance function low memory"""
-    d=0
-    return d
+    product = np.zeros([vec.size, cc.shape[1]])
+    for cl in np.unique(vec):
+        idx = np.where(vec == cl)[0]
+        product[idx, :] = cc[cl, :]
 
-def _initialize_clusters(n_el, n_clusters, low_memory = False):
+    part1 = np.repeat(np.sum(product, axis=0, keepdims=True, dtype='float64'),
+                      Z.shape[0],
+                      axis=0)
+    part2 = Z.shape[1] * epsilon
+    part3 = np.dot(Z, np.log(product + epsilon))
+    return part1 + part2 - part3
+
+
+def _initialize_clusters(n_el, n_clusters, low_memory=False):
     """ Initialize cluster occupation matrix """
     cluster_idx = np.mod(np.arange(n_el), n_clusters)
     cluster_idx = np.random.permutation(cluster_idx)
@@ -22,8 +33,8 @@ def _initialize_clusters(n_el, n_clusters, low_memory = False):
         eye = np.eye(n_clusters, dtype=np.int32)
         return eye[cluster_idx]
 
-def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row,
-                 nclusters_col):
+
+def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
     """
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
     """
@@ -36,7 +47,14 @@ def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row,
             product[r, c] = np.sum(Z[idx_rc[:, 0], idx_rc[:, 1]])
     return product
 
-def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon, low_memory=False):
+
+def coclustering(Z,
+                 nclusters_row,
+                 nclusters_col,
+                 errobj,
+                 niters,
+                 epsilon,
+                 low_memory=False):
     """
     Run the co-clustering, Numpy-based implementation
 
@@ -50,14 +68,13 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon, low_m
     error value
     """
     [m, n] = Z.shape
-    
+
     if low_memory:
-        row_clusters = _initialize_clusters(m, nclusters_row, low_memory = True)
-        col_clusters = _initialize_clusters(n, nclusters_col, low_memory = True)
+        row_clusters = _initialize_clusters(m, nclusters_row, low_memory=True)
+        col_clusters = _initialize_clusters(n, nclusters_col, low_memory=True)
     else:
         R = _initialize_clusters(m, nclusters_row)
         C = _initialize_clusters(n, nclusters_col)
-    
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -68,14 +85,15 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon, low_m
     while (not converged) & (s < niters):
         # Calculate cluster based averages
         if low_memory:
-            CoCavg = (_cluster_dot(Z, row_clusters, col_clusters, nclusters_row,
-                                nclusters_col) +
-                    Gavg * epsilon) / (_cluster_dot(np.ones(
-                        (m, n)), row_clusters, col_clusters, nclusters_row,
-                                                    nclusters_col) + epsilon)
+            CoCavg = (_cluster_dot(Z, row_clusters, col_clusters,
+                                   nclusters_row, nclusters_col) +
+                      Gavg * epsilon) / (_cluster_dot(np.ones(
+                          (m, n)), row_clusters, col_clusters, nclusters_row,
+                                                      nclusters_col) + epsilon)
         else:
-            CoCavg = (np.dot(np.dot(R.T, Z), C) + Gavg * epsilon) / (
-                    np.dot(np.dot(R.T, np.ones((m, n))), C) + epsilon)
+            CoCavg = (np.dot(np.dot(R.T, Z), C) +
+                      Gavg * epsilon) / (np.dot(np.dot(R.T, np.ones(
+                          (m, n))), C) + epsilon)
 
         # Calculate distance based on row approximation
         if low_memory:
