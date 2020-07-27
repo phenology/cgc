@@ -7,7 +7,6 @@ from dask.distributed import Client
 
 from . import coclustering_dask
 from . import coclustering_numpy
-from . import coclustering_numpy_lowmem
 
 logger = logging.getLogger(__name__)
 
@@ -66,16 +65,11 @@ class Coclustering(object):
         :return:
         """
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
-            if low_memory:
-                coclustering_np_func = coclustering_numpy_lowmem.coclustering
-            else:
-                coclustering_np_func = coclustering_numpy.coclustering
-
             futures = {
-                executor.submit(coclustering_np_func, self.Z,
+                executor.submit(coclustering_numpy.coclustering, self.Z,
                                 self.nclusters_row, self.nclusters_col,
                                 self.conv_threshold, self.max_iterations,
-                                self.epsilon): r
+                                self.epsilon, low_memory): r
                 for r in range(self.nruns)
             }
             row_min, col_min, e_min = None, None, 0.
