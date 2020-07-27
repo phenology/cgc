@@ -53,14 +53,11 @@ class TestCoclustering:
         ncl_row = 2
         ncl_col = 3
         conv, niterations, row_cl, col_cl, error = coclustering(
-            Z, ncl_row, ncl_col, 1.e-5, 100, 1.e-8
-        )
+            Z, ncl_row, ncl_col, 1.e-5, 100, 1.e-8)
         assert conv
         assert niterations == 3
-        np.testing.assert_array_equal(row_cl,
-                                      np.array([1, 0, 0]))
-        np.testing.assert_array_equal(col_cl,
-                                      np.array([1, 1, 2, 0]))
+        np.testing.assert_array_equal(row_cl, np.array([1, 0, 0]))
+        np.testing.assert_array_equal(col_cl, np.array([1, 1, 2, 0]))
         np.testing.assert_almost_equal(error, -56.457907947376775)
 
     def test_bigger_matrix(self):
@@ -68,9 +65,8 @@ class TestCoclustering:
         ncl_row = 5
         ncl_col = 6
         np.random.seed(1234)
-        _, _, row_cl, col_cl, _ = coclustering(
-            Z, ncl_row, ncl_col, 1.e-5, 100, 1.e-8
-        )
+        _, _, row_cl, col_cl, _ = coclustering(Z, ncl_row, ncl_col, 1.e-5, 100,
+                                               1.e-8)
         np.testing.assert_array_equal(np.sort(np.unique(row_cl)),
                                       np.arange(ncl_row))
         np.testing.assert_array_equal(np.sort(np.unique(col_cl)),
@@ -82,9 +78,8 @@ class TestCoclustering:
         ncl_col = 7
         np.random.seed(1234)
         Z = np.random.randint(100, size=(ncl_row, ncl_col)).astype('float64')
-        conv, niterations, _, _, _ = coclustering(
-            Z, ncl_row, ncl_col, 1.e-5, 100, 1.e-8
-        )
+        conv, niterations, _, _, _ = coclustering(Z, ncl_row, ncl_col, 1.e-5,
+                                                  100, 1.e-8)
         assert conv
         assert niterations == 2
 
@@ -94,9 +89,8 @@ class TestCoclustering:
         ncl_row = 3
         ncl_col = 4
         np.random.seed(1234)
-        _, _, row_cl, col_cl, _ = coclustering(
-            Z, ncl_row, ncl_col, 1.e-5, 100, 1.e-8
-        )
+        _, _, row_cl, col_cl, _ = coclustering(Z, ncl_row, ncl_col, 1.e-5, 100,
+                                               1.e-8)
         assert np.unique(row_cl).size == 1
         assert np.unique(col_cl).size == ncl_col
 
@@ -106,9 +100,8 @@ class TestCoclustering:
         ncl_row = 3
         ncl_col = 4
         np.random.seed(1234)
-        _, _, row_cl, col_cl, _ = coclustering(
-            Z, ncl_row, ncl_col, 1.e-5, 100, 1.e-8
-        )
+        _, _, row_cl, col_cl, _ = coclustering(Z, ncl_row, ncl_col, 1.e-5, 100,
+                                               1.e-8)
         assert np.unique(row_cl).size == ncl_row
         assert np.unique(col_cl).size == 1
 
@@ -119,7 +112,42 @@ class TestCoclustering:
         ncl_col = 4
         epsilon = 1.e-6
         np.random.seed(1234)
-        _, _, _, _, error = coclustering(
-            Z, ncl_row, ncl_col, 1.e-5, 100, epsilon
-        )
-        assert np.isclose(error, Z.size*epsilon)
+        _, _, _, _, error = coclustering(Z, ncl_row, ncl_col, 1.e-5, 100,
+                                         epsilon)
+        assert np.isclose(error, Z.size * epsilon)
+
+
+class TestLowMemory:
+    def test_distance_lowmem(self):
+        Z = np.arange(0, 40).reshape(8, 5).astype('float64')
+        row_clusters = np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int32)
+        col_clusters = np.array([0, 0, 0, 1, 1], dtype=np.int32)
+        cc = np.arange(1, 9).reshape(4, 2)
+        np.random.seed(1234)
+        R = np.eye(4, dtype=np.int32)[row_clusters]
+        C = np.eye(2, dtype=np.int32)[col_clusters]
+        d_row = coclustering_numpy._distance(Z, np.ones(Z.shape),
+                                             np.dot(C, cc.T), 1.e-6)
+        d_row_lowmem = coclustering_numpy._distance_lowmem(
+            Z, col_clusters, cc.T, 1.e-6)
+        d_col = coclustering_numpy._distance(Z.T, np.ones(Z.T.shape),
+                                             np.dot(R, cc), 1.e-6)
+        d_col_lowmem = coclustering_numpy._distance_lowmem(
+            Z.T, row_clusters, cc, 1.e-6)
+        # Test almost equal because numpy sum lose precision
+        np.testing.assert_almost_equal(d_row, d_row_lowmem, 10)
+        np.testing.assert_almost_equal(d_col, d_col_lowmem, 10)
+
+    def test_dot_clustering_lowmem(self):
+        Z = np.arange(0, 40).reshape(8, 5).astype('float64')
+        row_clusters = np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int32)
+        col_clusters = np.array([0, 0, 0, 1, 1], dtype=np.int32)
+        R = np.eye(4, dtype=np.int32)[row_clusters]
+        C = np.eye(2, dtype=np.int32)[col_clusters]
+        CoCavg = (np.dot(np.dot(R.T, Z), C) + Z.mean() * 1.e-6) / (
+            np.dot(np.dot(R.T, np.ones(Z.shape)), C) + 1.e-6)
+        CoCavg_lowmem = (coclustering_numpy._cluster_dot(
+            Z, row_clusters, col_clusters, 4, 2) + Z.mean() * 1.e-6) / (
+                coclustering_numpy._cluster_dot(np.ones(Z.shape), row_clusters,
+                                                col_clusters, 4, 2) + 1.e-6)
+        np.testing.assert_equal(CoCavg, CoCavg_lowmem)

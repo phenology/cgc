@@ -25,6 +25,12 @@ class TestCoclustering:
         assert isinstance(coclustering.col_clusters, np.ndarray)
         assert np.isclose(coclustering.error, -1430.4432279784644)
 
+    def test_run_with_threads_lowmem(self, coclustering):
+        coclustering.run_with_threads(nthreads=2, low_memory=True)
+        assert isinstance(coclustering.row_clusters, np.ndarray)
+        assert isinstance(coclustering.col_clusters, np.ndarray)
+        assert np.isclose(coclustering.error, -1430.4432279784644)
+
     def test_dask_runs_memory(self, client, coclustering):
         coclustering._dask_runs_memory()
         assert isinstance(coclustering.row_clusters, np.ndarray)
