@@ -13,9 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 class Coclustering(object):
-
-    def __init__(self, Z, nclusters_row, nclusters_col, conv_threshold=1.e-5,
-                 max_iterations=1, nruns=1, epsilon=1.e-8):
+    def __init__(self,
+                 Z,
+                 nclusters_row,
+                 nclusters_col,
+                 conv_threshold=1.e-5,
+                 max_iterations=1,
+                 nruns=1,
+                 epsilon=1.e-8):
         """
 
         :param Z:
@@ -62,19 +67,16 @@ class Coclustering(object):
         """
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
             if low_memory:
-                coclustering_numpy_func = coclustering_numpy_lowmem.coclustering
+                coclustering_np_func = coclustering_numpy_lowmem.coclustering
             else:
-                coclustering_numpy_func = coclustering_numpy.coclustering
-            
+                coclustering_np_func = coclustering_numpy.coclustering
+
             futures = {
-                executor.submit(coclustering_numpy_func,
-                                self.Z,
-                                self.nclusters_row,
-                                self.nclusters_col,
-                                self.conv_threshold,
-                                self.max_iterations,
-                                self.epsilon):
-                r for r in range(self.nruns)
+                executor.submit(coclustering_np_func, self.Z,
+                                self.nclusters_row, self.nclusters_col,
+                                self.conv_threshold, self.max_iterations,
+                                self.epsilon): r
+                for r in range(self.nruns)
             }
             row_min, col_min, e_min = None, None, 0.
             r = 0
@@ -102,13 +104,8 @@ class Coclustering(object):
         for r in range(self.nruns):
             logger.info(f'Run {r} ..')
             converged, niters, row, col, e = coclustering_dask.coclustering(
-                self.Z,
-                self.nclusters_row,
-                self.nclusters_col,
-                self.conv_threshold,
-                self.max_iterations,
-                self.epsilon
-            )
+                self.Z, self.nclusters_row, self.nclusters_col,
+                self.conv_threshold, self.max_iterations, self.epsilon)
             e = e.compute()
             logger.info(f'Error = {e}')
             if converged:
@@ -127,22 +124,21 @@ class Coclustering(object):
         scheduler
         """
         Z = self.client.scatter(self.Z)
-        futures = [self.client.submit(coclustering_dask.coclustering,
-                                      Z,
-                                      self.nclusters_row,
-                                      self.nclusters_col,
-                                      self.conv_threshold,
-                                      self.max_iterations,
-                                      self.epsilon,
-                                      run_on_worker=True,
-                                      pure=False)
-                   for r in range(self.nruns)]
+        futures = [
+            self.client.submit(coclustering_dask.coclustering,
+                               Z,
+                               self.nclusters_row,
+                               self.nclusters_col,
+                               self.conv_threshold,
+                               self.max_iterations,
+                               self.epsilon,
+                               run_on_worker=True,
+                               pure=False) for r in range(self.nruns)
+        ]
         row_min, col_min, e_min = None, None, 0.
         r = 0
         for future, result in dask.distributed.as_completed(
-                futures,
-                with_results=True,
-                raise_errors=False):
+                futures, with_results=True, raise_errors=False):
             logger.info(f'Waiting for run {r} ..')
             converged, niters, row, col, e = result
             logger.info(f'Error = {e}')

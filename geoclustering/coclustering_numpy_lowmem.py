@@ -20,26 +20,28 @@ def _full_matrix(cluster_idx, n_clusters):
     return eye[cluster_idx]
 
 
-def _cluster_dot(Z, row_clusters, col_clusters, k, l):
+def _cluster_dot(Z, row_clusters, col_clusters, n_row_clusters,
+                 n_col_clusters):
     """
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
     """
-    product = np.zeros((k,l))
-    for r in range(0, k):
-        for c in range(0, l):
-            idx_r = np.where(row_clusters==r)[0]
-            idx_c = np.where(col_clusters==c)[0]
-            idx_rc = np.array(np.meshgrid(idx_r, idx_c)).T.reshape(-1,2)
-            product[r,c] = np.sum(Z[idx_rc[:,0], idx_rc[:,1]])
+    product = np.zeros((n_row_clusters, n_col_clusters))
+    for r in range(0, n_row_clusters):
+        for c in range(0, n_col_clusters):
+            idx_r = np.where(row_clusters == r)[0]
+            idx_c = np.where(col_clusters == c)[0]
+            idx_rc = np.array(np.meshgrid(idx_r, idx_c)).T.reshape(-1, 2)
+            product[r, c] = np.sum(Z[idx_rc[:, 0], idx_rc[:, 1]])
     return product
 
-def coclustering(Z, k, l, errobj, niters, epsilon):
+
+def coclustering(Z, n_row_clusters, n_col_clusters, errobj, niters, epsilon):
     """
     Run the co-clustering, Numpy-based implementation
 
     :param Z: m x n data matrix
-    :param k: num row clusters
-    :param l: num col clusters
+    :param n_row_clusters: num row clusters
+    :param n_col_clusters: num col clusters
     :param errobj: precision of obj fun for convergence
     :param niters: max iterations
     :param epsilon: precision of matrix elements
@@ -48,8 +50,8 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
     """
     [m, n] = Z.shape
 
-    row_clusters = _initialize_clusters(m, k)
-    col_clusters = _initialize_clusters(n, l)
+    row_clusters = _initialize_clusters(m, n_row_clusters)
+    col_clusters = _initialize_clusters(n, n_col_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 1
@@ -58,20 +60,26 @@ def coclustering(Z, k, l, errobj, niters, epsilon):
 
     while (abs(e - old_e) > errobj) & (s <= niters):
         # Calculate cluster based averages
-        CoCavg = (_cluster_dot(Z, row_clusters, col_clusters, k, l) + Gavg * epsilon) / (
-                _cluster_dot(np.ones((m, n)), row_clusters, col_clusters, k, l) + epsilon)
+        CoCavg = (_cluster_dot(Z, row_clusters, col_clusters, n_row_clusters,
+                               n_col_clusters) +
+                  Gavg * epsilon) / (_cluster_dot(np.ones(
+                      (m, n)), row_clusters, col_clusters, n_row_clusters,
+                                                  n_col_clusters) + epsilon)
 
         # Calculate distance based on row approximation
-        d_row = _distance(Z, np.ones((m, n)), np.dot(_full_matrix(col_clusters, l), CoCavg.T), epsilon)
+        d_row = _distance(
+            Z, np.ones((m, n)),
+            np.dot(_full_matrix(col_clusters, n_col_clusters), CoCavg.T),
+            epsilon)
         # Assign to best row cluster
         row_clusters = np.argmin(d_row, axis=1)
-        R = np.eye(k, dtype=np.int32)[row_clusters]
+        R = np.eye(n_row_clusters, dtype=np.int32)[row_clusters]
 
         # Calculate distance based on column approximation
         d_col = _distance(Z.T, np.ones((n, m)), np.dot(R, CoCavg), epsilon)
         # Assign to best column cluster
         col_clusters = np.argmin(d_col, axis=1)
-        C = np.eye(l, dtype=np.int32)[col_clusters]
+        C = np.eye(n_col_clusters, dtype=np.int32)[col_clusters]
 
         # Error value (actually just the column components really)
         old_e = e
