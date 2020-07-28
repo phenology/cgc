@@ -27,10 +27,10 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
 
     :param Z: m x n data matrix
     :param nclusters_row: num row clusters
-    :param nclusters_col: num col clusters
-    :param errobj: precision of obj fun for convergence
-    :param niters: max iterations
-    :param epsilon: precision of matrix elements
+    :param nclusters_col: number of column clusters
+    :param errobj: convergence threshold for the objective function
+    :param niters: maximum number of iterations
+    :param epsilon: numerical parameter, avoids zero arguments in log
     :param run_on_worker: whether the function is submitted to a Dask worker
     :return: has converged, number of iterations performed. final row and
     column clustering, error value
