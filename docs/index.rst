@@ -6,15 +6,23 @@
 Welcome to Geoclustering's documentation!
 ==========================================================
 
+Geoclustering is a Python tool to perform clustering analysis for geo-spatial 
+applications.
+
+The code has been developed as a collaborative effort between the 
+`ITC, University of Twente`_ and `the Netherlands eScience Center`_ 
+within the generalization of the project `High spatial resolution phenological modelling at continental scales`_.
+The code is hosted on `GitHub`_. If you want to contribute to the development of Geoclustering,
+have a look at the  `contribution guidelines`_.
+
+.. _ITC, University of Twente: https://www.itc.nl
+.. _High spatial resolution phenological modelling at continental scales: https://www.esciencecenter.nl/projects/high-spatial-resolution-phenological-modelling-at-continental-scales/
+.. _the Netherlands eScience Center: https://www.esciencecenter.nl
+.. _GitHub: https://github.com/phenology/geoclustering
+.. _contribution guidelines: https://github.com/phenology/geoclustering/tree/master/CONTRIBUTING.md
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+  user_manual
