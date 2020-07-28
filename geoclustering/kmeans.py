@@ -16,7 +16,7 @@ class Kmeans(object):
                  kmean_max_iter=100):
         """
         Set up Kmeans object.
-        
+
         :param Z: m x n matrix of spatial-temporal data. Usually each row is a
         time-series of a spatial grid.
         :type Z: class:`numpy.ndarray`
@@ -56,7 +56,7 @@ class Kmeans(object):
 
     def compute(self):
         """
-        Compute statistics for each clustering group. 
+        Compute statistics for each clustering group.
         Then compute centroids of the "mean value" dimension.
         """
         self._statistic_mesures()
