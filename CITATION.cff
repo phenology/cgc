@@ -32,7 +32,7 @@ authors:
     given-names: Raul
 cff-version: "1.0.3"
 date-released: 2020-08-11
-doi: "10.0000/zenodo.00000"
+doi: "10.5281/zenodo.3979172"
 keywords:
   - "clustering"
   - "co-clustering"
