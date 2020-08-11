@@ -28,16 +28,16 @@
    :target: https://github.com/phenology/cgc
    :alt: License Badge
 
-.. |PyPI Badge| image:: https://img.shields.io/pypi/v/cgc.svg?colorB=blue
-   :target: https://pypi.python.org/project/cgc/
+.. |PyPI Badge| image:: https://img.shields.io/pypi/v/clustering-geodata-cubes.svg?colorB=blue
+   :target: https://pypi.python.org/project/clustering-geodata-cubes/
    :alt: PyPI Badge
 
-.. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/< replace with created DOI >.svg
-   :target: https://doi.org/<replace with created DOI>
+.. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3979172.svg
+   :target: https://doi.org/10.5281/zenodo.3979172
    :alt: Zenodo Badge
 
-.. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/< replace with created project identifier >/badge
-   :target: https://bestpractices.coreinfrastructure.org/projects/< replace with created project identifier >
+.. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/4167/badge
+   :target: https://bestpractices.coreinfrastructure.org/projects/4167
    :alt: CII Best Practices Badge
 
 .. |Python Build| image:: https://github.com/phenology/cgc/workflows/Build/badge.svg
