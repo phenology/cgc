@@ -6,29 +6,29 @@ from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-# To update the package version number, edit geoclustering/__version__.py
+# To update the package version number, edit cgc/__version__.py
 version = {}
-with open(os.path.join(here, 'geoclustering', '__version__.py')) as f:
+with open(os.path.join(here, 'cgc', '__version__.py')) as f:
     exec(f.read(), version)
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 setup(
-    name='geoclustering',
+    name='cgc',
     version=version['__version__'],
     description="A clustering tool for geospatial applications",
     long_description=readme + '\n\n',
     author="Netherlands eScience Center",
     author_email='team-atlas@esciencecenter.nl',
-    url='https://github.com/phenology/geoclustering',
+    url='https://github.com/phenology/cgc',
     packages=[
-        'geoclustering',
+        'cgc',
     ],
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords='geoclustering',
+    keywords='cgc',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',

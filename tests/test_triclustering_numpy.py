@@ -1,7 +1,7 @@
 import numpy as np
 
-from geoclustering import triclustering_numpy
-from geoclustering.triclustering_numpy import triclustering
+from cgc import triclustering_numpy
+from cgc.triclustering_numpy import triclustering
 
 
 class TestDistance:

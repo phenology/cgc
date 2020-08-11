@@ -1,7 +1,7 @@
 import numpy as np
 
-from geoclustering import coclustering_numpy
-from geoclustering.coclustering_numpy import coclustering
+from cgc import coclustering_numpy
+from cgc.coclustering_numpy import coclustering
 
 
 class TestDistance:

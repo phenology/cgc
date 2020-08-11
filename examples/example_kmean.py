@@ -5,8 +5,8 @@ import dask.array as da
 import numpy as np
 import matplotlib.pyplot as plt
 
-from geoclustering.kmeans import Kmeans
-from geoclustering.coclustering import Coclustering
+from cgc.kmeans import Kmeans
+from cgc.coclustering import Coclustering
 
 if __name__ == "__main__":
 

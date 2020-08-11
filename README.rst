@@ -21,15 +21,15 @@
 
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
-   :target: https://github.com/phenology/geoclustering
+   :target: https://github.com/phenology/cgc
    :alt: GitHub Badge
 
-.. |License Badge| image:: https://img.shields.io/github/license/phenology/geoclustering
-   :target: https://github.com/phenology/geoclustering
+.. |License Badge| image:: https://img.shields.io/github/license/phenology/cgc
+   :target: https://github.com/phenology/cgc
    :alt: License Badge
 
-.. |PyPI Badge| image:: https://img.shields.io/pypi/v/geoclustering.svg?colorB=blue
-   :target: https://pypi.python.org/project/geoclustering/
+.. |PyPI Badge| image:: https://img.shields.io/pypi/v/cgc.svg?colorB=blue
+   :target: https://pypi.python.org/project/cgc/
    :alt: PyPI Badge
 
 .. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/< replace with created DOI >.svg
@@ -40,12 +40,12 @@
    :target: https://bestpractices.coreinfrastructure.org/projects/< replace with created project identifier >
    :alt: CII Best Practices Badge
 
-.. |Python Build| image:: https://github.com/phenology/geoclustering/workflows/Build/badge.svg
-   :target: https://github.com/phenology/geoclustering/actions?query=workflow%3A%22Build%22
+.. |Python Build| image:: https://github.com/phenology/cgc/workflows/Build/badge.svg
+   :target: https://github.com/phenology/cgc/actions?query=workflow%3A%22Build%22
    :alt: Python Build
 
 ################################################################################
-Geoclustering
+CGC: Clustering Geo-Data Cubes
 ################################################################################
 
 A clustering tool for geospatial applications
@@ -54,12 +54,12 @@ A clustering tool for geospatial applications
 Installation
 ------------
 
-To install geoclustering, do:
+To install cgc, do:
 
 .. code-block:: console
 
-  git clone https://github.com/phenology/geoclustering.git
-  cd geoclustering
+  git clone https://github.com/phenology/cgc.git
+  cd cgc
   pip install .
 
 
@@ -73,12 +73,12 @@ Run tests (including coverage) with:
 Documentation
 *************
 
-The project's full documentation can be found `here <https://geoclustering.readthedocs.io/en/latest/>`_.
+The project's full documentation can be found `here <https://cgc.readthedocs.io/en/latest/>`_.
 
 Contributing
 ************
 
-If you want to contribute to the development of Geoclustering,
+If you want to contribute to the development of cgc,
 have a look at the `contribution guidelines <CONTRIBUTING.rst>`_.
 
 License
