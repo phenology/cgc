@@ -48,7 +48,8 @@
 CGC: Clustering Geo-Data Cubes
 ################################################################################
 
-A clustering tool for geospatial applications
+Clustering Geo-Data Cubes (CGC) is a Python package to perform clustering analysis for multidimensional geospatial data.
+The included tools allow the user to efficiently run tasks in parallel on local and distributed systems.
 
 
 Installation
