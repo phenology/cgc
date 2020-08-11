@@ -1,0 +1,46 @@
+# YAML 1.2
+---
+abstract: "Clustering Geo-Data Cubes (CGC) is a Python package to perform clustering analysis for multidimensional geospatial data. The included tools allow the user to efficiently run tasks in parallel on local and distributed systems. "
+authors:
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Nattino
+    given-names: Francesco
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Ku
+    given-names: Ou
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Grootes
+    given-names: "Meiert W."
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Goncalves
+    given-names: Romulo
+  -
+    affiliation: "Institute of Geomatics, Vienna BOKU"
+    family-names: Izquierdo-Verdiguier
+    given-names: Emma
+  -
+    affiliation: "Faculty ITC - University of Twente"
+    family-names: Girgin
+    given-names: Serkan
+  -
+    affiliation: "Faculty ITC - University of Twente"
+    family-names: Zurita-Milla
+    given-names: Raul
+cff-version: "1.0.3"
+date-released: 2020-08-11
+doi: "10.0000/zenodo.00000"
+keywords:
+  - "clustering"
+  - "co-clustering"
+  - "tri-clustering"
+  - "earth observation"
+  - "distributed computing"
+license: "Apache-2.0"
+message: "If you use this software, please cite it using these metadata."
+title: "Clustering Geo-Data Cubes (CGC): A Clustering Tool for Geospatial Applications"
+version: "0.1.0"
+...
