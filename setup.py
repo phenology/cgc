@@ -15,7 +15,7 @@ with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 setup(
-    name='cgc',
+    name='clustering-geodata-cubes',
     version=version['__version__'],
     description="A clustering tool for geospatial applications",
     long_description=readme + '\n\n',
