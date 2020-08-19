@@ -29,7 +29,7 @@ the co-clustering analysis is setup by initializing a
 
 .. code-block:: python
 
-    from geoclustering.coclustering import Coclustering
+    from cgc.coclustering import Coclustering
     
     cc = Coclustering(
         Z, 
@@ -131,7 +131,7 @@ is setup by creating an instance of ``Triclustering``:
 
 .. code-block:: python
 
-    from geoclustering.triclustering import Triclustering
+    from cgc.triclustering import Triclustering
     
     cc = Triclustering(
         Z, 
@@ -179,7 +179,7 @@ A ``Kmeans`` object should be set based on the existing clustering results:
 
 .. code-block:: python
 
-    from geoclustering.kmeans import Kmeans
+    from cgc.kmeans import Kmeans
 
     km = Kmeans(Z=Z,
         row_clusters=cc.row_clusters,

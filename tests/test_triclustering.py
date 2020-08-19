@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import dask.array as da
 
-from geoclustering.triclustering import Triclustering
+from cgc.triclustering import Triclustering
 
 
 @pytest.fixture

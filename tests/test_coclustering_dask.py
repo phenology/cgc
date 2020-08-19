@@ -1,8 +1,8 @@
 import numpy as np
 import dask.array as da
 
-from geoclustering import coclustering_dask
-from geoclustering.coclustering_dask import coclustering
+from cgc import coclustering_dask
+from cgc.coclustering_dask import coclustering
 
 
 class TestDistance:

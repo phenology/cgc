@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from geoclustering.kmeans import Kmeans
+from cgc.kmeans import Kmeans
 
 
 def initialize_kmean():
