@@ -25,3 +25,9 @@ class TestTriclustering:
         assert isinstance(triclustering.col_clusters, np.ndarray)
         assert isinstance(triclustering.bnd_clusters, np.ndarray)
         assert np.isclose(triclustering.error, -4638.9183068944785)
+
+    def test_nruns_completed(self, triclustering):
+        triclustering.run_with_threads(nthreads=1)
+        assert triclustering.nruns_completed == 10
+        triclustering.run_with_threads(nthreads=1)
+        assert triclustering.nruns_completed == 20
