@@ -80,15 +80,15 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         CoCavg2 = (np.dot(np.dot(B.T, Y2), C2) + Gavg * epsilon) / (
                 np.dot(np.dot(B.T, np.ones((d, m * n))), C2) + epsilon)
 
-        # Calculate distance based on column approximation
+        # Calculate distance based on band approximation
         d2 = _distance(Y2, np.ones((d, m * n)), np.dot(C2, CoCavg2.T), epsilon)
 
-        # Assign to best column cluster
+        # Assign to best band cluster
         bnd_clusters = np.argmin(d2, axis=1)
         B = np.eye(nclusters_bnd)[bnd_clusters, :]
         C1 = np.tile(B, (n, 1))
 
-        # Error value (actually just the column components really)
+        # Error value
         old_e = e
         minvals = np.amin(d2, axis=1)
         # power 1 divergence, power 2 euclidean
