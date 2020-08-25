@@ -25,7 +25,7 @@ class Coclustering(object):
         :param nclusters_col: number of column clusters
         :param conv_threshold: convergence threshold for the objective function
         :param max_iterations: maximum number of iterations
-        :param nruns: number of differntly-initialized runs
+        :param nruns: number of differently-initialized runs
         :param epsilon: numerical parameter, avoids zero arguments in log
         """
         self.Z = Z
