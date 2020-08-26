@@ -1,4 +1,5 @@
 import concurrent.futures
+import json
 import logging
 
 from concurrent.futures import ThreadPoolExecutor
@@ -14,7 +15,7 @@ class Triclustering(object):
     """
     def __init__(self, Z, nclusters_row, nclusters_col, nclusters_bnd,
                  conv_threshold=1.e-5, max_iterations=1, nruns=1,
-                 epsilon=1.e-8):
+                 epsilon=1.e-8, output_filename=''):
         """
         Initialize the object
 
@@ -26,6 +27,7 @@ class Triclustering(object):
         :param max_iterations: maximum number of iterations
         :param nruns: number of differntly-initialized runs
         :param epsilon: numerical parameter, avoids zero arguments in log
+        :param output_filename: name of the file where to write the clusters
         """
         self.Z = Z
         self.nclusters_row = nclusters_row
@@ -35,6 +37,7 @@ class Triclustering(object):
         self.max_iterations = max_iterations
         self.nruns = nruns
         self.epsilon = epsilon
+        self.output_filename = output_filename
 
         self.client = None
 
@@ -79,9 +82,21 @@ class Triclustering(object):
         self.col_clusters = col_min
         self.bnd_clusters = bnd_min
         self.error = e_min
+        self._write_clusters()
 
     def run_with_dask(self, client=None):
         raise NotImplementedError
 
     def run_serial(self):
         raise NotImplementedError
+
+    def _write_clusters(self):
+        if self.output_filename:
+            with open(self.output_filename, 'w') as f:
+                data = {
+                    'error': self.error,
+                    'row_clusters': self.row_clusters.tolist(),
+                    'col_clusters': self.col_clusters.tolist(),
+                    'bnd_clusters': self.bnd_clusters.tolist()
+                }
+                json.dump(data, f, indent=4)
