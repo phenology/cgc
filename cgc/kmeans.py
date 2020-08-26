@@ -15,7 +15,7 @@ class Kmeans(object):
                  n_col_clusters,
                  k_range,
                  kmean_max_iter=100,
-                 var_thres=2,
+                 var_thres=2.,
                  ouputdir=None):
         """
         Set up Kmeans object.
@@ -35,6 +35,10 @@ class Kmeans(object):
         :type k_range: range
         :param kmean_max_iter: maximum number of iterations of the KMeans
         :type kmean_max_iter: int
+        :param var_thres: threshold of the sum of variance to the centroid of each Kmean cluster
+        :type var_thres: float
+        :param ouputdir: path of the output directory to save the plots
+        :type ouputdir: str
         """
         self.Z = Z
         self.row_clusters = row_clusters
@@ -61,7 +65,9 @@ class Kmeans(object):
     def compute(self):
         """
         Compute statistics for each clustering group.
-        Then compute centroids of the "mean value" dimension.
+        Then Loop through the range of k values, and compute the sum of variances of each k.
+        Finally select the smallest k which gives the sum of variances smaller the threshold.
+
         """
         # Get statistic measures
         self._compute_statistic_mesures()
@@ -75,7 +81,7 @@ class Kmeans(object):
                 self.stat_measures_norm)
             var_list = np.hstack((var_list, self._compute_sum_var(kmeans_cc)))
             kmeans_cc_list.append(kmeans_cc)
-        idx_k = max(np.where(var_list > self.var_thres)[0])
+        idx_k = min(np.where(var_list < self.var_thres)[0])
         self.k_value = self.k_range[idx_k]
         self.kmeans_cc = kmeans_cc_list[idx_k]
         del kmeans_cc_list
@@ -123,7 +129,7 @@ class Kmeans(object):
 
         # Assign centroids to each cluster cell
         cl_mean_centroids = mean_centroids[self.kmeans_cc.labels_]
-        
+
         # Reshape the centroids of means to the shape of cluster matrix, taking into account
         # non-constructive row/col cluster
         self.cl_mean_centroids = np.empty(
@@ -134,7 +140,7 @@ class Kmeans(object):
             for c in np.unique(self.col_clusters):
                 self.cl_mean_centroids[r, c] = cl_mean_centroids[idx]
                 idx = idx + 1
-    
+
     def _compute_statistic_mesures(self):
         """
         Compute 6 statistics: Mean, STD, 5 percentile, 95 percentile, maximum
