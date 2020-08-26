@@ -35,7 +35,7 @@ class Kmeans(object):
         :type k_range: range
         :param kmean_max_iter: maximum number of iterations of the KMeans
         :type kmean_max_iter: int
-        :param var_thres: threshold of the sum of variance to the centroid of each Kmean cluster
+        :param var_thres: threshold of the sum of variance to select k
         :type var_thres: float
         :param ouputdir: path of the output directory to save the plots
         :type ouputdir: str
@@ -65,9 +65,10 @@ class Kmeans(object):
     def compute(self):
         """
         Compute statistics for each clustering group.
-        Then Loop through the range of k values, and compute the sum of variances of each k.
-        Finally select the smallest k which gives the sum of variances smaller the threshold.
-
+        Then Loop through the range of k values,
+        and compute the sum of variances of each k.
+        Finally select the smallest k which gives
+        the sum of variances smaller the threshold.
         """
         # Get statistic measures
         self._compute_statistic_mesures()
@@ -130,8 +131,8 @@ class Kmeans(object):
         # Assign centroids to each cluster cell
         cl_mean_centroids = mean_centroids[self.kmeans_cc.labels_]
 
-        # Reshape the centroids of means to the shape of cluster matrix, taking into account
-        # non-constructive row/col cluster
+        # Reshape the centroids of means to the shape of cluster matrix,
+        # taking into account non-constructive row/col cluster
         self.cl_mean_centroids = np.empty(
             (self.n_row_clusters, self.n_col_clusters))
         self.cl_mean_centroids[:] = np.nan
@@ -144,7 +145,7 @@ class Kmeans(object):
     def _compute_statistic_mesures(self):
         """
         Compute 6 statistics: Mean, STD, 5 percentile, 95 percentile, maximum
-        and minimum values, for each co-cluster group. 
+        and minimum values, for each co-cluster group.
         Normalize them to [0, 1]
         """
         self.stat_measures = np.empty([0, 6])

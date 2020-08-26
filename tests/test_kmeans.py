@@ -24,14 +24,15 @@ def initialize_kmean():
     row_clusters = np.array([0, 0, 1, 1, 1])
     col_clusters = np.array([0, 0, 1, 1])
     n_row_cluster, n_col_cluster = 3, 2
-    kmean_n_clusters, kmean_max_iter = 2, 100
+    k_range = range(1, 3)
+    kmean_max_iter = 2
     km = Kmeans(
         Z=Z,
         row_clusters=row_clusters,
         col_clusters=col_clusters,
         n_row_clusters=n_row_cluster,
         n_col_clusters=n_col_cluster,
-        kmean_n_clusters=kmean_n_clusters,
+        k_range=k_range,
         kmean_max_iter=kmean_max_iter)
     return km
 
@@ -42,14 +43,15 @@ class TestKmeans(unittest.TestCase):
         row_clusters = np.array([0, 0, 1, 1, 1])
         col_clusters = np.array([0, 1, 1, 2])
         n_row_cluster, n_col_cluster = 1, 1
-        kmean_n_clusters, kmean_max_iter = 2, 100
+        k_range = range(1, 3)
+        kmean_max_iter = 100
         km = Kmeans(
             Z=Z,
             row_clusters=row_clusters,
             col_clusters=col_clusters,
             n_row_clusters=n_row_cluster,
             n_col_clusters=n_col_cluster,
-            kmean_n_clusters=kmean_n_clusters,
+            k_range=k_range,
             kmean_max_iter=kmean_max_iter)
         self.assertEqual(2, km.n_row_clusters)
         self.assertEqual(3, km.n_col_clusters)
