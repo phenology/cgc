@@ -107,7 +107,6 @@ class Coclustering(object):
                 self.max_iterations,
                 self.epsilon
             )
-            e = e.compute()
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
