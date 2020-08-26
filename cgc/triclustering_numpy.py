@@ -1,4 +1,8 @@
+import logging
+
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 def _distance(Z, X, Y, epsilon):
@@ -52,6 +56,7 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
     converged = False
 
     while (not converged) & (s < niters):
+        logger.debug(f'Iteration # {s} ..')
         # Obtain all the cluster based averages
         CoCavg = (np.dot(np.dot(R.T, Y), C1) + Gavg * epsilon) / (
                 np.dot(np.dot(R.T, np.ones((m, n * d))), C1) + epsilon)
@@ -94,7 +99,11 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         # power 1 divergence, power 2 euclidean
         e = sum(np.power(minvals, 1))
 
+        logger.debug(f'Error = {e:+.15e}, dE = {e - old_e:+.15e}')
         converged = abs(e - old_e) < errobj
         s = s + 1
-
+    if converged:
+        logger.debug(f'Triclustering converged in {s} iterations')
+    else:
+        logger.debug(f'Triclustering not converged in {s} iterations')
     return converged, s, row_clusters, col_clusters, bnd_clusters, e
