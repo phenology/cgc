@@ -6,6 +6,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from dask.distributed import Client
 
+from . import __version__
 from . import coclustering_dask
 from . import coclustering_numpy
 
@@ -164,6 +165,7 @@ class Coclustering(object):
         if self.output_filename:
             with open(self.output_filename, 'w') as f:
                 data = {
+                    'cgc_version': __version__,
                     'error': self.error,
                     'row_clusters': self.row_clusters.tolist(),
                     'col_clusters': self.col_clusters.tolist()

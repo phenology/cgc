@@ -4,6 +4,7 @@ import logging
 
 from concurrent.futures import ThreadPoolExecutor
 
+from . import __version__
 from . import triclustering_numpy
 
 logger = logging.getLogger(__name__)
@@ -94,6 +95,7 @@ class Triclustering(object):
         if self.output_filename:
             with open(self.output_filename, 'w') as f:
                 data = {
+                    'cgc_version': __version__,
                     'error': self.error,
                     'row_clusters': self.row_clusters.tolist(),
                     'col_clusters': self.col_clusters.tolist(),
