@@ -1,5 +1,6 @@
 import numpy as np
-from numba import jit
+import numba
+
 
 
 def _distance(Z, X, Y, epsilon):
@@ -8,7 +9,7 @@ def _distance(Z, X, Y, epsilon):
     d = np.dot(X, Y) - np.dot(Z, np.log(Y))
     return d
 
-@jit(nopython=True,nogil=True,parallel=True,cache=True)
+@numba.jit(nopython=True,nogil=True,parallel=True,cache=True)
 def _distance_lowmem(Z, vec, cc, epsilon):
     """ Distance function low memory"""
     product = np.zeros([vec.size, cc.shape[1]])
@@ -35,7 +36,7 @@ def _initialize_clusters(n_el, n_clusters, low_memory=False):
         return eye[cluster_idx]
 
 
-@jit(nopython=True,nogil=True,parallel=True,cache=True)
+@numba.jit(nopython=True,nogil=True,parallel=True,cache=True)
 def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
     """
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
@@ -47,7 +48,7 @@ def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
             idx_c = np.where(col_clusters == c)[0]
             idx_r_grid = np.repeat(idx_r,len(idx_c)).reshape(len(idx_r),len(idx_c)).T
             idx_c_grid = np.repeat(idx_c,len(idx_r)).reshape(len(idx_c),len(idx_r))
-            idx_rc = np.array([idx_r_grid,idx_c_grid]).T.reshape(-1,2)
+            idx_rc = np.array((idx_r_grid,idx_c_grid)).T.reshape(-1,2)
             #idx_rc = np.array(np.meshgrid(idx_r, idx_c)).T.reshape(-1, 2)
             product[r, c] = np.sum(Z[idx_rc[:, 0], idx_rc[:, 1]])
     return product
