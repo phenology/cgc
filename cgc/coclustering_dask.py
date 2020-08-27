@@ -1,7 +1,11 @@
+import logging
+
 import numpy as np
 
 import dask.array as da
 from dask.distributed import get_client, rejoin, secede
+
+logger = logging.getLogger(__name__)
 
 
 def _distance(Z, X, Y, epsilon):
@@ -49,6 +53,7 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     Gavg = Z.mean()
 
     while (not converged) & (s < niters):
+        logger.debug(f'Iteration # {s} ..')
         # Calculate cluster based averages
         CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / (
             da.dot(da.dot(R.T, da.ones((m, n))), C) + epsilon)
@@ -82,9 +87,12 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
             e = e.result()
             rejoin()
         else:
-            e.compute()
-
+            e = e.compute()
+        logger.debug(f'Error = {e:+.15e}, dE = {e - old_e:+.15e}')
         converged = abs(e - old_e) < errobj
         s = s + 1
-
+    if converged:
+        logger.debug(f'Coclustering converged in {s} iterations')
+    else:
+        logger.debug(f'Coclustering not converged in {s} iterations')
     return converged, s, row_clusters, col_clusters, e
