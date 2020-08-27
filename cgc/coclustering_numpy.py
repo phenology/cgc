@@ -1,4 +1,5 @@
 import numpy as np
+from numba import jit
 
 
 def _distance(Z, X, Y, epsilon):
@@ -7,7 +8,7 @@ def _distance(Z, X, Y, epsilon):
     d = np.dot(X, Y) - np.dot(Z, np.log(Y))
     return d
 
-
+@jit(nopython=True,nogil=True,parallel=True,cache=True)
 def _distance_lowmem(Z, vec, cc, epsilon):
     """ Distance function low memory"""
     product = np.zeros([vec.size, cc.shape[1]])
@@ -34,6 +35,7 @@ def _initialize_clusters(n_el, n_clusters, low_memory=False):
         return eye[cluster_idx]
 
 
+@jit(nopython=True,nogil=True,parallel=True,cache=True)
 def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
     """
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
