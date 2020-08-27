@@ -27,7 +27,7 @@ if __name__ == "__main__":
                 n_row_clusters=k,
                 n_col_clusters=l,
                 k_range=range(2, 25),
-                kmean_max_iter=kmean_max_iter,
-                ouputdir='.')
+                kmean_max_iter=kmean_max_iter)
     km.compute()
+    km.plot_elbow_curve('./Test_kmean_elbow_curve.png')
     km.cl_mean_centroids
