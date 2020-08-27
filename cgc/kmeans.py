@@ -68,10 +68,10 @@ class Kmeans(object):
         Then Loop through the range of k values,
         and compute the sum of variances of each k.
         Finally select the smallest k which gives
-        the sum of variances smaller the threshold.
+        the sum of variances smaller than the threshold.
         """
         # Get statistic measures
-        self._compute_statistic_mesures()
+        self._compute_statistic_measures()
 
         # Search for value k
         var_list = np.array([])  # List of variance of each k value
@@ -133,16 +133,14 @@ class Kmeans(object):
 
         # Reshape the centroids of means to the shape of cluster matrix,
         # taking into account non-constructive row/col cluster
-        self.cl_mean_centroids = np.empty(
-            (self.n_row_clusters, self.n_col_clusters))
-        self.cl_mean_centroids[:] = np.nan
+        self.cl_mean_centroids = np.full((self.n_row_clusters, self.n_col_clusters), np.nan)
         idx = 0
         for r in np.unique(self.row_clusters):
             for c in np.unique(self.col_clusters):
                 self.cl_mean_centroids[r, c] = cl_mean_centroids[idx]
                 idx = idx + 1
 
-    def _compute_statistic_mesures(self):
+    def _compute_statistic_measures(self):
         """
         Compute 6 statistics: Mean, STD, 5 percentile, 95 percentile, maximum
         and minimum values, for each co-cluster group.
