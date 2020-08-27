@@ -1,10 +1,12 @@
 import concurrent.futures
 import dask.distributed
+import json
 import logging
 
 from concurrent.futures import ThreadPoolExecutor
 from dask.distributed import Client
 
+from . import __version__
 from . import coclustering_dask
 from . import coclustering_numpy
 
@@ -16,7 +18,7 @@ class Coclustering(object):
     Perform the co-clustering analysis of a 2D array
     """
     def __init__(self, Z, nclusters_row, nclusters_col, conv_threshold=1.e-5,
-                 max_iterations=1, nruns=1, epsilon=1.e-8):
+                 max_iterations=1, nruns=1, epsilon=1.e-8, output_filename=''):
         """
         Initialize the object
 
@@ -27,6 +29,7 @@ class Coclustering(object):
         :param max_iterations: maximum number of iterations
         :param nruns: number of differntly-initialized runs
         :param epsilon: numerical parameter, avoids zero arguments in log
+        :param output_filename: name of the file where to write the clusters
         """
         self.Z = Z
         self.nclusters_row = nclusters_row
@@ -35,6 +38,7 @@ class Coclustering(object):
         self.max_iterations = max_iterations
         self.nruns = nruns
         self.epsilon = epsilon
+        self.output_filename = output_filename
 
         self.client = None
 
@@ -57,6 +61,7 @@ class Coclustering(object):
             self._dask_runs_memory()
         else:
             self._dask_runs_performance()
+        self._write_clusters()
 
     def run_with_threads(self, nthreads=1):
         """
@@ -88,6 +93,7 @@ class Coclustering(object):
                     self.row_clusters, self.col_clusters = row, col
                     self.error = e
                 self.nruns_completed += 1
+        self._write_clusters()
 
     def run_serial(self):
         raise NotImplementedError
@@ -104,7 +110,6 @@ class Coclustering(object):
                 self.max_iterations,
                 self.epsilon
             )
-            e = e.compute()
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
@@ -148,3 +153,14 @@ class Coclustering(object):
                 self.col_clusters = col.compute()
                 self.error = e
             self.nruns_completed += 1
+
+    def _write_clusters(self):
+        if self.output_filename:
+            with open(self.output_filename, 'w') as f:
+                data = {
+                    'cgc_version': __version__,
+                    'error': self.error,
+                    'row_clusters': self.row_clusters.tolist(),
+                    'col_clusters': self.col_clusters.tolist()
+                }
+                json.dump(data, f, indent=4)
