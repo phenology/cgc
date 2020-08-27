@@ -45,7 +45,10 @@ def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
         for c in range(0, nclusters_col):
             idx_r = np.where(row_clusters == r)[0]
             idx_c = np.where(col_clusters == c)[0]
-            idx_rc = np.array(np.meshgrid(idx_r, idx_c)).T.reshape(-1, 2)
+            idx_r_grid = np.repeat(idx_r,len(idx_c)).reshape(len(idx_r),len(idx_c)).T
+            idx_c_grid = np.repeat(idx_c,len(idx_r)).reshape(len(idx_c),len(idx_r))
+            idx_rc = np.array([idx_r_grid,idx_c_grid]).T.reshape(-1,2)
+            #idx_rc = np.array(np.meshgrid(idx_r, idx_c)).T.reshape(-1, 2)
             product[r, c] = np.sum(Z[idx_rc[:, 0], idx_rc[:, 1]])
     return product
 
