@@ -63,7 +63,11 @@ class Triclustering(object):
                                 self.nclusters_bnd,
                                 self.conv_threshold,
                                 self.max_iterations,
-                                self.epsilon):
+                                self.epsilon,
+                                row_clusters_init=self.row_clusters,
+                                col_clusters_init=self.col_clusters,
+                                bnd_clusters_init=self.bnd_clusters
+                                ):
                 r for r in range(self.nruns)
             }
             row_min, col_min, bnd_min, e_min = None, None, None, 0.
@@ -90,6 +94,24 @@ class Triclustering(object):
 
     def run_serial(self):
         raise NotImplementedError
+
+    def set_initial_clusters(self, row_clusters, col_clusters, bnd_clusters):
+        """
+        Set initial cluster assignment
+
+        :param row_clusters: initial row clusters
+        :param col_clusters: initial column clusters
+        :param bnd_clusters: initial band clusters
+        """
+        if (not (row_clusters is None
+                 and col_clusters is None
+                 and bnd_clusters is None)
+                and self.nruns > 1):
+            logging.warning('Multiple runs with the same cluster '
+                            'initialization will be performed.')
+        self.row_clusters = row_clusters
+        self.col_clusters = col_clusters
+        self.bnd_clusters = bnd_clusters
 
     def _write_clusters(self):
         if self.output_filename:

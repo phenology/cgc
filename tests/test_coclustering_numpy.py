@@ -25,25 +25,21 @@ class TestInitializeClusters:
         m = 10
         k = 3
         clusters = coclustering_numpy._initialize_clusters(m, k)
-        assert clusters.sum(axis=0).sum() == m
+        assert set(clusters.tolist()) == {i for i in range(k)}
 
     def test_all_clusters_are_initialized(self):
         # if m == k, all clusters should have initial occupation one
         m = 10
         k = 10
         clusters = coclustering_numpy._initialize_clusters(m, k)
-        num_el_per_cluster = clusters.sum(axis=0)
-        np.testing.assert_array_equal(num_el_per_cluster,
-                                      np.ones_like(num_el_per_cluster))
+        assert sorted(clusters) == [i for i in range(k)]
 
     def test_more_clusters_than_elements(self):
         # only the first m clusters should be initialized
         m = 10
         k = 20
         clusters = coclustering_numpy._initialize_clusters(m, k)
-        num_el_per_cluster = clusters[:, :m].sum(axis=0)
-        np.testing.assert_array_equal(num_el_per_cluster,
-                                      np.ones_like(num_el_per_cluster))
+        assert set(clusters.tolist()) == {i for i in range(m)}
 
 
 class TestCoclustering:

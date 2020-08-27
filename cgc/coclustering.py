@@ -27,7 +27,7 @@ class Coclustering(object):
         :param nclusters_col: number of column clusters
         :param conv_threshold: convergence threshold for the objective function
         :param max_iterations: maximum number of iterations
-        :param nruns: number of differntly-initialized runs
+        :param nruns: number of differently-initialized runs
         :param epsilon: numerical parameter, avoids zero arguments in log
         :param output_filename: name of the file where to write the clusters
         """
@@ -76,7 +76,9 @@ class Coclustering(object):
                                 self.nclusters_col,
                                 self.conv_threshold,
                                 self.max_iterations,
-                                self.epsilon):
+                                self.epsilon,
+                                row_clusters_init=self.row_clusters,
+                                col_clusters_init=self.col_clusters):
                 r for r in range(self.nruns)
             }
             row_min, col_min, e_min = None, None, 0.
@@ -111,7 +113,9 @@ class Coclustering(object):
                 self.nclusters_col,
                 self.conv_threshold,
                 self.max_iterations,
-                self.epsilon
+                self.epsilon,
+                row_clusters_init=self.row_clusters,
+                col_clusters_init=self.col_clusters
             )
             logger.info(f'Error = {e}')
             if converged:
@@ -137,6 +141,8 @@ class Coclustering(object):
                                       self.conv_threshold,
                                       self.max_iterations,
                                       self.epsilon,
+                                      row_clusters_init=self.row_clusters,
+                                      col_clusters_init=self.col_clusters,
                                       run_on_worker=True,
                                       pure=False)
                    for r in range(self.nruns)]
@@ -159,6 +165,20 @@ class Coclustering(object):
         self.row_clusters = row_min.compute()
         self.col_clusters = col_min.compute()
         self.error = e_min
+
+    def set_initial_clusters(self, row_clusters, col_clusters):
+        """
+        Set initial cluster assignment
+
+        :param row_clusters: initial row clusters
+        :param col_clusters: initial column clusters
+        """
+        if (not (row_clusters is None and col_clusters is None)
+                and self.nruns > 1):
+            logging.warning('Multiple runs with the same cluster '
+                            'initialization will be performed.')
+        self.row_clusters = row_clusters
+        self.col_clusters = col_clusters
 
     def _write_clusters(self):
         if self.output_filename:
