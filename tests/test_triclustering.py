@@ -36,3 +36,9 @@ class TestTriclustering:
         np.testing.assert_equal(triclustering.bnd_clusters,
                                 [1, 0, 2, 0, 1, 0])
         assert np.isclose(triclustering.error, -69712.35398188536)
+
+    def test_nruns_completed(self, triclustering):
+        triclustering.run_with_threads(nthreads=1)
+        assert triclustering.nruns_completed == 10
+        triclustering.run_with_threads(nthreads=1)
+        assert triclustering.nruns_completed == 20

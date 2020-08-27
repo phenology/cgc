@@ -52,3 +52,15 @@ class TestCoclustering:
         np.testing.assert_equal(coclustering.col_clusters,
                                 [0, 0, 0, 1, 0, 0, 1, 1])
         assert np.isclose(coclustering.error, -11554.1406004284)
+
+    def test_nruns_completed_threads(self, coclustering):
+        coclustering.run_with_threads(nthreads=1)
+        assert coclustering.nruns_completed == 10
+        coclustering.run_with_threads(nthreads=1)
+        assert coclustering.nruns_completed == 20
+
+    def test_nruns_completed_dask(self, client, coclustering):
+        coclustering.run_with_dask(client)
+        assert coclustering.nruns_completed == 10
+        coclustering.run_with_dask(client, low_memory=True)
+        assert coclustering.nruns_completed == 20

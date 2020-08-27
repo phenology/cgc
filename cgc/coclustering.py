@@ -46,6 +46,8 @@ class Coclustering(object):
         self.col_clusters = None
         self.error = None
 
+        self.nruns_completed = 0
+
     def run_with_dask(self, client=None, low_memory=False):
         """
         Run the co-clustering with Dask
@@ -81,22 +83,18 @@ class Coclustering(object):
                                 col_clusters_init=self.col_clusters):
                 r for r in range(self.nruns)
             }
-            row_min, col_min, e_min = None, None, 0.
-            r = 0
             for future in concurrent.futures.as_completed(futures):
-                logger.info(f'Waiting for run {r} ..')
+                logger.info(f'Waiting for run {self.nruns_completed} ..')
                 converged, niters, row, col, e = future.result()
                 logger.info(f'Error = {e}')
                 if converged:
                     logger.info(f'Run converged in {niters} iterations')
                 else:
                     logger.warning(f'Run not converged in {niters} iterations')
-                if e < e_min:
-                    row_min, col_min, e_min = row, col, e
-                r += 1
-        self.row_clusters = row_min
-        self.col_clusters = col_min
-        self.error = e_min
+                if self.error is None or e < self.error:
+                    self.row_clusters, self.col_clusters = row, col
+                    self.error = e
+                self.nruns_completed += 1
         self._write_clusters()
 
     def run_serial(self):
@@ -104,9 +102,8 @@ class Coclustering(object):
 
     def _dask_runs_memory(self):
         """ Memory efficient Dask implementation: sequential runs """
-        row_min, col_min, e_min = None, None, 0.
         for r in range(self.nruns):
-            logger.info(f'Run {r} ..')
+            logger.info(f'Run {self.nruns_completed} ..')
             converged, niters, row, col, e = coclustering_dask.coclustering(
                 self.Z,
                 self.nclusters_row,
@@ -122,11 +119,11 @@ class Coclustering(object):
                 logger.info(f'Run converged in {niters} iterations')
             else:
                 logger.warning(f'Run not converged in {niters} iterations')
-            if e < e_min:
-                row_min, col_min, e_min = row, col, e
-        self.row_clusters = row_min.compute()
-        self.col_clusters = col_min.compute()
-        self.error = e_min
+            if self.error is None or e < self.error:
+                self.row_clusters = row.compute()
+                self.col_clusters = col.compute()
+                self.error = e
+            self.nruns_completed += 1
 
     def _dask_runs_performance(self):
         """
@@ -146,25 +143,22 @@ class Coclustering(object):
                                       run_on_worker=True,
                                       pure=False)
                    for r in range(self.nruns)]
-        row_min, col_min, e_min = None, None, 0.
-        r = 0
         for future, result in dask.distributed.as_completed(
                 futures,
                 with_results=True,
                 raise_errors=False):
-            logger.info(f'Waiting for run {r} ..')
+            logger.info(f'Waiting for run {self.nruns_completed} ..')
             converged, niters, row, col, e = result
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
             else:
                 logger.warning(f'Run not converged in {niters} iterations')
-            if e < e_min:
-                row_min, col_min, e_min = row, col, e
-            r += 1
-        self.row_clusters = row_min.compute()
-        self.col_clusters = col_min.compute()
-        self.error = e_min
+            if self.error is None or e < self.error:
+                self.row_clusters = row.compute()
+                self.col_clusters = col.compute()
+                self.error = e
+            self.nruns_completed += 1
 
     def set_initial_clusters(self, row_clusters, col_clusters):
         """

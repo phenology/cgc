@@ -47,6 +47,8 @@ class Triclustering(object):
         self.bnd_clusters = None
         self.error = None
 
+        self.nruns_completed = 0
+
     def run_with_threads(self, nthreads=1):
         """
         Run the tri-clustering using an algorithm based on numpy + threading
@@ -70,23 +72,20 @@ class Triclustering(object):
                                 ):
                 r for r in range(self.nruns)
             }
-            row_min, col_min, bnd_min, e_min = None, None, None, 0.
-            r = 0
             for future in concurrent.futures.as_completed(futures):
-                logger.info(f'Waiting for run {r} ..')
+                logger.info(f'Waiting for run {self.nruns_completed} ..')
                 converged, niters, row, col, bnd, e = future.result()
                 logger.info(f'Error = {e}')
                 if converged:
                     logger.info(f'Run converged in {niters} iterations')
                 else:
                     logger.warning(f'Run not converged in {niters} iterations')
-                if e < e_min:
-                    row_min, col_min, bnd_min, e_min = row, col, bnd, e
-                r += 1
-        self.row_clusters = row_min
-        self.col_clusters = col_min
-        self.bnd_clusters = bnd_min
-        self.error = e_min
+                if self.error is None or e < self.error:
+                    self.row_clusters = row
+                    self.col_clusters = col
+                    self.bnd_clusters = bnd
+                    self.error = e
+                self.nruns_completed += 1
         self._write_clusters()
 
     def run_with_dask(self, client=None):
