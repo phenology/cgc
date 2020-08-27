@@ -1,3 +1,4 @@
 numpy
 dask[complete]
 scikit-learn
+matplotlib
