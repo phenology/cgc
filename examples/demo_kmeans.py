@@ -14,15 +14,12 @@ if __name__ == "__main__":
     k = 30  # num clusters in rows
     l = 5  # num clusters in columns
     errobj, niters, nruns, epsilon = 0.00001, 1, 1, 10e-8
-    Z = np.load(
-        '/mnt/c/Users/OuKu/Developments/phenology/data/LeafFinal_one_band_3000000_1980-2017_int32.npy'
-    )
+    Z = np.random.randint(1000, size=(100000, 20))
     Z = Z.astype('float64')
     cc = Coclustering(Z, k, l, errobj, niters, nruns, epsilon)
     cc.run_with_threads(nthreads=1)
 
     # Kmean
-    kmean_n_clusters = 5
     kmean_max_iter = 500
     km = Kmeans(Z=Z,
                 row_clusters=cc.row_clusters,
