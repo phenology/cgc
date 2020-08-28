@@ -85,9 +85,9 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
         minvals = da.min(d_col, axis=1)
         # power 1 divergence, power 2 euclidean
         e = da.sum(da.power(minvals, 1))
-        row_clusters, col_clusters, e = client.persist([row_clusters,
-                                                        col_clusters,
-                                                        e])
+        row_clusters, R, col_clusters, C, e = client.persist([row_clusters, R,
+                                                              col_clusters, C,
+                                                              e])
         if run_on_worker:
             # this is workaround for e.compute() for a function that runs
             # on a worker with multiple threads
