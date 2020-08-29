@@ -8,10 +8,13 @@ from dask.distributed import get_client, rejoin, secede
 logger = logging.getLogger(__name__)
 
 
-def _distance(Z, X, Y, epsilon):
+def _distance(Z, Y, epsilon):
     """ Distance function """
     Y = Y + epsilon
-    d = da.dot(X, Y) - da.dot(Z, da.log(Y))
+    # The first term below is equal to: da.dot(da.ones(m, n), Y)
+    # with Z.shape = (m, n) and Y.shape = (n, k)
+    d = (Y.sum(axis=0, keepdims=True).repeat(Z.shape[0], axis=0)
+         - da.dot(Z, da.log(Y)))
     return d
 
 
@@ -65,17 +68,18 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     while (not converged) & (s < niters):
         logger.debug(f'Iteration # {s} ..')
         # Calculate cluster based averages
-        CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / (
-            da.dot(da.dot(R.T, da.ones((m, n))), C) + epsilon)
+        # dot is equivalent to:  da.dot(da.dot(R.T, da.ones((m, n))), C)
+        dot = da.dot(R.T.sum(axis=1, keepdims=True).repeat(n, axis=1), C)
+        CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / (dot + epsilon)
 
         # Calculate distance based on row approximation
-        d_row = _distance(Z, da.ones((m, n)), da.dot(C, CoCavg.T), epsilon)
+        d_row = _distance(Z, da.dot(C, CoCavg.T), epsilon)
         # Assign to best row cluster
         row_clusters = da.argmin(d_row, axis=1)
         R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
         # Calculate distance based on column approximation
-        d_col = _distance(Z.T, da.ones((n, m)), da.dot(R, CoCavg), epsilon)
+        d_col = _distance(Z.T, da.dot(R, CoCavg), epsilon)
         # Assign to best column cluster
         col_clusters = da.argmin(d_col, axis=1)
         C = _setup_cluster_matrix(nclusters_col, col_clusters)
