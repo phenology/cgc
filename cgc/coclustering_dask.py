@@ -51,9 +51,11 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
 
     [m, n] = Z.shape
 
-    row_clusters = row_clusters_init if row_clusters_init is not None \
+    row_clusters = da.array(row_clusters_init) \
+        if row_clusters_init is not None \
         else _initialize_clusters(m, nclusters_row)
-    col_clusters = col_clusters_init if col_clusters_init is not None \
+    col_clusters = da.array(col_clusters_init) \
+        if col_clusters_init is not None \
         else _initialize_clusters(n, nclusters_col)
     R = _setup_cluster_matrix(nclusters_row, row_clusters)
     C = _setup_cluster_matrix(nclusters_col, col_clusters)
