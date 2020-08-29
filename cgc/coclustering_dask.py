@@ -26,8 +26,7 @@ def _initialize_clusters(n_el, n_clusters):
 
 def _setup_cluster_matrix(n_clusters, cluster_idx):
     """ Set cluster occupation matrix """
-    # TODO: check if Z shape is larger than max int32?
-    return da.eye(n_clusters, dtype=np.int32)[cluster_idx]
+    return da.eye(n_clusters, dtype=np.bool)[cluster_idx]
 
 
 def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
