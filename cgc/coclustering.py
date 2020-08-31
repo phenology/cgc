@@ -43,21 +43,23 @@ class Coclustering(object):
 
         self._clean()
 
-    def _clean(self):
-        self.row_clusters = None
-        self.col_clusters = None
+    def _clean(self, row_clusters=None, col_clusters=None):
+        self.row_clusters = row_clusters
+        self.col_clusters = col_clusters
 
         self.error = None
         self.nruns_completed = 0
 
-    def run_with_dask(self, client=None, low_memory=False):
+    def run_with_dask(self, client=None, low_memory=False, row_clusters=None, col_clusters=None):
         """
         Run the co-clustering with Dask
 
         :param client: Dask client
         :param low_memory: if true, use a memory-conservative algorithm
+        :param row_clusters: initial row clusters
+        :param col_clusters: initial column clusters        
         """
-        self._clean()
+        self._clean(row_clusters, col_clusters)
 
         self.client = client if client is not None else Client()
 
@@ -67,14 +69,16 @@ class Coclustering(object):
             self._dask_runs_performance()
         self._write_clusters()
 
-    def run_with_threads(self, nthreads=1):
+    def run_with_threads(self, nthreads=1, row_clusters=None, col_clusters=None):
         """
         Run the co-clustering using an algorithm based on numpy + threading
         (only suitable for local runs)
 
         :param nthreads: number of threads
+        :param row_clusters: initial row clusters
+        :param col_clusters: initial column clusters
         """
-        self._clean()
+        self._clean(row_clusters, col_clusters)
 
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
             futures = {
@@ -162,20 +166,6 @@ class Coclustering(object):
                 self.col_clusters = col.compute()
                 self.error = e
             self.nruns_completed += 1
-
-    def set_initial_clusters(self, row_clusters, col_clusters):
-        """
-        Set initial cluster assignment
-
-        :param row_clusters: initial row clusters
-        :param col_clusters: initial column clusters
-        """
-        if (not (row_clusters is None and col_clusters is None)
-                and self.nruns > 1):
-            logging.warning('Multiple runs with the same cluster '
-                            'initialization will be performed.')
-        self.row_clusters = row_clusters
-        self.col_clusters = col_clusters
 
     def _write_clusters(self):
         if self.output_filename:
