@@ -39,15 +39,14 @@ class Coclustering(object):
         self.nruns = nruns
         self.epsilon = epsilon
         self.output_filename = output_filename
-
         self.client = None
-        
+
         self.row_clusters = None
         self.col_clusters = None
-        
+
         self.error = None
         self.nruns_completed = 0
-        
+
     def _clean(self):
         self.error = None
         self.nruns_completed = 0
@@ -60,7 +59,7 @@ class Coclustering(object):
         :param low_memory: if true, use a memory-conservative algorithm
         """
         self._clean()
-        
+
         self.client = client if client is not None else Client()
 
         if low_memory:
@@ -77,7 +76,7 @@ class Coclustering(object):
         :param nthreads: number of threads
         """
         self._clean()
-        
+
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
             futures = {
                 executor.submit(coclustering_numpy.coclustering,
