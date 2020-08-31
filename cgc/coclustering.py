@@ -41,13 +41,12 @@ class Coclustering(object):
         self.output_filename = output_filename
         self.client = None
 
+        self._clean()
+
+    def _clean(self):
         self.row_clusters = None
         self.col_clusters = None
 
-        self.error = None
-        self.nruns_completed = 0
-
-    def _clean(self):
         self.error = None
         self.nruns_completed = 0
 
