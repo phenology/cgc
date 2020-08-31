@@ -50,14 +50,15 @@ class Coclustering(object):
         self.error = None
         self.nruns_completed = 0
 
-    def run_with_dask(self, client=None, low_memory=False, row_clusters=None, col_clusters=None):
+    def run_with_dask(self, client=None, low_memory=False,
+                      row_clusters=None, col_clusters=None):
         """
         Run the co-clustering with Dask
 
         :param client: Dask client
         :param low_memory: if true, use a memory-conservative algorithm
         :param row_clusters: initial row clusters
-        :param col_clusters: initial column clusters        
+        :param col_clusters: initial column clusters
         """
         self._clean(row_clusters, col_clusters)
 
@@ -69,7 +70,8 @@ class Coclustering(object):
             self._dask_runs_performance()
         self._write_clusters()
 
-    def run_with_threads(self, nthreads=1, row_clusters=None, col_clusters=None):
+    def run_with_threads(self, nthreads=1,
+                         row_clusters=None, col_clusters=None):
         """
         Run the co-clustering using an algorithm based on numpy + threading
         (only suitable for local runs)
