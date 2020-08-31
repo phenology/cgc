@@ -47,11 +47,11 @@ def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
             idx_r = np.where(row_clusters == r)[0]
             idx_c = np.where(col_clusters == c)[0]
             k=0
-            idx_rc = np.ndarray(size=(len(idx_r)*len(idx_c),2),dtype=np.int32)
+            idx_rc = np.zeros(shape=(len(idx_r)*len(idx_c),2),dtype=np.int32)
             for idr in idx_r:
                 for idc in idx_c:
                     idx_rc[k] = [idr,idc]
-                    k=k+1        
+                    k=k+1
             #idx_r_grid = np.repeat(idx_r,len(idx_c)).reshape(len(idx_r),len(idx_c)).T
             #idx_c_grid = np.repeat(idx_c,len(idx_r)).reshape(len(idx_c),len(idx_r))
             #idx_rc = np.array((idx_r_grid,idx_c_grid)).T.reshape(-1,2)
