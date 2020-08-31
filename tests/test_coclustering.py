@@ -23,9 +23,10 @@ class TestCoclustering:
         assert coclustering.col_clusters is None
 
     def test_run_with_threads(self, coclustering):
-        coclustering.set_initial_clusters([0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-                                          [0, 1, 0, 1, 0, 1, 0, 1])
-        coclustering.run_with_threads(nthreads=2)
+        coclustering.run_with_threads(nthreads=2,
+                                      row_clusters=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
+                                      col_clusters=[0, 1, 0, 1, 0, 1, 0, 1]
+                                     )
         np.testing.assert_equal(coclustering.row_clusters,
                                 [3, 0, 1, 4, 0, 2, 2, 2, 3, 4])
         np.testing.assert_equal(coclustering.col_clusters,
@@ -33,9 +34,10 @@ class TestCoclustering:
         assert np.isclose(coclustering.error, -11554.1406004284)
 
     def test_dask_runs_memory(self, client, coclustering):
-        coclustering.set_initial_clusters([0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-                                          [0, 1, 0, 1, 0, 1, 0, 1])
-        coclustering._dask_runs_memory()
+        coclustering.run_with_dask(low_memory=True,
+                                   row_clusters=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
+                                   col_clusters=[0, 1, 0, 1, 0, 1, 0, 1]
+                                  )
         np.testing.assert_equal(coclustering.row_clusters,
                                 [3, 0, 1, 4, 0, 2, 2, 2, 3, 4])
         np.testing.assert_equal(coclustering.col_clusters,
@@ -43,10 +45,10 @@ class TestCoclustering:
         assert np.isclose(coclustering.error, -11554.1406004284)
 
     def test_dask_runs_performance(self, client, coclustering):
-        coclustering.set_initial_clusters([0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-                                          [0, 1, 0, 1, 0, 1, 0, 1])
-        coclustering.client = client
-        coclustering._dask_runs_performance()
+        coclustering.run_with_dask(client=client, low_memory=False,
+                                   row_clusters=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
+                                   col_clusters=[0, 1, 0, 1, 0, 1, 0, 1]
+                                  )
         np.testing.assert_equal(coclustering.row_clusters,
                                 [3, 0, 1, 4, 0, 2, 2, 2, 3, 4])
         np.testing.assert_equal(coclustering.col_clusters,
