@@ -57,10 +57,10 @@ class TestCoclustering:
         coclustering.run_with_threads(nthreads=1)
         assert coclustering.nruns_completed == 10
         coclustering.run_with_threads(nthreads=1)
-        assert coclustering.nruns_completed == 20
+        assert coclustering.nruns_completed == 10
 
     def test_nruns_completed_dask(self, client, coclustering):
         coclustering.run_with_dask(client)
         assert coclustering.nruns_completed == 10
         coclustering.run_with_dask(client, low_memory=True)
-        assert coclustering.nruns_completed == 20
+        assert coclustering.nruns_completed == 10
