@@ -40,12 +40,11 @@ class Coclustering(object):
         self.epsilon = epsilon
         self.output_filename = output_filename
 
-        self.client = None
-
         self.row_clusters = None
         self.col_clusters = None
+        
+    def _clean(self):
         self.error = None
-
         self.nruns_completed = 0
 
     def run_with_dask(self, client=None, low_memory=False):
@@ -55,6 +54,8 @@ class Coclustering(object):
         :param client: Dask client
         :param low_memory: if true, use a memory-conservative algorithm
         """
+        self._clean()
+        
         self.client = client if client is not None else Client()
 
         if low_memory:
@@ -70,6 +71,8 @@ class Coclustering(object):
 
         :param nthreads: number of threads
         """
+        self._clean()
+        
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
             futures = {
                 executor.submit(coclustering_numpy.coclustering,
@@ -96,9 +99,6 @@ class Coclustering(object):
                     self.error = e
                 self.nruns_completed += 1
         self._write_clusters()
-
-    def run_serial(self):
-        raise NotImplementedError
 
     def _dask_runs_memory(self):
         """ Memory efficient Dask implementation: sequential runs """
