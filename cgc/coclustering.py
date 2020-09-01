@@ -1,16 +1,29 @@
 import concurrent.futures
 import dask.distributed
-import json
 import logging
 
 from concurrent.futures import ThreadPoolExecutor
 from dask.distributed import Client
 
-from . import __version__
 from . import coclustering_dask
 from . import coclustering_numpy
 
+from .results import Results
+
 logger = logging.getLogger(__name__)
+
+
+class CoclusteringResults(Results):
+    def reset(self):
+        self.row_clusters_initial = None
+        self.col_clusters_initial = None
+
+        self.row_clusters = None
+        self.col_clusters = None
+
+        self.error = None
+        self.nruns_completed = 0
+        self.nruns_converged = 0
 
 
 class Coclustering(object):
@@ -41,14 +54,7 @@ class Coclustering(object):
         self.output_filename = output_filename
         self.client = None
 
-        self._clean()
-
-    def _clean(self, row_clusters=None, col_clusters=None):
-        self.row_clusters = row_clusters
-        self.col_clusters = col_clusters
-
-        self.error = None
-        self.nruns_completed = 0
+        self.results = CoclusteringResults()
 
     def run_with_dask(self, client=None, low_memory=False,
                       row_clusters=None, col_clusters=None):
@@ -60,8 +66,6 @@ class Coclustering(object):
         :param row_clusters: initial row clusters
         :param col_clusters: initial column clusters
         """
-        self._clean(row_clusters, col_clusters)
-
         self.client = client if client is not None else Client()
 
         if low_memory:
