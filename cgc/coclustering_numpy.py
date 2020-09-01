@@ -20,7 +20,7 @@ def _distance_lowmem(Z, vec, cc, epsilon):
     sum_part1 = np.sum(product, axis=0, dtype='float64')
     Zdim0 = Z.shape[0]
     part1 = np.zeros((Zdim0,dim2))
-    for i in np.range(Zdim0):
+    for i in range(Zdim0):
         part1[i,:] = sum_part1
 
 #    part1 = np.repeat(np.sum(product, axis=0, keepdims=True, dtype='float64'),
