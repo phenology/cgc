@@ -3,6 +3,7 @@ import numba
 
 def _distance(Z, X, Y, epsilon):
     """ Distance function """
+
     Y = Y + epsilon
     d = np.dot(X, Y) - np.dot(Z, np.log(Y))
     return d
@@ -10,6 +11,7 @@ def _distance(Z, X, Y, epsilon):
 @numba.jit(nopython=True, nogil=True, parallel=True, cache=True)
 def _distance_lowmem(Z, vec, cc, epsilon):
     """ Distance function low memory"""
+
     dim1 = vec.size
     dim2 = cc.shape[1]
     product = np.zeros((dim1, dim2))
@@ -62,8 +64,10 @@ def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
             product[r, c] = prod_rc
 #                    idx_rc[k] = [idr,idc]
 #                    k=k+1
-#            #idx_r_grid = np.repeat(idx_r,len(idx_c)).reshape(len(idx_r),len(idx_c)).T
-#            #idx_c_grid = np.repeat(idx_c,len(idx_r)).reshape(len(idx_c),len(idx_r))
+#            #idx_r_grid = np.repeat(idx_r,len(idx_c)).reshape(
+#                                                      len(idx_r),len(idx_c)).T
+#            #idx_c_grid = np.repeat(idx_c,len(idx_r)).reshape(
+#                                                         len(idx_c),len(idx_r))
 #            #idx_rc = np.array((idx_r_grid,idx_c_grid)).T.reshape(-1,2)
 #            #idx_rc = np.array(np.meshgrid(idx_r, idx_c)).T.reshape(-1, 2)
 #            #prod=0
