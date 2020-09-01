@@ -12,7 +12,7 @@ def _distance_lowmem(Z, vec, cc, epsilon):
     """ Distance function low memory"""
     dim1 = vec.size
     dim2 = cc.shape[1]
-    product = np.zeros(shape=[dim1, dim2))
+    product = np.zeros(shape=[dim1, dim2])
     for cl in np.unique(vec):
         idx = np.where(vec == cl)[0]
         product[idx, :] = cc[cl, :]
