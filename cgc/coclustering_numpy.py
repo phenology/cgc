@@ -74,7 +74,8 @@ def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
 
 
 @numba.jit(nopython=True, nogil=True, parallel=True, cache=True)
-def _cluster_dot_numba(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
+def _cluster_dot_numba(Z, row_clusters, col_clusters, nclusters_row,
+                                                                nclusters_col):
     """
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
     """
@@ -90,7 +91,7 @@ def _cluster_dot_numba(Z, row_clusters, col_clusters, nclusters_row, nclusters_c
                     prod_rc += Z[idr, idc]
 
             product[r, c] = prod_rc
-            
+
     return product
 
 
@@ -134,14 +135,14 @@ def coclustering(Z,
         if low_memory:
             if numba_jit:
                 CoCavg = (_cluster_dot_numba(Z, row_clusters, col_clusters,
-                                    nclusters_row, nclusters_col) +
+                                             nclusters_row, nclusters_col) +
                         Gavg * epsilon) / (_cluster_dot_numba(np.ones(
                           (m, n)), row_clusters, col_clusters, nclusters_row,
                                                       nclusters_col) + epsilon)
 
             else:
                 CoCavg = (_cluster_dot(Z, row_clusters, col_clusters,
-                                    nclusters_row, nclusters_col) +
+                                       nclusters_row, nclusters_col) +
                         Gavg * epsilon) / (_cluster_dot(np.ones(
                           (m, n)), row_clusters, col_clusters, nclusters_row,
                                                       nclusters_col) + epsilon)
@@ -154,7 +155,7 @@ def coclustering(Z,
         if low_memory:
             if numba_jit:
                 d_row = _distance_lowmem_numba(Z, col_clusters, CoCavg.T,
-                                                                    epsilon)
+                                               epsilon)
             else:
                 d_row = _distance_lowmem(Z, col_clusters, CoCavg.T, epsilon)
         else:
@@ -170,7 +171,7 @@ def coclustering(Z,
                 d_col = _distance_lowmem(Z.T, row_clusters, CoCavg, epsilon)
             else:
                 d_col = _distance_lowmem_numba(Z.T, row_clusters, CoCavg,
-                                                                        epsilon)
+                                               epsilon)
         else:
             d_col = _distance(Z.T, np.ones((n, m)), np.dot(R, CoCavg), epsilon)
         # Assign to best column cluster
