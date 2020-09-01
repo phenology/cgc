@@ -116,7 +116,7 @@ class Coclustering(object):
                 r for r in range(self.nruns)
             }
             for future in concurrent.futures.as_completed(futures):
-                logger.info(f'Waiting for run {self.nruns_completed} ..')
+                logger.info(f'Retrieving run {self.results.nruns_completed}')
                 converged, niters, row, col, e = future.result()
                 logger.info(f'Error = {e}')
                 if converged:
@@ -180,7 +180,7 @@ class Coclustering(object):
                 futures,
                 with_results=True,
                 raise_errors=False):
-            logger.info(f'Waiting for run {self.nruns_completed} ..')
+            logger.info(f'Retrieving run {self.results.nruns_completed} ..')
             converged, niters, row, col, e = result
             logger.info(f'Error = {e}')
             if converged:
