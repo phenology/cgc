@@ -17,7 +17,7 @@ def _distance_lowmem(Z, vec, cc, epsilon):
         idx = np.where(vec == cl)[0]
         product[idx, :] = cc[cl, :]
 
-    sum_part1 = np.sum(product, axis=0, dtype='float64')
+    sum_part1 = np.sum(product, axis=0) 
     Zdim0 = Z.shape[0]
     part1 = np.zeros((Zdim0,dim2))
     for i in range(Zdim0):
