@@ -1,17 +1,17 @@
 import numpy as np
 import numba
 
+
 def _distance(Z, X, Y, epsilon):
     """ Distance function """
-
     Y = Y + epsilon
     d = np.dot(X, Y) - np.dot(Z, np.log(Y))
     return d
 
+
 @numba.jit(nopython=True, nogil=True, parallel=True, cache=True)
 def _distance_lowmem(Z, vec, cc, epsilon):
     """ Distance function low memory"""
-
     dim1 = vec.size
     dim2 = cc.shape[1]
     product = np.zeros((dim1, dim2))
