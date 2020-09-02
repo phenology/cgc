@@ -75,7 +75,7 @@ def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
 
 @numba.jit(nopython=True, nogil=True, parallel=True, cache=True)
 def _cluster_dot_numba(Z, row_clusters, col_clusters, nclusters_row,
-                                                                nclusters_col):
+                       nclusters_col):
     """
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
     """
@@ -134,18 +134,19 @@ def coclustering(Z,
         # Calculate cluster based averages
         if low_memory:
             if numba_jit:
-                CoCavg = (_cluster_dot_numba(Z, row_clusters, col_clusters,
-                                             nclusters_row, nclusters_col) +
+                CoCavg = (
+                    _cluster_dot_numba(Z, row_clusters, col_clusters,
+                                       nclusters_row, nclusters_col) +
                         Gavg * epsilon) / (_cluster_dot_numba(np.ones(
                           (m, n)), row_clusters, col_clusters, nclusters_row,
-                                                      nclusters_col) + epsilon)
+                                           nclusters_col) + epsilon)
 
             else:
                 CoCavg = (_cluster_dot(Z, row_clusters, col_clusters,
                                        nclusters_row, nclusters_col) +
                         Gavg * epsilon) / (_cluster_dot(np.ones(
                           (m, n)), row_clusters, col_clusters, nclusters_row,
-                                                      nclusters_col) + epsilon)
+                                           nclusters_col) + epsilon)
         else:
             CoCavg = (np.dot(np.dot(R.T, Z), C) +
                       Gavg * epsilon) / (np.dot(np.dot(R.T, np.ones(
