@@ -144,8 +144,8 @@ def coclustering(Z,
                 CoCavg = (_cluster_dot(Z, row_clusters, col_clusters,
                                        nclusters_row, nclusters_col) +
                           Gavg * epsilon) / (_cluster_dot(np.ones(
-                          (m, n)), row_clusters, col_clusters, nclusters_row,
-                                           nclusters_col) + epsilon)
+                            (m, n)), row_clusters, col_clusters, nclusters_row,
+                            nclusters_col) + epsilon)
         else:
             CoCavg = (np.dot(np.dot(R.T, Z), C) +
                       Gavg * epsilon) / (np.dot(np.dot(R.T, np.ones(
