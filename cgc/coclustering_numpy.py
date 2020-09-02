@@ -37,7 +37,6 @@ def _distance_lowmem_numba(Z, vec, cc, epsilon):
         product[idx, :] = cc[cl, :]
 
     sum_part1 = np.sum(product, axis=0)
-    
     Zdim0 = Z.shape[0]
     part1 = np.zeros((Zdim0, dim2))
     for i in range(Zdim0):
