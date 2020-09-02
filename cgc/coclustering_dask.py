@@ -8,10 +8,13 @@ from dask.distributed import get_client, rejoin, secede
 logger = logging.getLogger(__name__)
 
 
-def _distance(Z, X, Y, epsilon):
+def _distance(Z, Y, epsilon):
     """ Distance function """
     Y = Y + epsilon
-    d = da.dot(X, Y) - da.dot(Z, da.log(Y))
+    # The first term below is equal to: da.dot(da.ones(m, n), Y)
+    # with Z.shape = (m, n) and Y.shape = (n, k)
+    d = (Y.sum(axis=0, keepdims=True).repeat(Z.shape[0], axis=0)
+         - da.dot(Z, da.log(Y)))
     return d
 
 
@@ -23,18 +26,17 @@ def _initialize_clusters(n_el, n_clusters):
 
 def _setup_cluster_matrix(n_clusters, cluster_idx):
     """ Set cluster occupation matrix """
-    # TODO: check if Z shape is larger than max int32?
-    return da.eye(n_clusters, dtype=np.int32)[cluster_idx]
+    return da.eye(n_clusters, dtype=np.bool)[cluster_idx]
 
 
 def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
-                 col_clusters_init=None, row_clusters_init=None,
+                 row_clusters_init=None, col_clusters_init=None,
                  run_on_worker=False):
     """
     Run the co-clustering, Dask implementation
 
     :param Z: m x n data matrix
-    :param nclusters_row: num row clusters
+    :param nclusters_row: number of row clusters
     :param nclusters_col: number of column clusters
     :param errobj: convergence threshold for the objective function
     :param niters: maximum number of iterations
@@ -42,16 +44,18 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     :param row_clusters_init: initial row cluster assignment
     :param col_clusters_init: initial column cluster assignment
     :param run_on_worker: whether the function is submitted to a Dask worker
-    :return: has converged, number of iterations performed. final row and
-    column clustering, error value
+    :return: has converged, number of iterations performed, row clusters,
+             column clusters, error value
     """
     client = get_client()
 
     [m, n] = Z.shape
 
-    row_clusters = row_clusters_init if row_clusters_init is not None \
+    row_clusters = da.array(row_clusters_init) \
+        if row_clusters_init is not None \
         else _initialize_clusters(m, nclusters_row)
-    col_clusters = col_clusters_init if col_clusters_init is not None \
+    col_clusters = da.array(col_clusters_init) \
+        if col_clusters_init is not None \
         else _initialize_clusters(n, nclusters_col)
     R = _setup_cluster_matrix(nclusters_row, row_clusters)
     C = _setup_cluster_matrix(nclusters_col, col_clusters)
@@ -65,29 +69,30 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     while (not converged) & (s < niters):
         logger.debug(f'Iteration # {s} ..')
         # Calculate cluster based averages
-        CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / (
-            da.dot(da.dot(R.T, da.ones((m, n))), C) + epsilon)
+        # dot is equivalent to:  da.dot(da.dot(R.T, da.ones((m, n))), C)
+        dot = da.outer(da.bincount(row_clusters, minlength=nclusters_row),
+                       da.bincount(col_clusters, minlength=nclusters_col))
+        CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / (dot + epsilon)
 
         # Calculate distance based on row approximation
-        d_row = _distance(Z, da.ones((m, n)), da.dot(C, CoCavg.T), epsilon)
+        d = _distance(Z, da.dot(C, CoCavg.T), epsilon)
         # Assign to best row cluster
-        row_clusters = da.argmin(d_row, axis=1)
+        row_clusters = da.argmin(d, axis=1)
         R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
         # Calculate distance based on column approximation
-        d_col = _distance(Z.T, da.ones((n, m)), da.dot(R, CoCavg), epsilon)
+        d = _distance(Z.T, da.dot(R, CoCavg), epsilon)
         # Assign to best column cluster
-        col_clusters = da.argmin(d_col, axis=1)
+        col_clusters = da.argmin(d, axis=1)
         C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
-        # Error value (actually just the column components really)
+        # Error value (just the column components)
         old_e = e
-        minvals = da.min(d_col, axis=1)
-        # power 1 divergence, power 2 euclidean
-        e = da.sum(da.power(minvals, 1))
-        row_clusters, col_clusters, e = client.persist([row_clusters,
-                                                        col_clusters,
-                                                        e])
+        minvals = da.min(d, axis=1)
+        e = da.sum(minvals)
+        row_clusters, R, col_clusters, C, e = client.persist([row_clusters, R,
+                                                              col_clusters, C,
+                                                              e])
         if run_on_worker:
             # this is workaround for e.compute() for a function that runs
             # on a worker with multiple threads
