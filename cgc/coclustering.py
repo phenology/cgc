@@ -128,7 +128,7 @@ class Coclustering(object):
     def _dask_runs_performance(self):
         """
         Faster but memory-intensive Dask implementation: all runs are
-        simultaneosly submitted to the scheduler
+        simultaneously submitted to the scheduler
         """
         Z = self.client.scatter(self.Z)
         futures = [self.client.submit(coclustering_dask.coclustering,
