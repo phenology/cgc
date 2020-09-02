@@ -184,7 +184,6 @@ class TestLowMemoryNumba:
             np.dot(np.dot(R.T, np.ones(Z.shape)), C) + 1.e-6)
         CoCavg_lowmem_numba = (coclustering_numpy._cluster_dot_numba(
             Z, row_clusters, col_clusters, 4, 2) + Z.mean() * 1.e-6) / (
-                coclustering_numpy._cluster_dot_numba(np.ones(Z.shape), row_clusters,
-                                                col_clusters, 4, 2) + 1.e-6)
+                coclustering_numpy._cluster_dot_numba(np.ones(Z.shape),
+                row_clusters, col_clusters, 4, 2) + 1.e-6)
         np.testing.assert_equal(CoCavg, CoCavg_lowmem_numba)
-        
