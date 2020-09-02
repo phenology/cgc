@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class CoclusteringResults(Results):
+    """
+    Contains results and metadata of a co-clustering calculation
+    """
     def reset(self):
         self.row_clusters_initial = None
         self.col_clusters_initial = None
