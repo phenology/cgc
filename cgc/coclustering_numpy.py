@@ -134,17 +134,16 @@ def coclustering(Z,
         # Calculate cluster based averages
         if low_memory:
             if numba_jit:
-                CoCavg = (
-                    _cluster_dot_numba(Z, row_clusters, col_clusters,
-                                       nclusters_row, nclusters_col) +
-                        Gavg * epsilon) / (_cluster_dot_numba(np.ones(
-                          (m, n)), row_clusters, col_clusters, nclusters_row,
-                                           nclusters_col) + epsilon)
+                CoCavg = (_cluster_dot_numba(Z, row_clusters, col_clusters,
+                                             nclusters_row, nclusters_col) +
+                          Gavg * epsilon) / (_cluster_dot_numba(np.ones(
+                            (m, n)), row_clusters, col_clusters, nclusters_row,
+                            nclusters_col) + epsilon)
 
             else:
                 CoCavg = (_cluster_dot(Z, row_clusters, col_clusters,
                                        nclusters_row, nclusters_col) +
-                        Gavg * epsilon) / (_cluster_dot(np.ones(
+                          Gavg * epsilon) / (_cluster_dot(np.ones(
                           (m, n)), row_clusters, col_clusters, nclusters_row,
                                            nclusters_col) + epsilon)
         else:
