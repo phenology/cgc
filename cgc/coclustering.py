@@ -56,7 +56,7 @@ class Coclustering(object):
         else:
             self._dask_runs_performance()
 
-    def run_with_threads(self, nthreads=1, low_memory=False):
+    def run_with_threads(self, nthreads=1, low_memory=False, numba_jit=False):
         """
         Run the co-clustering using an algorithm based on numpy + threading
         (only suitable for local runs)
@@ -68,7 +68,7 @@ class Coclustering(object):
                 executor.submit(coclustering_numpy.coclustering, self.Z,
                                 self.nclusters_row, self.nclusters_col,
                                 self.conv_threshold, self.max_iterations,
-                                self.epsilon, low_memory): r
+                                self.epsilon, low_memory, numba_jit): r
                 for r in range(self.nruns)
             }
             row_min, col_min, e_min = None, None, 0.
