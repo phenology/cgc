@@ -12,7 +12,6 @@ class TestDistance:
         k = 2
         da.random.seed(1234)
         Z = da.random.randint(100, size=(m, n)).astype('float64')
-        X = da.ones((m, n))
         Y = da.random.randint(2, size=(n, k)).astype('float64')
         epsilon = 1.e-8
         d = coclustering_dask._distance(Z, Y, epsilon)
