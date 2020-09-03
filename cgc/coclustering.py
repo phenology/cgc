@@ -128,8 +128,8 @@ class Coclustering(object):
                 else:
                     logger.warning(f'Run not converged in {niters} iterations')
                 if self.results.error is None or e < self.results.error:
-                    self.results.row_clusters = row.tolist()
-                    self.results.col_clusters = col.tolist()
+                    self.results.row_clusters = row
+                    self.results.col_clusters = col
                     self.results.error = e
                 self.results.nruns_completed += 1
         self.results.write(filename=self.output_filename)
@@ -156,8 +156,8 @@ class Coclustering(object):
             else:
                 logger.warning(f'Run not converged in {niters} iterations')
             if self.results.error is None or e < self.results.error:
-                self.results.row_clusters = row.compute().tolist()
-                self.results.col_clusters = col.compute().tolist()
+                self.results.row_clusters = row.compute()
+                self.results.col_clusters = col.compute()
                 self.results.error = e
             self.results.nruns_completed += 1
 
@@ -192,7 +192,7 @@ class Coclustering(object):
             else:
                 logger.warning(f'Run not converged in {niters} iterations')
             if self.results.error is None or e < self.results.error:
-                self.results.row_clusters = row.compute().tolist()
-                self.results.col_clusters = col.compute().tolist()
+                self.results.row_clusters = row.compute()
+                self.results.col_clusters = col.compute()
                 self.results.error = e
             self.results.nruns_completed += 1
