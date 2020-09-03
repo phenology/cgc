@@ -18,9 +18,10 @@ class Results(object):
     Base class to be inherited by the various calculators. It is meant to
     contain results and metadata of a calculation.
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.version = __version__
         self.time_created = datetime.datetime.now().isoformat()
+        self.input_parameters = {name: value for name, value in kwargs.items()}
         self.reset()
 
     def reset(self):
