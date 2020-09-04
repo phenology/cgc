@@ -44,8 +44,8 @@ class Coclustering(object):
         :param nruns: number of differently-initialized runs
         :param epsilon: numerical parameter, avoids zero arguments in log
         :param output_filename: name of the file where to write the clusters
-        :param row_clusters: initial row clusters
-        :param col_clusters: initial column clusters
+        :param row_clusters_init: initial row clusters
+        :param col_clusters_init: initial column clusters
         """
         # Input parameters -----------------
         self.nclusters_row = nclusters_row
