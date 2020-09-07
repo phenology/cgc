@@ -112,6 +112,8 @@ def coclustering(Z,
     :param errobj: convergence threshold for the objective function
     :param niters: maximum number of iterations
     :param epsilon: numerical parameter, avoids zero arguments in log
+    :param low_memory: boolean, set low memory usage version
+    :param numba_jit: boolean, set numba optimized single node  version
     :return: has converged, number of iterations performed, final row and
     column clustering, error value
     """

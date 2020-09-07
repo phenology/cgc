@@ -16,7 +16,8 @@ class Coclustering(object):
     Perform the co-clustering analysis of a 2D array
     """
     def __init__(self, Z, nclusters_row, nclusters_col, conv_threshold=1.e-5,
-                 max_iterations=1, nruns=1, epsilon=1.e-8):
+                 max_iterations=1, nruns=1, epsilon=1.e-8, low_memory=False,
+                 numba_jit=False):
         """
         Initialize the object
 
@@ -27,6 +28,8 @@ class Coclustering(object):
         :param max_iterations: maximum number of iterations
         :param nruns: number of differntly-initialized runs
         :param epsilon: numerical parameter, avoids zero arguments in log
+        :param low_memory: boolean parameter, choose low memory implementations
+        :param numba_jit: boolean parameter, choose numba optimized single node 
         """
         self.Z = Z
         self.nclusters_row = nclusters_row
