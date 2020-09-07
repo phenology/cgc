@@ -69,10 +69,16 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     while (not converged) & (s < niters):
         logger.debug(f'Iteration # {s} ..')
         # Calculate cluster based averages
-        # dot is equivalent to:  da.dot(da.dot(R.T, da.ones((m, n))), C)
-        dot = da.outer(da.bincount(row_clusters, minlength=nclusters_row),
-                       da.bincount(col_clusters, minlength=nclusters_col))
-        CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / (dot + epsilon)
+        # nel_clusters is a matrix with the number of elements per co-cluster
+        # originally computed as:  da.dot(da.dot(R.T, da.ones((m, n))), C)
+        nel_row_clusters = da.bincount(row_clusters, minlength=nclusters_row)
+        nel_col_clusters = da.bincount(col_clusters, minlength=nclusters_col)
+        logger.debug('num of populated clusters: row {}, col {}'.format(
+                        da.sum(nel_row_clusters > 0).compute(),
+                        da.sum(nel_col_clusters > 0).compute()))
+        nel_clusters = da.outer(nel_row_clusters, nel_col_clusters)
+        CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / \
+                 (nel_clusters + epsilon)
 
         # Calculate distance based on row approximation
         d_row = _distance(Z, da.dot(C, CoCavg.T), epsilon)
