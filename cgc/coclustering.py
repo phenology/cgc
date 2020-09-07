@@ -29,7 +29,7 @@ class Coclustering(object):
         :param nruns: number of differntly-initialized runs
         :param epsilon: numerical parameter, avoids zero arguments in log
         :param low_memory: boolean parameter, choose low memory implementations
-        :param numba_jit: boolean parameter, choose numba optimized single node 
+        :param numba_jit: boolean parameter, choose numba optimized single node
         """
         self.Z = Z
         self.nclusters_row = nclusters_row
