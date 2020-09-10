@@ -41,7 +41,6 @@ class Coclustering(object):
                  max_iterations=1,
                  nruns=1,
                  epsilon=1.e-8,
-                 low_memory=False,
                  output_filename=''):
         """
         Initialize the object
