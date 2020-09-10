@@ -1,5 +1,9 @@
+import logging
+
 import numpy as np
 import numba
+
+logger = logging.getLogger(__name__)
 
 
 def _distance(Z, X, Y, epsilon):
@@ -58,6 +62,11 @@ def _initialize_clusters(n_el, n_clusters, low_memory=False):
         return eye[cluster_idx]
 
 
+def _setup_cluster_matrix(n_clusters, cluster_idx):
+    """ Set cluster occupation matrix """
+    return np.eye(n_clusters, dtype=np.int32)[cluster_idx]
+
+
 def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
     """
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
@@ -102,7 +111,10 @@ def coclustering(Z,
                  niters,
                  epsilon,
                  low_memory=False,
-                 numba_jit=False):
+                 numba_jit=False,
+                 row_clusters_init=None,
+                 col_clusters_init=None):
+
     """
     Run the co-clustering, Numpy-based implementation
 
@@ -114,6 +126,8 @@ def coclustering(Z,
     :param epsilon: numerical parameter, avoids zero arguments in log
     :param low_memory: boolean, set low memory usage version
     :param numba_jit: boolean, set numba optimized single node  version
+    :param row_clusters_init: initial row cluster assignment
+    :param col_clusters_init: initial column cluster assignment
     :return: has converged, number of iterations performed, final row and
     column clustering, error value
     """
@@ -126,6 +140,23 @@ def coclustering(Z,
         R = _initialize_clusters(m, nclusters_row)
         C = _initialize_clusters(n, nclusters_col)
 
+    if row_clusters_init is not None:
+        row_clusters = row_clusters_init
+    else:
+        if low_memory:
+            row_clusters = _initialize_clusters(m, nclusters_row, low_memory=True)
+        else:
+            R = _initialize_clusters(m, nclusters_row)
+    
+    if col_clusters is not None:
+        col_clusters = col_clusters_init
+    else:
+        if low_memory:
+            col_clusters = _initialize_clusters(n, nclusters_col, low_memory=True)
+        else:
+            C = _initialize_clusters(n, nclusters_col)
+
+
     e, old_e = 2 * errobj, 0
     s = 0
     converged = False
@@ -133,6 +164,7 @@ def coclustering(Z,
     Gavg = Z.mean()
 
     while (not converged) & (s < niters):
+        logger.debug(f'Iteration # {s} ..')
         # Calculate cluster based averages
         if low_memory:
             if numba_jit:
@@ -164,8 +196,10 @@ def coclustering(Z,
             d_row = _distance(Z, np.ones((m, n)), np.dot(C, CoCavg.T), epsilon)
         # Assign to best row cluster
         row_clusters = np.argmin(d_row, axis=1)
+        
         if not low_memory:
-            R = np.eye(nclusters_row, dtype=np.int32)[row_clusters]
+            R = _setup_cluster_matrix(nclusters_row, row_clusters)
+
 
         # Calculate distance based on column approximation
         if low_memory:
@@ -179,7 +213,8 @@ def coclustering(Z,
         # Assign to best column cluster
         col_clusters = np.argmin(d_col, axis=1)
         if not low_memory:
-            C = np.eye(nclusters_col, dtype=np.int32)[col_clusters]
+            C = _setup_cluster_matrix(nclusters_col, col_clusters)
+
 
         # Error value (actually just the column components really)
         old_e = e
@@ -187,7 +222,11 @@ def coclustering(Z,
         # power 1 divergence, power 2 euclidean
         e = np.sum(np.power(minvals_da, 1))
 
+        logger.debug(f'Error = {e:+.15e}, dE = {e - old_e:+.15e}')
         converged = abs(e - old_e) < errobj
         s = s + 1
-
+    if converged:
+        logger.debug(f'Coclustering converged in {s} iterations')
+    else:
+        logger.debug(f'Coclustering not converged in {s} iterations')
     return converged, s, row_clusters, col_clusters, e
