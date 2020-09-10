@@ -52,8 +52,6 @@ class Coclustering(object):
         :param max_iterations: maximum number of iterations
         :param nruns: number of differently-initialized runs
         :param epsilon: numerical parameter, avoids zero arguments in log
-        :param low_memory: boolean parameter, choose low memory implementations
-        :param numba_jit: boolean parameter, choose numba optimized single node
         :param output_filename: name of the file where to write the clusters
         """
         self.Z = Z
