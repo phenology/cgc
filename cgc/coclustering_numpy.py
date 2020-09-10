@@ -128,14 +128,14 @@ def coclustering(Z,
     [m, n] = Z.shape
 
     if row_clusters_init is not None:
-        row_clusters = row_clusters_init
+        row_clusters = np.array(row_clusters_init)
     else:
         row_clusters = _initialize_clusters(m, nclusters_row)
     if not low_memory:
         R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
     if col_clusters_init is not None:
-        col_clusters = col_clusters_init
+        col_clusters = np.array(col_clusters_init)
     else:
         col_clusters = _initialize_clusters(n, nclusters_col)
     if not low_memory:
