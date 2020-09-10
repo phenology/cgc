@@ -52,7 +52,7 @@ def _distance_lowmem_numba(Z, vec, cc, epsilon):
 
 
 def _initialize_clusters(n_el, n_clusters):
-    """ Initialize cluster occupation matrix """
+    """ Initialize cluster array """
     cluster_idx = np.mod(np.arange(n_el), n_clusters)
     return np.random.permutation(cluster_idx)
 
