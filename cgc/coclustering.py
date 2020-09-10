@@ -198,10 +198,8 @@ class Coclustering(object):
         row_min, col_min, e_min = None, None, 0.
         r = 0
         for future, result in dask.distributed.as_completed(
-                futures,	                
-                with_results=True,	            
-                raise_errors=False):	
-                logger.info(f'Retrieving run {self.results.nruns_completed} ..')
+                futures, with_results=True, raise_errors=False):
+            logger.info(f'Retrieving run {self.results.nruns_completed} ..')
             converged, niters, row, col, e = result
             logger.info(f'Error = {e}')
             if converged:
