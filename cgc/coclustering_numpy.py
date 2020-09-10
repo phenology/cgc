@@ -51,15 +51,10 @@ def _distance_lowmem_numba(Z, vec, cc, epsilon):
     return part1 + part2 - part3
 
 
-def _initialize_clusters(n_el, n_clusters, low_memory=False):
+def _initialize_clusters(n_el, n_clusters):
     """ Initialize cluster occupation matrix """
     cluster_idx = np.mod(np.arange(n_el), n_clusters)
-    cluster_idx = np.random.permutation(cluster_idx)
-    if low_memory:
-        return cluster_idx
-    else:
-        eye = np.eye(n_clusters, dtype=np.int32)
-        return eye[cluster_idx]
+    return np.random.permutation(cluster_idx)
 
 
 def _setup_cluster_matrix(n_clusters, cluster_idx):
@@ -114,7 +109,6 @@ def coclustering(Z,
                  numba_jit=False,
                  row_clusters_init=None,
                  col_clusters_init=None):
-
     """
     Run the co-clustering, Numpy-based implementation
 
@@ -133,29 +127,19 @@ def coclustering(Z,
     """
     [m, n] = Z.shape
 
-    if low_memory:
-        row_clusters = _initialize_clusters(m, nclusters_row, low_memory=True)
-        col_clusters = _initialize_clusters(n, nclusters_col, low_memory=True)
-    else:
-        R = _initialize_clusters(m, nclusters_row)
-        C = _initialize_clusters(n, nclusters_col)
-
     if row_clusters_init is not None:
         row_clusters = row_clusters_init
     else:
-        if low_memory:
-            row_clusters = _initialize_clusters(m, nclusters_row, low_memory=True)
-        else:
-            R = _initialize_clusters(m, nclusters_row)
-    
+        row_clusters = _initialize_clusters(m, nclusters_row)
+        if not low_memory:
+            R = _setup_cluster_matrix(nclusters_row, row_clusters)
+
     if col_clusters_init is not None:
         col_clusters = col_clusters_init
     else:
-        if low_memory:
-            col_clusters = _initialize_clusters(n, nclusters_col, low_memory=True)
-        else:
-            C = _initialize_clusters(n, nclusters_col)
-
+        col_clusters = _initialize_clusters(n, nclusters_col)
+        if not low_memory:
+            C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -170,16 +154,17 @@ def coclustering(Z,
             if numba_jit:
                 CoCavg = (_cluster_dot_numba(Z, row_clusters, col_clusters,
                                              nclusters_row, nclusters_col) +
-                          Gavg * epsilon) / (_cluster_dot_numba(np.ones(
-                            (m, n)), row_clusters, col_clusters, nclusters_row,
-                            nclusters_col) + epsilon)
+                          Gavg * epsilon) / (_cluster_dot_numba(
+                              np.ones((m, n)), row_clusters, col_clusters,
+                              nclusters_row, nclusters_col) + epsilon)
 
             else:
-                CoCavg = (_cluster_dot(Z, row_clusters, col_clusters,
-                                       nclusters_row, nclusters_col) +
-                          Gavg * epsilon) / (_cluster_dot(np.ones(
-                            (m, n)), row_clusters, col_clusters, nclusters_row,
-                            nclusters_col) + epsilon)
+                CoCavg = (
+                    _cluster_dot(Z, row_clusters, col_clusters, nclusters_row,
+                                 nclusters_col) +
+                    Gavg * epsilon) / (_cluster_dot(np.ones(
+                        (m, n)), row_clusters, col_clusters, nclusters_row,
+                                                    nclusters_col) + epsilon)
         else:
             CoCavg = (np.dot(np.dot(R.T, Z), C) +
                       Gavg * epsilon) / (np.dot(np.dot(R.T, np.ones(
@@ -196,10 +181,9 @@ def coclustering(Z,
             d_row = _distance(Z, np.ones((m, n)), np.dot(C, CoCavg.T), epsilon)
         # Assign to best row cluster
         row_clusters = np.argmin(d_row, axis=1)
-        
+
         if not low_memory:
             R = _setup_cluster_matrix(nclusters_row, row_clusters)
-
 
         # Calculate distance based on column approximation
         if low_memory:
@@ -214,7 +198,6 @@ def coclustering(Z,
         col_clusters = np.argmin(d_col, axis=1)
         if not low_memory:
             C = _setup_cluster_matrix(nclusters_col, col_clusters)
-
 
         # Error value (actually just the column components really)
         old_e = e

@@ -33,10 +33,17 @@ class Coclustering(object):
     """
     Perform the co-clustering analysis of a 2D array
     """
-    def __init__(self, Z, nclusters_row, nclusters_col, conv_threshold=1.e-5,
-                 max_iterations=1, nruns=1, epsilon=1.e-8, low_memory=False,
-                 numba_jit=False, output_filename=''):
-
+    def __init__(self,
+                 Z,
+                 nclusters_row,
+                 nclusters_col,
+                 conv_threshold=1.e-5,
+                 max_iterations=1,
+                 nruns=1,
+                 epsilon=1.e-8,
+                 low_memory=False,
+                 numba_jit=False,
+                 output_filename=''):
         """
         Initialize the object
 
@@ -63,8 +70,11 @@ class Coclustering(object):
 
         self.results = CoclusteringResults()
 
-    def run_with_dask(self, client=None, low_memory=False,
-                      row_clusters=None, col_clusters=None):
+    def run_with_dask(self,
+                      client=None,
+                      low_memory=False,
+                      row_clusters=None,
+                      col_clusters=None):
         """
         Run the co-clustering with Dask
 
@@ -92,9 +102,12 @@ class Coclustering(object):
         self.results.write(filename=self.output_filename)
         return self.results
 
-    def run_with_threads(self, nthreads=1, low_memory=False, 
-                        numba_jit=False, row_clusters=None, 
-                        col_clusters=None):
+    def run_with_threads(self,
+                         nthreads=1,
+                         low_memory=False,
+                         numba_jit=False,
+                         row_clusters=None,
+                         col_clusters=None):
         """
         Run the co-clustering using an algorithm based on numpy + threading
         (only suitable for local runs)
@@ -112,10 +125,15 @@ class Coclustering(object):
 
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
             futures = {
-                executor.submit(coclustering_numpy.coclustering, self.Z,
-                                self.nclusters_row, self.nclusters_col,
-                                self.conv_threshold, self.max_iterations,
-                                self.epsilon, low_memory, numba_jit, 
+                executor.submit(coclustering_numpy.coclustering,
+                                self.Z,
+                                self.nclusters_row,
+                                self.nclusters_col,
+                                self.conv_threshold,
+                                self.max_iterations,
+                                self.epsilon,
+                                low_memory,
+                                numba_jit,
                                 row_clusters_init=row_clusters,
                                 col_clusters_init=col_clusters): r
                 for r in range(self.nruns)
@@ -142,9 +160,14 @@ class Coclustering(object):
         for r in range(self.nruns):
             logger.info(f'Run {self.results.nruns_completed}')
             converged, niters, row, col, e = coclustering_dask.coclustering(
-                self.Z, self.nclusters_row, self.nclusters_col,
-                self.conv_threshold, self.max_iterations, self.epsilon, 
-                row_clusters_init=row_clusters, col_clusters_init=col_clusters)
+                self.Z,
+                self.nclusters_row,
+                self.nclusters_col,
+                self.conv_threshold,
+                self.max_iterations,
+                self.epsilon,
+                row_clusters_init=row_clusters,
+                col_clusters_init=col_clusters)
             e = e.compute()
             logger.info(f'Error = {e}')
             if converged:
