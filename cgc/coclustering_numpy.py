@@ -131,15 +131,15 @@ def coclustering(Z,
         row_clusters = row_clusters_init
     else:
         row_clusters = _initialize_clusters(m, nclusters_row)
-        if not low_memory:
-            R = _setup_cluster_matrix(nclusters_row, row_clusters)
+    if not low_memory:
+        R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
     if col_clusters_init is not None:
         col_clusters = col_clusters_init
     else:
         col_clusters = _initialize_clusters(n, nclusters_col)
-        if not low_memory:
-            C = _setup_cluster_matrix(nclusters_col, col_clusters)
+    if not low_memory:
+        C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 0
