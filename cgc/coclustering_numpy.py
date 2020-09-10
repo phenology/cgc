@@ -181,7 +181,6 @@ def coclustering(Z,
             d_row = _distance(Z, np.ones((m, n)), np.dot(C, CoCavg.T), epsilon)
         # Assign to best row cluster
         row_clusters = np.argmin(d_row, axis=1)
-
         if not low_memory:
             R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
