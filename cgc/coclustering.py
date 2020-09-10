@@ -168,7 +168,6 @@ class Coclustering(object):
                 self.epsilon,
                 row_clusters_init=row_clusters,
                 col_clusters_init=col_clusters)
-            e = e.compute()
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
