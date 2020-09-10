@@ -148,7 +148,7 @@ def coclustering(Z,
         else:
             R = _initialize_clusters(m, nclusters_row)
     
-    if col_clusters is not None:
+    if col_clusters_init is not None:
         col_clusters = col_clusters_init
     else:
         if low_memory:

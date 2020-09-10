@@ -89,10 +89,12 @@ class Coclustering(object):
             self._dask_runs_performance(row_clusters=row_clusters,
                                         col_clusters=col_clusters)
 
-
-    def run_with_threads(self, nthreads=1, low_memory=False, numba_jit=False):
         self.results.write(filename=self.output_filename)
         return self.results
+
+    def run_with_threads(self, nthreads=1, low_memory=False, 
+                        numba_jit=False, row_clusters=None, 
+                        col_clusters=None):
         """
         Run the co-clustering using an algorithm based on numpy + threading
         (only suitable for local runs)
