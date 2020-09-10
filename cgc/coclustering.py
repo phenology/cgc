@@ -42,7 +42,6 @@ class Coclustering(object):
                  nruns=1,
                  epsilon=1.e-8,
                  low_memory=False,
-                 numba_jit=False,
                  output_filename=''):
         """
         Initialize the object
