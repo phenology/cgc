@@ -39,7 +39,7 @@ def _min_dist_lowmem(Z, clusters, CoCavg, epsilon):
     return clusters_new, min_d
 
 
-@numba.jit(nopython=True, nogil=True, parallel=True, cache=True)
+@numba.jit(nopython=True, nogil=True, cache=True)
 def _min_dist_numba(Z, clusters, CoCavg, epsilon, max=np.nan_to_num(np.inf)):
     m, n = Z.shape
     l, k = CoCavg.shape
