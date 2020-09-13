@@ -6,49 +6,55 @@ import numba
 logger = logging.getLogger(__name__)
 
 
-def _distance(Z, X, Y, epsilon):
+def _distance(Z, Y, epsilon):
     """ Distance function """
     Y = Y + epsilon
-    d = np.dot(X, Y) - np.dot(Z, np.log(Y))
+    # The first term below is equal to: da.dot(da.ones(m, n), Y)
+    # with Z.shape = (m, n) and Y.shape = (n, k)
+    d = (Y.sum(axis=0, keepdims=True).repeat(Z.shape[0], axis=0) -
+         np.dot(Z, np.log(Y)))
     return d
 
 
-def _distance_lowmem(Z, vec, cc, epsilon):
-    """ Distance function low memory"""
-    dim1 = vec.size
-    dim2 = cc.shape[1]
-    product = np.zeros((vec.size, cc.shape[1]))
-    for cl in np.unique(vec):
-        idx = np.where(vec == cl)[0]
-        product[idx, :] = cc[cl, :]
-
-    part1 = np.repeat(np.sum(product, axis=0, keepdims=True, dtype='float64'),
-                      Z.shape[0],
-                      axis=0)
-    part2 = Z.shape[1] * epsilon
-    part3 = np.dot(Z, np.log(product + epsilon))
-    return part1 + part2 - part3
+def _min_dist(Z, M, CoCavg, epsilon):
+    Y = np.dot(M, CoCavg)
+    d = _distance(Z, Y, epsilon)
+    return np.argmin(d, axis=1), np.min(d, axis=1)
 
 
-@numba.jit(nopython=True, nogil=True, parallel=True, cache=True)
-def _distance_lowmem_numba(Z, vec, cc, epsilon):
-    """ Distance function low memory"""
-    dim1 = vec.size
-    dim2 = cc.shape[1]
-    product = np.zeros((dim1, dim2))
-    for cl in np.unique(vec):
-        idx = np.where(vec == cl)[0]
-        product[idx, :] = cc[cl, :]
+def _min_dist_lowmem(Z, clusters, CoCavg, epsilon):
+    m, n = Z.shape
+    l, k = CoCavg.shape
+    Y = CoCavg[clusters] + epsilon
+    sum = Y.sum(axis=0)
+    min_d = np.full(m, np.nan_to_num(np.inf))  # Initialize with largest float
+    clusters_new = np.zeros(m, dtype=np.int)
+    for ir in range(k):
+        # Calculate distance for cluster ir
+        d = sum[ir] - np.dot(Z, np.log(Y[:, ir]))
+        # If distance is smaller then previous assignment, reassign
+        smaller = d < min_d
+        min_d = smaller * d + ~smaller * min_d
+        clusters_new = smaller * ir + ~smaller * clusters_new
+    return clusters_new, min_d
 
-    sum_part1 = np.sum(product, axis=0)
-    Zdim0 = Z.shape[0]
-    part1 = np.zeros((Zdim0, dim2))
-    for i in range(Zdim0):
-        part1[i, :] = sum_part1
 
-    part2 = Z.shape[1] * epsilon
-    part3 = np.dot(Z, np.log(product + epsilon))
-    return part1 + part2 - part3
+@numba.jit(nopython=True, nogil=True, cache=True)
+def _min_dist_numba(Z, clusters, CoCavg, epsilon, max=np.nan_to_num(np.inf)):
+    m, n = Z.shape
+    l, k = CoCavg.shape
+    Y = CoCavg[clusters] + epsilon
+    sum = Y.sum(axis=0)
+    min_d = np.full(m, max)  # Initialize with largest float
+    clusters_new = np.zeros(m, dtype=numba.types.int64)
+    for ir in range(k):
+        # Calculate distance for cluster ir
+        d = sum[ir] - np.dot(Z, np.log(Y[:, ir]))
+        # If distance is smaller then previous assignment, reassign
+        smaller = d < min_d
+        min_d = smaller * d + ~smaller * min_d
+        clusters_new = smaller * ir + ~smaller * clusters_new
+    return clusters_new, min_d
 
 
 def _initialize_clusters(n_el, n_clusters):
@@ -67,13 +73,12 @@ def _cluster_dot(Z, row_clusters, col_clusters, nclusters_row, nclusters_col):
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
     """
     product = np.zeros((nclusters_row, nclusters_col))
-    for r in range(0, nclusters_row):
-        for c in range(0, nclusters_col):
-            idx_r = np.where(row_clusters == r)[0]
+    for r in range(nclusters_row):
+        idx_r = np.where(row_clusters == r)[0]
+        for c in range(nclusters_col):
             idx_c = np.where(col_clusters == c)[0]
-            idx_rc = np.array(np.meshgrid(idx_r, idx_c)).T.reshape(-1, 2)
-            product[r, c] = np.sum(Z[idx_rc[:, 0], idx_rc[:, 1]])
-
+            ir, ic = np.meshgrid(idx_r, idx_c)
+            product[r, c] = Z[ir, ic].sum()
     return product
 
 
@@ -84,9 +89,9 @@ def _cluster_dot_numba(Z, row_clusters, col_clusters, nclusters_row,
     To replace np.dot(np.dot(R.T, Z), C), where R and C are full matrix
     """
     product = np.zeros((nclusters_row, nclusters_col))
-    for r in range(0, nclusters_row):
-        for c in range(0, nclusters_col):
-            idx_r = np.where(row_clusters == r)[0]
+    for r in range(nclusters_row):
+        idx_r = np.where(row_clusters == r)[0]
+        for c in range(nclusters_col):
             idx_c = np.where(col_clusters == c)[0]
 
             prod_rc = 0
@@ -150,58 +155,51 @@ def coclustering(Z,
     while (not converged) & (s < niters):
         logger.debug(f'Iteration # {s} ..')
         # Calculate cluster based averages
+        nel_row_clusters = np.bincount(row_clusters, minlength=nclusters_row)
+        nel_col_clusters = np.bincount(col_clusters, minlength=nclusters_col)
+        logger.debug('num of populated clusters: row {}, col {}'.format(
+            np.sum(nel_row_clusters > 0), np.sum(nel_col_clusters > 0)))
+        nel_clusters = np.outer(nel_row_clusters, nel_col_clusters)
         if low_memory:
             if numba_jit:
-                CoCavg = (_cluster_dot_numba(Z, row_clusters, col_clusters,
-                                             nclusters_row, nclusters_col) +
-                          Gavg * epsilon) / (_cluster_dot_numba(
-                              np.ones((m, n)), row_clusters, col_clusters,
-                              nclusters_row, nclusters_col) + epsilon)
+                CoCavg = _cluster_dot_numba(Z, row_clusters, col_clusters,
+                                            nclusters_row, nclusters_col)
             else:
-                CoCavg = (
-                    _cluster_dot(Z, row_clusters, col_clusters, nclusters_row,
-                                 nclusters_col) +
-                    Gavg * epsilon) / (_cluster_dot(np.ones(
-                        (m, n)), row_clusters, col_clusters, nclusters_row,
-                                                    nclusters_col) + epsilon)
+                CoCavg = _cluster_dot(Z, row_clusters, col_clusters,
+                                      nclusters_row, nclusters_col)
         else:
-            CoCavg = (np.dot(np.dot(R.T, Z), C) +
-                      Gavg * epsilon) / (np.dot(np.dot(R.T, np.ones(
-                          (m, n))), C) + epsilon)
+            CoCavg = np.dot(np.dot(R.T, Z), C)
+        CoCavg += Gavg * epsilon
+        CoCavg /= nel_clusters + epsilon
 
-        # Calculate distance based on row approximation
+        # Calculate distance based on row approximation and assign best cluster
         if low_memory:
             if numba_jit:
-                d_row = _distance_lowmem_numba(Z, col_clusters, CoCavg.T,
-                                               epsilon)
+                row_clusters, _ = _min_dist_numba(Z, col_clusters, CoCavg.T,
+                                                  epsilon)
             else:
-                d_row = _distance_lowmem(Z, col_clusters, CoCavg.T, epsilon)
+                row_clusters, _ = _min_dist_lowmem(Z, col_clusters, CoCavg.T,
+                                                   epsilon)
         else:
-            d_row = _distance(Z, np.ones((m, n)), np.dot(C, CoCavg.T), epsilon)
-        # Assign to best row cluster
-        row_clusters = np.argmin(d_row, axis=1)
-        if not low_memory:
+            row_clusters, _ = _min_dist(Z, C, CoCavg.T, epsilon)
             R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
-        # Calculate distance based on column approximation
+        # Calculate distance based on col approximation and assign best cluster
         if low_memory:
             if numba_jit:
-                d_col = _distance_lowmem(Z.T, row_clusters, CoCavg, epsilon)
+                col_clusters, dist = _min_dist_numba(Z.T, row_clusters, CoCavg,
+                                                     epsilon)
             else:
-                d_col = _distance_lowmem_numba(Z.T, row_clusters, CoCavg,
-                                               epsilon)
+                col_clusters, dist = _min_dist_lowmem(Z.T, row_clusters,
+                                                      CoCavg, epsilon)
         else:
-            d_col = _distance(Z.T, np.ones((n, m)), np.dot(R, CoCavg), epsilon)
-        # Assign to best column cluster
-        col_clusters = np.argmin(d_col, axis=1)
-        if not low_memory:
+            col_clusters, dist = _min_dist(Z.T, R, CoCavg, epsilon)
             C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
         # Error value (actually just the column components really)
         old_e = e
-        minvals_da = np.min(d_col, axis=1)
         # power 1 divergence, power 2 euclidean
-        e = np.sum(np.power(minvals_da, 1))
+        e = np.sum(np.power(dist, 1))
 
         logger.debug(f'Error = {e:+.15e}, dE = {e - old_e:+.15e}')
         converged = abs(e - old_e) < errobj
