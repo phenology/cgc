@@ -33,8 +33,15 @@ class Coclustering(object):
     """
     Perform the co-clustering analysis of a 2D array
     """
-    def __init__(self, Z, nclusters_row, nclusters_col, conv_threshold=1.e-5,
-                 max_iterations=1, nruns=1, epsilon=1.e-8, output_filename=''):
+    def __init__(self,
+                 Z,
+                 nclusters_row,
+                 nclusters_col,
+                 conv_threshold=1.e-5,
+                 max_iterations=1,
+                 nruns=1,
+                 epsilon=1.e-8,
+                 output_filename=''):
         """
         Initialize the object
 
@@ -59,8 +66,11 @@ class Coclustering(object):
 
         self.results = CoclusteringResults()
 
-    def run_with_dask(self, client=None, low_memory=False,
-                      row_clusters=None, col_clusters=None):
+    def run_with_dask(self,
+                      client=None,
+                      low_memory=False,
+                      row_clusters=None,
+                      col_clusters=None):
         """
         Run the co-clustering with Dask
 
@@ -88,8 +98,12 @@ class Coclustering(object):
         self.results.write(filename=self.output_filename)
         return self.results
 
-    def run_with_threads(self, nthreads=1,
-                         row_clusters=None, col_clusters=None):
+    def run_with_threads(self,
+                         nthreads=1,
+                         low_memory=False,
+                         numba_jit=False,
+                         row_clusters=None,
+                         col_clusters=None):
         """
         Run the co-clustering using an algorithm based on numpy + threading
         (only suitable for local runs)
@@ -114,9 +128,11 @@ class Coclustering(object):
                                 self.conv_threshold,
                                 self.max_iterations,
                                 self.epsilon,
+                                low_memory,
+                                numba_jit,
                                 row_clusters_init=row_clusters,
-                                col_clusters_init=col_clusters):
-                r for r in range(self.nruns)
+                                col_clusters_init=col_clusters): r
+                for r in range(self.nruns)
             }
             for future in concurrent.futures.as_completed(futures):
                 logger.info(f'Retrieving run {self.results.nruns_completed}')
@@ -147,8 +163,7 @@ class Coclustering(object):
                 self.max_iterations,
                 self.epsilon,
                 row_clusters_init=row_clusters,
-                col_clusters_init=col_clusters
-            )
+                col_clusters_init=col_clusters)
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
@@ -167,22 +182,23 @@ class Coclustering(object):
         simultaneosly submitted to the scheduler
         """
         Z = self.client.scatter(self.Z)
-        futures = [self.client.submit(coclustering_dask.coclustering,
-                                      Z,
-                                      self.nclusters_row,
-                                      self.nclusters_col,
-                                      self.conv_threshold,
-                                      self.max_iterations,
-                                      self.epsilon,
-                                      row_clusters_init=row_clusters,
-                                      col_clusters_init=col_clusters,
-                                      run_on_worker=True,
-                                      pure=False)
-                   for r in range(self.nruns)]
+        futures = [
+            self.client.submit(coclustering_dask.coclustering,
+                               Z,
+                               self.nclusters_row,
+                               self.nclusters_col,
+                               self.conv_threshold,
+                               self.max_iterations,
+                               self.epsilon,
+                               row_clusters_init=row_clusters,
+                               col_clusters_init=col_clusters,
+                               run_on_worker=True,
+                               pure=False) for r in range(self.nruns)
+        ]
+        row_min, col_min, e_min = None, None, 0.
+        r = 0
         for future, result in dask.distributed.as_completed(
-                futures,
-                with_results=True,
-                raise_errors=False):
+                futures, with_results=True, raise_errors=False):
             logger.info(f'Retrieving run {self.results.nruns_completed} ..')
             converged, niters, row, col, e = result
             logger.info(f'Error = {e}')
