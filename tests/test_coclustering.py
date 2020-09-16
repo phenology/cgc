@@ -33,8 +33,16 @@ class TestCoclustering:
                                 [0, 0, 0, 1, 0, 0, 1, 1])
         assert np.isclose(coclustering.results.error, -11554.1406004284)
 
+    def test_run_with_threads_lowmem(self, coclustering):
+        coclustering.run_with_threads(nthreads=2, low_memory=True)
+        np.testing.assert_equal(coclustering.results.row_clusters,
+                                [3, 0, 1, 4, 0, 2, 2, 2, 3, 4])
+        np.testing.assert_equal(coclustering.results.col_clusters,
+                                [0, 0, 0, 1, 0, 0, 1, 1])
+        assert np.isclose(coclustering.results.error, -11554.1406004284)
+
     def test_dask_runs_memory(self, client, coclustering):
-        coclustering.run_with_dask(low_memory=True)
+        coclustering.run_with_dask(client=client, low_memory=True)
         np.testing.assert_equal(coclustering.results.row_clusters,
                                 [3, 0, 1, 4, 0, 2, 2, 2, 3, 4])
         np.testing.assert_equal(coclustering.results.col_clusters,

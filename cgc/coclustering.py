@@ -29,10 +29,17 @@ class Coclustering(object):
     """
     Perform the co-clustering analysis of a 2D array
     """
-    def __init__(self, Z, nclusters_row=1, nclusters_col=1,
-                 conv_threshold=1.e-5, max_iterations=1, nruns=1,
-                 epsilon=1.e-8, output_filename='',
-                 row_clusters_init=None, col_clusters_init=None):
+    def __init__(self,
+                 Z,
+                 nclusters_row,
+                 nclusters_col,
+                 conv_threshold=1.e-5,
+                 max_iterations=1,
+                 nruns=1,
+                 epsilon=1.e-8,
+                 output_filename='',
+                 row_clusters_init=None,
+                 col_clusters_init=None):
         """
         Initialize the object
 
@@ -89,7 +96,10 @@ class Coclustering(object):
         self.results.write(filename=self.output_filename)
         return self.results
 
-    def run_with_threads(self, nthreads=1):
+    def run_with_threads(self,
+                         nthreads=1,
+                         low_memory=False,
+                         numba_jit=False):
         """
         Run the co-clustering using an algorithm based on numpy + threading
         (only suitable for local runs)
@@ -106,6 +116,8 @@ class Coclustering(object):
                                 self.conv_threshold,
                                 self.max_iterations,
                                 self.epsilon,
+                                low_memory,
+                                numba_jit,
                                 row_clusters_init=self.row_clusters_init,
                                 col_clusters_init=self.col_clusters_init):
                 r for r in range(self.nruns)
@@ -173,9 +185,7 @@ class Coclustering(object):
                        pure=False)
                    for _ in range(self.nruns)]
         for future, result in dask.distributed.as_completed(
-                futures,
-                with_results=True,
-                raise_errors=False):
+                futures, with_results=True, raise_errors=False):
             logger.info(f'Retrieving run {self.results.nruns_completed} ..')
             converged, niters, row, col, e = result
             logger.info(f'Error = {e}')
