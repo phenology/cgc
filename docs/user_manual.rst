@@ -89,17 +89,13 @@ Different co-clustering implementations are available:
   which are also distributed across the cluster. 
 
   If a Dask cluster is already running, we can connect to it and run the co-clustering analysis 
-  in the following way:
-
-.. code-block:: python
+  in the following way::
 
     from dask.distributed import Client
-    
     client = Client('tcp://node0:8786')  # create connection to the Dask scheduler
     results = cc.run_with_dask(client)
     
-.. _Dask: https://dask.org   
-
+.. _Dask: https://dask.org
 
   Dask clusters can be run on different types of distributed systems: clusters 
   of nodes connected by SSH, HPC systems, Kubernetes clusters on cloud services. 
@@ -116,9 +112,7 @@ Different co-clustering implementations are available:
   In this second approach, which might be suitable for particularly large matrices, the 
   differently-initialized co-clustering runs are executed sequentially, thus relying 
   on Dask for the only distribution of data chunks. This implementation can be selected 
-  through the optional argument ``low_memory``:
-
-.. code-block:: python
+  through the optional argument ``low_memory``::
 
     results = cc.run_with_dask(client, low_memory=True)
 
