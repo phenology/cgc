@@ -8,13 +8,24 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
-[0.1.2] - 2020-08-
+[0.2.0] - 2020-09-
 ******************
+
+Added
+-----
+
+* Low-memory version for numpy-based coclustering, significantly reducing the memory footprint of the code
+* Numba-accelerated version of the low-memory version of the numpy-based co-clustering
 
 Fixed
 -----
 
 * Solve issue in increasingly large Dask graph for increasing iterations
+
+Changed
+-------
+
+* Main calculator classes stores results in dedicated object
 
 [0.1.1] - 2020-08-27
 ********************
