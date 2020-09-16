@@ -3,7 +3,18 @@ import logging
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
+from .results import Results
+
 logger = logging.getLogger(__name__)
+
+
+class KmeansResults(Results):
+    """
+    Contains results and metadata of a k-means refinement calculation
+    """
+    def reset(self):
+        self.k_value = None
+        self.cl_mean_centroids = None
 
 
 class Kmeans(object):
@@ -15,7 +26,8 @@ class Kmeans(object):
                  n_col_clusters,
                  k_range,
                  kmean_max_iter=100,
-                 var_thres=2.):
+                 var_thres=2.,
+                 output_filename=''):
         """
         Set up Kmeans object.
 
@@ -36,15 +48,24 @@ class Kmeans(object):
         :type kmean_max_iter: int
         :param var_thres: threshold of the sum of variance to select k
         :type var_thres: float
+        :param output_filename: name of the file where to write the results
+        :type output_filename: str
         """
-        self.Z = Z
+        # Input parameters -----------------
         self.row_clusters = row_clusters
         self.col_clusters = col_clusters
         self.n_row_clusters = n_row_clusters
         self.n_col_clusters = n_col_clusters
-        self.k_range = k_range
-        self.var_thres = var_thres
+        self.k_range = list(k_range)
         self.kmean_max_iter = kmean_max_iter
+        self.var_thres = var_thres
+        self.output_filename = output_filename
+        # Input parameters end -------------
+
+        # store input parameters in results object
+        self.results = KmeansResults(**self.__dict__)
+
+        self.Z = Z
 
         if len(np.unique(row_clusters)) > n_row_clusters:
             print('Setting "n_row_clusters" to {}, \
@@ -80,7 +101,7 @@ class Kmeans(object):
             kmeans_cc_list.append(kmeans_cc)
         idx_k = min(np.where(var_list < self.var_thres)[0])
         self.var_list = var_list
-        self.k_value = self.k_range[idx_k]
+        self.results.k_value = self.k_range[idx_k]
         self.kmeans_cc = kmeans_cc_list[idx_k]
         del kmeans_cc_list
 
@@ -95,13 +116,16 @@ class Kmeans(object):
 
         # Reshape the centroids of means to the shape of cluster matrix,
         # taking into account non-constructive row/col cluster
-        self.cl_mean_centroids = np.full(
+        self.results.cl_mean_centroids = np.full(
             (self.n_row_clusters, self.n_col_clusters), np.nan)
         idx = 0
         for r in np.unique(self.row_clusters):
             for c in np.unique(self.col_clusters):
-                self.cl_mean_centroids[r, c] = cl_mean_centroids[idx]
+                self.results.cl_mean_centroids[r, c] = cl_mean_centroids[idx]
                 idx = idx + 1
+
+        self.results.write(filename=self.output_filename)
+        return self.results
 
     def _compute_statistic_measures(self):
         """
@@ -152,15 +176,15 @@ class Kmeans(object):
         return var_sum
 
     def plot_elbow_curve(self, output_plot='./kmean_elbow_curve.png'):
-        '''
+        """
         Export elbow curve plot
-        '''
+        """
         plt.plot(self.k_range, self.var_list)  # kmean curve
         plt.plot([min(self.k_range), max(self.k_range)],
                  [self.var_thres, self.var_thres],
                  color='r',
                  linestyle='--')  # Threshold
-        plt.plot([self.k_value, self.k_value],
+        plt.plot([self.results.k_value, self.results.k_value],
                  [min(self.var_list), max(self.var_list)],
                  color='g',
                  linestyle='--')  # Selected k
@@ -174,9 +198,9 @@ class Kmeans(object):
                  'threshold={}'.format(self.var_thres),
                  color='r',
                  fontsize=12)
-        plt.text(self.k_value + xtick_step / 4,
+        plt.text(self.results.k_value + xtick_step / 4,
                  max(self.var_list) - ytick_step,
-                 'k={}'.format(self.k_value),
+                 'k={}'.format(self.results.k_value),
                  color='g',
                  fontsize=12)
         plt.xlabel('k value', fontsize=20)

@@ -66,9 +66,9 @@ class TestKmeans(unittest.TestCase):
     def test_statistic_centroids_shape(self):
         km = initialize_kmean()
         km.compute()
-        self.assertEqual((3, 2), km.cl_mean_centroids.shape)
+        self.assertEqual((3, 2), km.results.cl_mean_centroids.shape)
 
     def test_centroids_nan(self):
         km = initialize_kmean()
         km.compute()
-        self.assertTrue(all(np.isnan(km.cl_mean_centroids[2, :])))
+        self.assertTrue(all(np.isnan(km.results.cl_mean_centroids[2, :])))
