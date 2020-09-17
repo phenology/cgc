@@ -105,6 +105,9 @@ class Coclustering(object):
         (only suitable for local runs)
 
         :param nthreads: number of threads
+        :param low_memory: if true, use a memory-conservative algorithm
+        :param numba_jit: if true, and low_memory is true, then use Numba
+                          just-in-time compilation to improve performance
         :return: co-clustering results
         """
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
