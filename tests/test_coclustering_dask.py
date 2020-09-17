@@ -12,10 +12,9 @@ class TestDistance:
         k = 2
         da.random.seed(1234)
         Z = da.random.randint(100, size=(m, n)).astype('float64')
-        X = da.ones((m, n))
         Y = da.random.randint(2, size=(n, k)).astype('float64')
         epsilon = 1.e-8
-        d = coclustering_dask._distance(Z, X, Y, epsilon)
+        d = coclustering_dask._distance(Z, Y, epsilon)
         assert isinstance(d, da.core.Array)
         assert d.shape == (m, k)
         assert ~np.any(np.isinf(d))

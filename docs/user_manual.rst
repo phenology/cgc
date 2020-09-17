@@ -38,7 +38,8 @@ the co-clustering analysis is setup by initializing a
         max_iterations=100,  # maximum number of iterations
         conv_threshold=1.e-5,  # error convergence threshold 
         nruns=10,  # number of differently-initialized runs
-        epsilon=1.e-8  # numerical parameter
+        epsilon=1.e-8,  # numerical parameter
+        output_filename='results.json'  # JSON file where to write output
     )
 
 Here, we have set the maximum number of row and column clusters to 4 and 3, respectively, 
@@ -49,7 +50,7 @@ of two consecutive iterations differs by less than a threshold (the default valu
 Multiple runs can be performed in order to limit the influence of the choice of initial 
 conditions on the final cluster assignment. A numerical parameter guarantees that no 
 zero-valued arguments are encountered in the logarithm that appears in the I-divergence, 
-which is employed as objective function.
+which is employed as objective function. Results are (optionally) written to a JSON file.
 
 Different co-clustering implementations are available:
 
@@ -57,32 +58,44 @@ Different co-clustering implementations are available:
   To make efficient use of architectures with multi-core CPUs, the various 
   differently-initialized co-clustering runs can be executed as multiple threads. 
   They are, in fact, embarrassingly parallel tasks that require no communication 
-  between each other. The co-clustering analysis is run using e.g. 4 threads as:
+  between each other. The co-clustering analysis is run using e.g. 4 threads as::
 
-.. code-block:: python
+    results = cc.run_with_threads(nthreads=4)
 
-    cc.run_with_threads(nthreads=4)
-    
+  This first implementation makes use of (fast) matrix multiplications to calculate cluster-based
+  properties, such as averages and distances. However, if ``Z``'s dimensions are large,
+  large auxiliary matrices needs to be stored into memory, so that the memory requirement of this
+  implementation quickly becomes a bottleneck.
+
 .. _Numpy: https://numpy.org    
-    
-* A second implementation makes use of `Dask`_ and is thus suitable to run the co-clustering 
+
+* A second Numpy-based implementation makes use of an algorithm with a much lower memory footprint,
+  and can be selected with the optional flag ``low_memory``::
+
+    results = cc.run_with_threads(nthreads=4, low_memory=True)
+
+  The reduced memory requirement comes at the cost of performance. However, the performance loss of
+  the low-memory algorithm can be significantly reduced by using `Numba`_'s just-in-time compilation
+  feature, which can be activated with a second optional flag, ``numba_jit``::
+
+    results = cc.run_with_threads(nthreads=4, low_memory=True, numba_jit=True)
+
+.. _Numba: https://numba.pydata.org
+
+* An alternative implementation makes use of `Dask`_ and is thus suitable to run the co-clustering
   algorithm on distributed systems (e.g. on a cluster of compute nodes). In this implementation, 
   the various co-clustering runs are submitted to the Dask scheduler, which distributes them 
   across the cluster. In addition, Dask arrays are employed to process the data in chunks, 
   which are also distributed across the cluster. 
 
   If a Dask cluster is already running, we can connect to it and run the co-clustering analysis 
-  in the following way:
-
-.. code-block:: python
+  in the following way::
 
     from dask.distributed import Client
-    
     client = Client('tcp://node0:8786')  # create connection to the Dask scheduler
-    cc.run_with_dask(client)
+    results = cc.run_with_dask(client)
     
-.. _Dask: https://dask.org   
-
+.. _Dask: https://dask.org
 
   Dask clusters can be run on different types of distributed systems: clusters 
   of nodes connected by SSH, HPC systems, Kubernetes clusters on cloud services. 
@@ -99,15 +112,13 @@ Different co-clustering implementations are available:
   In this second approach, which might be suitable for particularly large matrices, the 
   differently-initialized co-clustering runs are executed sequentially, thus relying 
   on Dask for the only distribution of data chunks. This implementation can be selected 
-  through the optional argument ``low_memory``:
+  through the optional argument ``low_memory``::
 
-.. code-block:: python
+    results = cc.run_with_dask(client, low_memory=True)
 
-    cc.run_with_dask(client, low_memory=True)
-
-Ultimately, The arrays ``cc.row_clusters`` and ``cc.col_clusters`` (:math:`m-` and :math:`n-` 
+Ultimately, The arrays ``results.row_clusters`` and ``results.col_clusters`` (:math:`m-` and :math:`n-`
 dimensional, respectively) contain the final row and column cluster assignments,
-regardless of the implementation employed. ``cc.error`` is the corresponding 
+regardless of the implementation employed. ``results.error`` is the corresponding
 approximation error.
 
 Tri-clustering
@@ -142,6 +153,7 @@ is setup by creating an instance of ``Triclustering``:
         conv_threshold=1.e-5,  # error convergence threshold 
         nruns=10,  # number of differently-initialized runs
         epsilon=1.e-8  # numerical parameter
+        output_filename='results.json'  # JSON file where to write output
     )
 
 The input arguments of ``Triclustering`` are almost identical to the
@@ -157,7 +169,7 @@ In order to run the tri-clustering analysis using 4 threads:
 
 .. code-block:: python
 
-    cc.run_with_threads(nthreads=4)
+    results = cc.run_with_threads(nthreads=4)
 
 .. NOTE::
     A single tri-clustering implementation is currently available and based 
@@ -165,49 +177,65 @@ In order to run the tri-clustering analysis using 4 threads:
 
 K-means
 -------
-The `kmeans` module is an implementation of `k-mean clustering`_ to the existing clustering results. 
-It classifies the clustering results based on the following six statistics of each cluster cell:
+The `Kmeans` module is an implementation of `k-means clustering`_ to a co-clustering results.
+In particular, `Kmeans` looks for the smallest value of ``k`` in a provided range such that the
+sum of the cluster variances is smaller than a given threshold. K-means clusters are constructed
+using the following six statistics calculated for each co-cluster cell:
 
 #. Mean
-#. STD
+#. Standard deviation
 #. 5th percentile
 #. 95th percentile
-#. maximum
-#. and minimum values
+#. Maximum value
+#. Minimum value
 
-A ``Kmeans`` object should be set based on the existing clustering results:
+A ``Kmeans`` object should be set based on the existing co-clustering results:
 
 .. code-block:: python
 
     from cgc.kmeans import Kmeans
 
     km = Kmeans(Z=Z,
-        row_clusters=cc.row_clusters,
-        col_clusters=cc.col_clusters,
-        n_row_clusters=cc.nclusters_row,
-        n_col_clusters=cc.nclusters_col,
-        kmean_n_clusters=3,
-        kmean_max_iter=100)
+        row_clusters=results.row_clusters,
+        col_clusters=results.col_clusters,
+        n_row_clusters=results.input_parameters['nclusters_row'],
+        n_col_clusters=results.input_parameters['nclusters_col'],
+        k_range=range(1, 5),
+        kmean_max_iter=100,
+        var_thres=2.,
+        output_filename='results.json')
 
-Here we present an example based on the co-clustering object ``cc`` setup in "Co-clustering" section.
-``cc.nclusters_row=k`` and  ``cc.nclusters_col=l`` are the number of row/column clusters.
-``Z`` is the :math:`(m\times n)` input array for co-clustering. 
-``kmean_n_clusters`` is the number of k-mean clusters. 
-``kmean_max_iter`` is the maximum number of iterations.
+Here we present an example based on the results of co-clustering from the "Co-clustering" section.
+``results.input_parameters['nclusters_row']`` and  ``results.input_parameters['nclusters_col']``
+are the number of row/column clusters.
+``Z`` is the :math:`(m\times n)` input array, also used for co-clustering.
+``k_range`` is the range of ``k`` values to investigate.
+``kmean_max_iter`` is the maximum number of iterations per each ``k`` value.
+``var_thres`` sets the threshold for the selection of the best ``k`` value.
 
-The ``compute`` function can be called to compute the k-mean results:
-
-.. code-block:: python
-
-    km.compute()
-
-The centroids of "mean" statistics is stored in:
+The ``compute`` function can be called to compute the k-means results:
 
 .. code-block:: python
 
-    km.cl_mean_centroids
-        
-.. _k-mean clustering: https://en.wikipedia.org/wiki/K-means_clustering
+    results = km.compute()
+
+In order to evaluate the outcome of the ``KMeans`` refinement, one can plot the
+computed sum of variances as a function of ``k`` in what is usually known as elbow plot:
+
+.. code-block:: python
+
+    km.plot_elbow_curve()
+
+The plot is also functional to select the value of ``var_thres``.
+The optimal ``k`` value and the centroids of the "mean" statistics are stored in:
+
+.. code-block:: python
+
+    results.k_value
+    results.cl_mean_centroids
+
+
+.. _k-means clustering: https://en.wikipedia.org/wiki/K-means_clustering
 
 
 

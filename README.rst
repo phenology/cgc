@@ -59,6 +59,12 @@ To install cgc, do:
 
 .. code-block:: console
 
+  pip install clustering-geodata-cubes
+
+Alternatively, you can clone this repository and install it using `pip`:
+
+.. code-block:: console
+
   git clone https://github.com/phenology/cgc.git
   cd cgc
   pip install .
