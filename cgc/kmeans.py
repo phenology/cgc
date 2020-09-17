@@ -14,6 +14,7 @@ class KmeansResults(Results):
     """
     def reset(self):
         self.k_value = None
+        self.var_list = None
         self.cl_mean_centroids = None
 
 
@@ -86,6 +87,8 @@ class Kmeans(object):
         and compute the sum of variances of each k.
         Finally select the smallest k which gives
         the sum of variances smaller than the threshold.
+
+        :return: k-means result object
         """
         # Get statistic measures
         self._compute_statistic_measures()
@@ -100,7 +103,7 @@ class Kmeans(object):
             var_list = np.hstack((var_list, self._compute_sum_var(kmeans_cc)))
             kmeans_cc_list.append(kmeans_cc)
         idx_k = min(np.where(var_list < self.var_thres)[0])
-        self.var_list = var_list
+        self.results.var_list = var_list
         self.results.k_value = self.k_range[idx_k]
         self.kmeans_cc = kmeans_cc_list[idx_k]
         del kmeans_cc_list
@@ -179,27 +182,30 @@ class Kmeans(object):
         """
         Export elbow curve plot
         """
-        plt.plot(self.k_range, self.var_list)  # kmean curve
-        plt.plot([min(self.k_range), max(self.k_range)],
-                 [self.var_thres, self.var_thres],
+        k_range = self.results.input_parameters['k_range']
+        var_thres = self.results.input_parameters['var_thres']
+        plt.plot(k_range, self.results.var_list)  # kmean curve
+        plt.plot([min(k_range), max(k_range)],
+                 [var_thres, var_thres],
                  color='r',
                  linestyle='--')  # Threshold
         plt.plot([self.results.k_value, self.results.k_value],
-                 [min(self.var_list), max(self.var_list)],
+                 [min(self.results.var_list), max(self.results.var_list)],
                  color='g',
                  linestyle='--')  # Selected k
-        xtick_step = int((max(self.k_range) - min(self.k_range)) / 6)
-        ytick_step = int((max(self.var_list) - min(self.var_list)) / 6)
-        plt.xticks(range(min(self.k_range), max(self.k_range), xtick_step))
-        plt.xlim(min(self.k_range), max(self.k_range))
-        plt.ylim(min(self.var_list), max(self.var_list))
-        plt.text(max(self.k_range) - 2 * xtick_step,
-                 self.var_thres + ytick_step / 4,
-                 'threshold={}'.format(self.var_thres),
+        xtick_step = int((max(k_range) - min(k_range)) / 6)
+        ytick_step = int((max(self.results.var_list)
+                          - min(self.results.var_list)) / 6)
+        plt.xticks(range(min(k_range), max(k_range), xtick_step))
+        plt.xlim(min(k_range), max(k_range))
+        plt.ylim(min(self.results.var_list), max(self.results.var_list))
+        plt.text(max(k_range) - 2 * xtick_step,
+                 var_thres + ytick_step / 4,
+                 'threshold={}'.format(var_thres),
                  color='r',
                  fontsize=12)
         plt.text(self.results.k_value + xtick_step / 4,
-                 max(self.var_list) - ytick_step,
+                 max(self.results.var_list) - ytick_step,
                  'k={}'.format(self.results.k_value),
                  color='g',
                  fontsize=12)
