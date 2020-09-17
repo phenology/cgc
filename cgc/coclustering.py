@@ -108,7 +108,7 @@ class Coclustering(object):
         :return: co-clustering results
         """
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
-            futures = {
+            futures = [
                 executor.submit(coclustering_numpy.coclustering,
                                 self.Z,
                                 self.nclusters_row,
@@ -119,9 +119,9 @@ class Coclustering(object):
                                 low_memory,
                                 numba_jit,
                                 row_clusters_init=self.row_clusters_init,
-                                col_clusters_init=self.col_clusters_init):
-                r for r in range(self.nruns)
-            }
+                                col_clusters_init=self.col_clusters_init)
+                for _ in range(self.nruns)
+            ]
             for future in concurrent.futures.as_completed(futures):
                 logger.info(f'Retrieving run {self.results.nruns_completed}')
                 converged, niters, row, col, e = future.result()
