@@ -16,6 +16,7 @@ Added
 
 * Low-memory version for numpy-based coclustering, significantly reducing the memory footprint of the code
 * Numba-accelerated version of the low-memory version of the numpy-based co-clustering
+* Results objects include input_parameters dictionary and other metadata
 
 Fixed
 -----
