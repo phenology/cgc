@@ -8,6 +8,15 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.2.1] - 2020-09-18
+********************
+
+Fixed
+-----
+
+* Solve dependency issue: fail to install requirements with `pip`
+
+
 [0.2.0] - 2020-09-17
 ********************
 
