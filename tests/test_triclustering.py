@@ -15,30 +15,30 @@ def triclustering():
     Z = np.random.randint(100, size=(d, m, n)).astype('float64')
     return Triclustering(Z, nclusters_row=ncl_row, nclusters_col=ncl_col,
                          nclusters_bnd=ncl_bnd, conv_threshold=1.e-5,
-                         max_iterations=100, nruns=10, epsilon=1.e-8)
+                         max_iterations=100, nruns=1, epsilon=1.e-8,
+                         row_clusters_init=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
+                         col_clusters_init=[0, 1, 0, 1, 0, 1, 0, 1],
+                         bnd_clusters_init=[0, 1, 2, 0, 1, 2])
 
 
 class TestTriclustering:
     def test_check_initial_assignments(self, triclustering):
-        assert triclustering.row_clusters is None
-        assert triclustering.col_clusters is None
-        assert triclustering.bnd_clusters is None
+        assert triclustering.results.row_clusters is None
+        assert triclustering.results.col_clusters is None
+        assert triclustering.results.bnd_clusters is None
 
     def test_run_with_threads(self, triclustering):
-        triclustering.set_initial_clusters([0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-                                           [0, 1, 0, 1, 0, 1, 0, 1],
-                                           [0, 1, 2, 0, 1, 2])
         triclustering.run_with_threads(nthreads=2)
-        np.testing.assert_equal(triclustering.row_clusters,
+        np.testing.assert_equal(triclustering.results.row_clusters,
                                 [1, 1, 0, 3, 4, 0, 2, 2, 0, 0])
-        np.testing.assert_equal(triclustering.col_clusters,
+        np.testing.assert_equal(triclustering.results.col_clusters,
                                 [0, 1, 0, 1, 1, 1, 0, 1])
-        np.testing.assert_equal(triclustering.bnd_clusters,
+        np.testing.assert_equal(triclustering.results.bnd_clusters,
                                 [1, 0, 2, 0, 1, 0])
-        assert np.isclose(triclustering.error, -69712.35398188536)
+        assert np.isclose(triclustering.results.error, -69712.35398188536)
 
     def test_nruns_completed(self, triclustering):
         triclustering.run_with_threads(nthreads=1)
-        assert triclustering.nruns_completed == 10
+        assert triclustering.results.nruns_completed == 1
         triclustering.run_with_threads(nthreads=1)
-        assert triclustering.nruns_completed == 20
+        assert triclustering.results.nruns_completed == 2
