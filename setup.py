@@ -14,6 +14,9 @@ with open(os.path.join(here, 'cgc', '__version__.py')) as f:
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
+with open('requirements.txt') as requirements_file:
+    requirements = requirements_file.read().split()
+
 setup(
     name='clustering-geodata-cubes',
     version=version['__version__'],
@@ -40,11 +43,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     test_suite='tests',
-    install_requires=[
-        'numpy',
-        'dask[complete]',
-        'scikit-learn',
-    ],
+    install_requires=requirements,
     setup_requires=[
         # dependency for `python setup.py test`
         'pytest-runner',
