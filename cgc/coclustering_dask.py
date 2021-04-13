@@ -52,6 +52,8 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     """
     client = get_client()
 
+    Z = da.array(Z) if not isinstance(Z, da.Array) else Z
+
     [m, n] = Z.shape
     row_chunks, col_chunks = Z.chunksize
 
