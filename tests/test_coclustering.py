@@ -57,6 +57,14 @@ class TestCoclustering:
                                 [0, 0, 0, 1, 0, 0, 1, 1])
         assert np.isclose(coclustering.results.error, -11554.1406004284)
 
+    def test_dask_performance_raises_error(self, client):
+        m, n = 10, 8
+        Z = np.random.randint(100, size=(m, n)).astype('float64')
+        cc = Coclustering(Z, nclusters_row=5, nclusters_col=2,
+                          epsilon="epsilon")  # wrong data type for epsilon
+        with pytest.raises(TypeError):
+            cc.run_with_dask()
+
     def test_nruns_completed_threads(self, coclustering):
         coclustering.run_with_threads(nthreads=1)
         assert coclustering.results.nruns_completed == 1
