@@ -11,14 +11,9 @@ logger = logging.getLogger(__name__)
 def _distance(Z, Y, epsilon):
     """ Distance function """
     Y = Y + epsilon
-    # The first term below is equal to: da.dot(da.ones(m, n), Y)
+    # The first term below is equal to one row of: da.dot(da.ones(m, n), Y)
     # with Z.shape = (m, n) and Y.shape = (n, k)
-    col = Y.sum(axis=0, keepdims=True)
-    block = col.repeat(Z.chunksize[0], axis=0)
-    first_term = da.concatenate([block for _ in Z.chunks[0]])
-    second_term = da.matmul(Z, da.log(Y))
-    d = first_term - second_term
-    return d
+    return Y.sum(axis=0, keepdims=True) - da.matmul(Z, da.log(Y))
 
 
 def _initialize_clusters(n_el, n_clusters, chunks=None):
