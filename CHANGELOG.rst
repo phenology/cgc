@@ -8,6 +8,22 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.3.0] - 2021-04-30
+********************
+
+Fixed
+-----
+
+* Reduced memory footprint of low-memory Dask-based implementation
+* Fixed error handling in high-performance Dask implementation
+
+
+Changed
+-------
+
+* Dropped tests on Python 3.6, added tests for Python 3.9 (following Dask)
+
+
 [0.2.1] - 2020-09-18
 ********************
 
