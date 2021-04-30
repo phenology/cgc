@@ -17,8 +17,9 @@
    * - **Other best practices**
      -
    * - Continuous integration
-     - |Python Build|
-
+     - |Python Build| |Python Publish|
+   * - Documentation
+     - |Documentation Status|
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
    :target: https://github.com/phenology/cgc
@@ -43,6 +44,14 @@
 .. |Python Build| image:: https://github.com/phenology/cgc/workflows/Build/badge.svg
    :target: https://github.com/phenology/cgc/actions?query=workflow%3A%22Build%22
    :alt: Python Build
+
+.. |Python Publish| image:: https://github.com/phenology/cgc/workflows/Publish/badge.svg
+   :target: https://github.com/phenology/cgc/actions?query=workflow%3A%22Publish%22
+   :alt: Python Publish
+
+.. |Documentation Status| image:: https://readthedocs.org/projects/cgc/badge/?version=latest
+   :target: https://cgc.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 ################################################################################
 CGC: Clustering Geo-Data Cubes

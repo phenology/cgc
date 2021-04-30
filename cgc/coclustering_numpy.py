@@ -9,11 +9,9 @@ logger = logging.getLogger(__name__)
 def _distance(Z, Y, epsilon):
     """ Distance function """
     Y = Y + epsilon
-    # The first term below is equal to: da.dot(da.ones(m, n), Y)
+    # The first term below is equal to one row of: da.dot(da.ones(m, n), Y)
     # with Z.shape = (m, n) and Y.shape = (n, k)
-    d = (Y.sum(axis=0, keepdims=True).repeat(Z.shape[0], axis=0) -
-         np.dot(Z, np.log(Y)))
-    return d
+    return Y.sum(axis=0, keepdims=True) - np.dot(Z, np.log(Y))
 
 
 def _min_dist(Z, M, CoCavg, epsilon):

@@ -11,22 +11,20 @@ logger = logging.getLogger(__name__)
 def _distance(Z, Y, epsilon):
     """ Distance function """
     Y = Y + epsilon
-    # The first term below is equal to: da.dot(da.ones(m, n), Y)
+    # The first term below is equal to one row of: da.dot(da.ones(m, n), Y)
     # with Z.shape = (m, n) and Y.shape = (n, k)
-    d = (Y.sum(axis=0, keepdims=True).repeat(Z.shape[0], axis=0)
-         - da.dot(Z, da.log(Y)))
-    return d
+    return Y.sum(axis=0, keepdims=True) - da.matmul(Z, da.log(Y))
 
 
-def _initialize_clusters(n_el, n_clusters):
+def _initialize_clusters(n_el, n_clusters, chunks=None):
     """ Initialize cluster array """
-    cluster_idx = da.mod(da.arange(n_el), n_clusters)
+    cluster_idx = da.mod(da.arange(n_el, chunks=(chunks or n_el)), n_clusters)
     return da.random.permutation(cluster_idx)
 
 
 def _setup_cluster_matrix(n_clusters, cluster_idx):
     """ Set cluster occupation matrix """
-    return da.eye(n_clusters, dtype=np.bool)[cluster_idx]
+    return da.eye(n_clusters, dtype=np.bool, chunks=n_clusters)[cluster_idx]
 
 
 def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
@@ -49,14 +47,17 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     """
     client = get_client()
 
+    Z = da.array(Z) if not isinstance(Z, da.Array) else Z
+
     [m, n] = Z.shape
+    row_chunks, col_chunks = Z.chunksize
 
     row_clusters = da.array(row_clusters_init) \
         if row_clusters_init is not None \
-        else _initialize_clusters(m, nclusters_row)
+        else _initialize_clusters(m, nclusters_row, chunks=row_chunks)
     col_clusters = da.array(col_clusters_init) \
         if col_clusters_init is not None \
-        else _initialize_clusters(n, nclusters_col)
+        else _initialize_clusters(n, nclusters_col, chunks=col_chunks)
     R = _setup_cluster_matrix(nclusters_row, row_clusters)
     C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
@@ -77,17 +78,17 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
                         da.sum(nel_row_clusters > 0).compute(),
                         da.sum(nel_col_clusters > 0).compute()))
         nel_clusters = da.outer(nel_row_clusters, nel_col_clusters)
-        CoCavg = (da.dot(da.dot(R.T, Z), C) + Gavg * epsilon) / \
+        CoCavg = (da.matmul(da.matmul(R.T, Z), C) + Gavg * epsilon) / \
                  (nel_clusters + epsilon)
 
         # Calculate distance based on row approximation
-        d_row = _distance(Z, da.dot(C, CoCavg.T), epsilon)
+        d_row = _distance(Z, da.matmul(C, CoCavg.T), epsilon)
         # Assign to best row cluster
         row_clusters = da.argmin(d_row, axis=1)
         R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
         # Calculate distance based on column approximation
-        d_col = _distance(Z.T, da.dot(R, CoCavg), epsilon)
+        d_col = _distance(Z.T, da.matmul(R, CoCavg), epsilon)
         # Assign to best column cluster
         col_clusters = da.argmin(d_col, axis=1)
         C = _setup_cluster_matrix(nclusters_col, col_clusters)

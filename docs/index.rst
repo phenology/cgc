@@ -25,4 +25,5 @@ have a look at the  `contribution guidelines`_.
    :maxdepth: 2
    :caption: Contents:
 
-  user_manual
+   user_manual
+   Tutorial <https://cgc-tutorial.readthedocs.io>
