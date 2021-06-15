@@ -2,7 +2,9 @@ import concurrent.futures
 import logging
 
 from concurrent.futures import ThreadPoolExecutor
+from dask.distributed import Client
 
+from . import triclustering_dask
 from . import triclustering_numpy
 
 from .results import Results
@@ -75,6 +77,8 @@ class Triclustering(object):
                                len(row_clusters_init),
                                len(col_clusters_init))
 
+        self.client = None
+
     def run_with_threads(self, nthreads=1):
         """
         Run the tri-clustering using an algorithm based on numpy + threading
@@ -116,8 +120,53 @@ class Triclustering(object):
         self.results.write(filename=self.output_filename)
         return self.results
 
-    def run_with_dask(self, client=None):
-        raise NotImplementedError
+    def run_with_dask(self, client=None, low_memory=False):
+        """
+        Run the tri-clustering with Dask
+
+        :param client: Dask client
+        :param low_memory: if true, use a memory-conservative algorithm
+        :return: co-clustering results
+        """
+        self.client = client if client is not None else Client()
+
+        if low_memory:
+            self._dask_runs_memory()
+        else:
+            raise NotImplementedError("Only low-mempry tri-clustering!")
+
+        self.results.write(filename=self.output_filename)
+        return self.results
+
+    def _dask_runs_memory(self):
+        """ Memory efficient Dask implementation: sequential runs """
+        for r in range(self.nruns):
+            logger.info(f'Run {self.results.nruns_completed}')
+            converged, niters, row, col, bnd, e = \
+                triclustering_dask.triclustering(
+                    self.Z,
+                    self.nclusters_row,
+                    self.nclusters_col,
+                    self.nclusters_bnd,
+                    self.conv_threshold,
+                    self.max_iterations,
+                    self.epsilon,
+                    row_clusters_init=self.row_clusters_init,
+                    col_clusters_init=self.col_clusters_init,
+                    bnd_clusters_init=self.bnd_clusters_init
+                )
+            logger.info(f'Error = {e}')
+            if converged:
+                logger.info(f'Run converged in {niters} iterations')
+                self.results.nruns_converged += 1
+            else:
+                logger.warning(f'Run not converged in {niters} iterations')
+            if self.results.error is None or e < self.results.error:
+                self.results.row_clusters = row.compute()
+                self.results.col_clusters = col.compute()
+                self.results.bnd_clusters = bnd.compute()
+                self.results.error = e
+            self.results.nruns_completed += 1
 
     def run_serial(self):
         raise NotImplementedError
