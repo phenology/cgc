@@ -95,7 +95,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         # finally divide by number of elements in each tri-cluster
         TriCavg = (TriCavg + Gavg * epsilon) / (nel_clusters + epsilon)
 
-
         # unpack tri-cluster averages ..
         avg_unpck = da.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
         avg_unpck = da.einsum('ij,klj->kli', C, avg_unpck)  # .. along col axis
@@ -105,12 +104,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         row_clusters = da.argmin(d_row, axis=1)
         R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
-        # TriCavg = da.einsum('ij,ilm->jlm', B, Z)  # .. along band axis
-        # TriCavg = da.einsum('ij,kim->kjm', R, TriCavg)  # .. along row axis
-        # TriCavg = da.einsum('ij,kli->klj', C, TriCavg)  # .. along col axis
-        # # finally divide by number of elements in each tri-cluster
-        # TriCavg = (TriCavg + Gavg * epsilon) / (nel_clusters + epsilon)
-
         # unpack tri-cluster averages ..
         avg_unpck = da.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
         avg_unpck = da.einsum('ij,kjl->kil', R, avg_unpck)  # .. along row axis
@@ -119,12 +112,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         d_col = _distance(Z.transpose(idx), avg_unpck.transpose(idx), epsilon)
         col_clusters = da.argmin(d_col, axis=1)
         C = _setup_cluster_matrix(nclusters_col, col_clusters)
-
-        # TriCavg = da.einsum('ij,ilm->jlm', B, Z)  # .. along band axis
-        # TriCavg = da.einsum('ij,kim->kjm', R, TriCavg)  # .. along row axis
-        # TriCavg = da.einsum('ij,kli->klj', C, TriCavg)  # .. along col axis
-        # # finally divide by number of elements in each tri-cluster
-        # TriCavg = (TriCavg + Gavg * epsilon) / (nel_clusters + epsilon)
 
         # unpack tri-cluster averages ..
         avg_unpck = da.einsum('ij,kjl->kil', R, TriCavg)  # .. along row axis
