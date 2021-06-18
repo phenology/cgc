@@ -5,11 +5,10 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def _distance(Z, X, Y, epsilon):
+def _distance(Z, Y, epsilon):
     """ Distance function """
     Y = Y + epsilon
-    d = np.dot(X, Y) - np.dot(Z, np.log(Y))
-    return d
+    return Y.sum(axis=(1, 2)) - np.einsum('ijk,ljk->il', Z, np.log(Y))
 
 
 def _initialize_clusters(n_el, n_clusters):
@@ -44,13 +43,8 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
     """
     [d, m, n] = Z.shape
 
-    # Setup matrices to ..
-    Y = np.concatenate(Z, axis=1)  # .. update rows
-    Y1 = np.concatenate(Z, axis=0)  # .. update columns
-    Y2 = Z.reshape(d, m*n)  # .. update bands
-
     # Calculate average
-    Gavg = Y.mean()
+    Gavg = Z.mean()
 
     # Initialize cluster assignments
     row_clusters = row_clusters_init if row_clusters_init is not None \
@@ -59,11 +53,9 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         else _initialize_clusters(n, nclusters_col)
     bnd_clusters = bnd_clusters_init if bnd_clusters_init is not None \
         else _initialize_clusters(d, nclusters_bnd)
-    x_clusters = np.repeat(bnd_clusters, n)
     R = _setup_cluster_matrix(nclusters_row, row_clusters)
     C = _setup_cluster_matrix(nclusters_col, col_clusters)
     B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
-    C1 = _setup_cluster_matrix(nclusters_bnd, x_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -71,47 +63,59 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
 
     while (not converged) & (s < niters):
         logger.debug(f'Iteration # {s} ..')
-        # Obtain all the cluster based averages
-        CoCavg = (np.dot(np.dot(R.T, Y), C1) + Gavg * epsilon) / (
-                np.dot(np.dot(R.T, np.ones((m, n * d))), C1) + epsilon)
+        # Calculate number of elements in each tri-cluster
+        nel_row_clusters = np.bincount(row_clusters, minlength=nclusters_row)
+        nel_col_clusters = np.bincount(col_clusters, minlength=nclusters_col)
+        nel_bnd_clusters = np.bincount(bnd_clusters, minlength=nclusters_bnd)
+        logger.debug(
+            'num of populated clusters: row {}, col {}, bnd {}'.format(
+                np.sum(nel_row_clusters > 0),
+                np.sum(nel_col_clusters > 0),
+                np.sum(nel_bnd_clusters > 0)
+            )
+        )
+        nel_clusters = np.einsum('i,j->ij', nel_row_clusters, nel_col_clusters)
+        nel_clusters = np.einsum('i,jk->ijk', nel_bnd_clusters, nel_clusters)
 
-        # Calculate distance based on row approximation
-        d2 = _distance(Y, np.ones((m, n * d)), np.dot(C1, CoCavg.T), epsilon)
+        # calculate tri-cluster averages (epsilon takes care of empty clusters)
+        # first sum values in each tri-cluster ..
+        TriCavg = np.einsum('ij,ilm->jlm', B, Z)  # .. along band axis
+        TriCavg = np.einsum('ij,kim->kjm', R, TriCavg)  # .. along row axis
+        TriCavg = np.einsum('ij,kli->klj', C, TriCavg)  # .. along col axis
+        # finally divide by number of elements in each tri-cluster
+        TriCavg = (TriCavg + Gavg * epsilon) / (nel_clusters + epsilon)
 
-        # Assign to best row cluster
-        row_clusters = np.argmin(d2, axis=1)
+        # unpack tri-cluster averages ..
+        avg_unpck = np.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
+        avg_unpck = np.einsum('ij,klj->kli', C, avg_unpck)  # .. along col axis
+        # use these for the row cluster assignment
+        idx = (1, 0, 2)
+        d_row = _distance(Z.transpose(idx), avg_unpck.transpose(idx), epsilon)
+        row_clusters = np.argmin(d_row, axis=1)
         R = _setup_cluster_matrix(nclusters_row, row_clusters)
-        R1 = np.tile(R, (d, 1))
 
-        # Obtain all the cluster based averages
-        CoCavg1 = (np.dot(np.dot(R1.T, Y1), C) + Gavg * epsilon) / (
-                np.dot(np.dot(R1.T, np.ones((m * d, n))), C) + epsilon)
-
-        # Calculate distance based on column approximation
-        d2 = _distance(Y1.T, np.ones((n, m * d)), np.dot(R1, CoCavg1), epsilon)
-
-        # Assign to best column cluster
-        col_clusters = np.argmin(d2, axis=1)
+        # unpack tri-cluster averages ..
+        avg_unpck = np.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
+        avg_unpck = np.einsum('ij,kjl->kil', R, avg_unpck)  # .. along row axis
+        # use these for the col cluster assignment
+        idx = (2, 0, 1)
+        d_col = _distance(Z.transpose(idx), avg_unpck.transpose(idx), epsilon)
+        col_clusters = np.argmin(d_col, axis=1)
         C = _setup_cluster_matrix(nclusters_col, col_clusters)
-        C2 = np.tile(C, (m, 1))
 
-        # Obtain all the cluster based averages
-        CoCavg2 = (np.dot(np.dot(B.T, Y2), C2) + Gavg * epsilon) / (
-                np.dot(np.dot(B.T, np.ones((d, m * n))), C2) + epsilon)
-
-        # Calculate distance based on band approximation
-        d2 = _distance(Y2, np.ones((d, m * n)), np.dot(C2, CoCavg2.T), epsilon)
-
-        # Assign to best band cluster
-        bnd_clusters = np.argmin(d2, axis=1)
+        # unpack tri-cluster averages ..
+        avg_unpck = np.einsum('ij,kjl->kil', R, TriCavg)  # .. along row axis
+        avg_unpck = np.einsum('ij,klj->kli', C, avg_unpck)  # .. along col axis
+        # use these for the band cluster assignment
+        d_bnd = _distance(Z, avg_unpck, epsilon)
+        bnd_clusters = np.argmin(d_bnd, axis=1)
         B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
-        C1 = np.repeat(B, n, axis=0)
 
-        # Error value
+        # Error value (actually just the band component really)
         old_e = e
-        minvals = np.amin(d2, axis=1)
+        minvals = np.min(d_bnd, axis=1)
         # power 1 divergence, power 2 euclidean
-        e = sum(np.power(minvals, 1))
+        e = np.sum(np.power(minvals, 1))
 
         logger.debug(f'Error = {e:+.15e}, dE = {e - old_e:+.15e}')
         converged = abs(e - old_e) < errobj
