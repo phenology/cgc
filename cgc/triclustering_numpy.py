@@ -59,8 +59,7 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         else _initialize_clusters(n, nclusters_col)
     bnd_clusters = bnd_clusters_init if bnd_clusters_init is not None \
         else _initialize_clusters(d, nclusters_bnd)
-    x_clusters = np.tile(bnd_clusters, n) if bnd_clusters_init is not None \
-        else _initialize_clusters(n*d, nclusters_bnd)
+    x_clusters = np.repeat(bnd_clusters, n)
     R = _setup_cluster_matrix(nclusters_row, row_clusters)
     C = _setup_cluster_matrix(nclusters_col, col_clusters)
     B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
@@ -106,7 +105,7 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         # Assign to best band cluster
         bnd_clusters = np.argmin(d2, axis=1)
         B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
-        C1 = np.tile(B, (n, 1))
+        C1 = np.repeat(B, n, axis=0)
 
         # Error value
         old_e = e
