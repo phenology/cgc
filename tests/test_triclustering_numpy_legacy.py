@@ -1,29 +1,30 @@
 import numpy as np
+import pytest
 
-from cgc import triclustering_numpy
-from cgc.triclustering_numpy import triclustering
+from cgc.legacy import triclustering_numpy
+from cgc.legacy.triclustering_numpy import triclustering
+
+
+pytest.skip(
+    "skipping tests on old triclustering implementation",
+    allow_module_level=True
+)
 
 
 class TestDistance:
     def test(self):
-        d = 3
         m = 4
         n = 5
-        k = 2  # number of band clusters
+        k = 2
         np.random.seed(1234)
-        Z = np.random.randint(100, size=(d, m, n)).astype('float64')
-        Y = np.random.randint(100, size=(k, m, n)).astype('float64')
-        Y[0, 3, 1] = 0.  # setting value to zero should not give infinite
+        Z = np.random.randint(100, size=(m, n)).astype('float64')
+        X = np.ones((m, n))
+        Y = np.random.randint(100, size=(n, k)).astype('float64')
+        Y[3, 1] = 0.  # setting value to zero should not give infinite
         epsilon = 1.e-8
-        distance = triclustering_numpy._distance(Z, Y, epsilon)
-        assert distance.shape == (d, k)
-        assert ~np.any(np.isinf(distance))
-        target = [
-            [-1136.1376816, -2094.30771188],
-            [-542.49375152, -2152.56590639],
-            [-2074.05605694, -1505.49646914]
-        ]
-        assert np.allclose(distance, target)
+        d = triclustering_numpy._distance(Z, X, Y, epsilon)
+        assert d.shape == (m, k)
+        assert ~np.any(np.isinf(d))
 
 
 class TestInitializeClusters:
@@ -69,7 +70,7 @@ class TestTriclustering:
                                       np.array([1, 0, 3, 2, 0]))
         np.testing.assert_array_equal(bnd_cl,
                                       np.array([1, 0, 0]))
-        np.testing.assert_almost_equal(error, -4330.426306789841)
+        np.testing.assert_almost_equal(error, -4249.966724020571)
 
     def test_bigger_matrix(self):
         np.random.seed(1234)
