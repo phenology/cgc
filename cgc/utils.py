@@ -1,10 +1,5 @@
 import math
 import logging
-import sys
-
-logging.basicConfig(level=logging.INFO,
-                    stream=sys.stdout,
-                    format="%(asctime)-15s %(levelname)-5s - %(message)s")
 
 
 def mem_estimate_numpy(m, n, k, l, out_unit=None):
@@ -25,6 +20,7 @@ def mem_estimate_numpy(m, n, k, l, out_unit=None):
     :param out_unit: Output unit, defaults to None
     :return: Estimated memory usage, unit, peak
     """
+    logger = logging.getLogger(__name__)
 
     # Size of major matrix
     Z = _est_arr_size((m, n))
@@ -52,6 +48,9 @@ def mem_estimate_numpy(m, n, k, l, out_unit=None):
     # Make results human redable
     mem_usage, unit = _human_size(mem_usage, out_unit)
 
+    logger.info('Estimated memory usage: {:.2f}{}, peak number: {}'.format(
+        mem_usage, unit, peak))
+
     return (mem_usage, unit, peak)
 
 
@@ -66,9 +65,6 @@ def _est_arr_size(shape, nbytes=8):
     """
 
     return math.prod(shape) * nbytes
-
-
-import math
 
 
 def _human_size(size_bytes, out_unit=None):
