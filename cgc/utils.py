@@ -1,5 +1,6 @@
 import math
 import logging
+import numpy as np
 
 
 def mem_estimate_coclustering_numpy(n_rows,
@@ -73,7 +74,7 @@ def _est_arr_size(shape, nbytes=8):
     :return: Size of the array in bytes
     """
 
-    return math.prod(shape) * nbytes
+    return np.prod(shape) * nbytes
 
 
 def _human_size(size_bytes, out_unit=None):
