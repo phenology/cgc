@@ -2,14 +2,19 @@ import math
 import logging
 
 
-def mem_estimate_coclustering_numpy(n_rows, n_cols, nclusters_row, nclusters_col, out_unit=None):
+def mem_estimate_coclustering_numpy(n_rows,
+                                    n_cols,
+                                    nclusters_row,
+                                    nclusters_col,
+                                    out_unit=None):
     """
-    Estimate maximum memory usage of cgc.coclustering_numpy, given the matrix 
-    size(n_rows, n_cols) and number of row/column clusters (nclusters_row, nclusters_col)
+    Estimate maximum memory usage of cgc.coclustering_numpy, given the matrix
+    size(n_rows, n_cols) and number of row/column clusters (nclusters_row,
+    nclusters_col)
 
     The estimated memory usage is the sum of all major arrays in the process of
-    cgc.coclustering_numpy.coclustering. 
-    
+    cgc.coclustering_numpy.coclustering.
+
     Depending on the shape of Z, there are two possible memory peaks: the first
     or the second call of cgc.coclustering_numpy._distance()
 
@@ -29,13 +34,17 @@ def mem_estimate_coclustering_numpy(n_rows, n_cols, nclusters_row, nclusters_col
 
     # First call _distance
     Y1 = _est_arr_size((n_cols, nclusters_row))
-    d1 = _est_arr_size((n_rows, nclusters_row)) * 2  # x2 because "Y.sum(axis=0, keepdims=True)"
+    d1 = _est_arr_size(
+        (n_rows,
+         nclusters_row)) * 2  # x2 because "Y.sum(axis=0, keepdims=True)"
     # is also exanpded to (n_rows,nclusters_row) for matrix minus
     # operation
 
     # Second call _distance
     Y2 = _est_arr_size((n_rows, nclusters_col))
-    d2 = _est_arr_size((n_cols, nclusters_col)) * 2  # x2 because "Y.sum(axis=0, keepdims=True)"
+    d2 = _est_arr_size(
+        (n_cols,
+         nclusters_col)) * 2  # x2 because "Y.sum(axis=0, keepdims=True)"
     # is also exanpded to (n_rows,nclusters_row) for matrix minus
     # operation
 
