@@ -2,10 +2,10 @@ import math
 import logging
 
 
-def mem_estimate_numpy(m, n, k, l, out_unit=None):
+def mem_estimate_coclustering_numpy(n_rows, n_cols, nclusters_row, nclusters_col, out_unit=None):
     """
     Estimate maximum memory usage of cgc.coclustering_numpy, given the matrix 
-    size(m, n) and number of row/column clusters (k, l)
+    size(n_rows, n_cols) and number of row/column clusters (nclusters_row, nclusters_col)
 
     The estimated memory usage is the sum of all major arrays in the process of
     cgc.coclustering_numpy.coclustering. 
@@ -13,30 +13,30 @@ def mem_estimate_numpy(m, n, k, l, out_unit=None):
     Depending on the shape of Z, there are two possible memory peaks: the first
     or the second call of cgc.coclustering_numpy._distance()
 
-    :param m: Number of rows of matrix Z
-    :param n: Number of columns of matrix Z
-    :param k: Number of row clusters
-    :param l: Number of column clusters
+    :param n_rows: Number of rows of matrix Z
+    :param n_cols: Number of columns of matrix Z
+    :param nclusters_row: Number of row clusters
+    :param nclusters_col: Number of column clusters
     :param out_unit: Output unit, defaults to None
     :return: Estimated memory usage, unit, peak
     """
     logger = logging.getLogger(__name__)
 
     # Size of major matrix
-    Z = _est_arr_size((m, n))
-    C = _est_arr_size((n, l), 4)
-    R = _est_arr_size((m, k), 4)
+    Z = _est_arr_size((n_rows, n_cols))
+    C = _est_arr_size((n_cols, nclusters_col), 4)
+    R = _est_arr_size((n_rows, nclusters_row), 4)
 
     # First call _distance
-    Y1 = _est_arr_size((n, k))
-    d1 = _est_arr_size((m, k)) * 2  # x2 because "Y.sum(axis=0, keepdims=True)"
-    # is also exanpded to (m,k) for matrix minus
+    Y1 = _est_arr_size((n_cols, nclusters_row))
+    d1 = _est_arr_size((n_rows, nclusters_row)) * 2  # x2 because "Y.sum(axis=0, keepdims=True)"
+    # is also exanpded to (n_rows,nclusters_row) for matrix minus
     # operation
 
     # Second call _distance
-    Y2 = _est_arr_size((m, l))
-    d2 = _est_arr_size((n, l)) * 2  # x2 because "Y.sum(axis=0, keepdims=True)"
-    # is also exanpded to (m,k) for matrix minus
+    Y2 = _est_arr_size((n_rows, nclusters_col))
+    d2 = _est_arr_size((n_cols, nclusters_col)) * 2  # x2 because "Y.sum(axis=0, keepdims=True)"
+    # is also exanpded to (n_rows,nclusters_row) for matrix minus
     # operation
 
     # Compare two potential peaks
