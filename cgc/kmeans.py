@@ -136,36 +136,42 @@ class Kmeans(object):
         and minimum values, for each co-cluster group.
         Normalize them to [0, 1]
         """
-        self.stat_measures = np.empty([0, 6])
-        # Loop per co-cluster cell
-        for r in np.unique(self.row_clusters):
-            for c in np.unique(self.col_clusters):
-                idx_rows = np.where(self.row_clusters == r)[0]
-                idx_col = np.where(self.col_clusters == c)[0]
-                # All elements in Z falling into this cluster cell
-                cl_Z = self.Z[idx_rows, :][:, idx_col]
+        row_clusters = np.unique(self.row_clusters)
+        col_clusters = np.unique(self.col_clusters)
+        self.stat_measures = np.zeros(
+            (len(row_clusters)*len(col_clusters), 6)
+        )
 
-                cl_stat = np.array([
-                    np.nanmean(cl_Z),
-                    np.nanstd(cl_Z),
-                    np.nanpercentile(cl_Z, 5),
-                    np.nanpercentile(cl_Z, 95),
-                    np.nanmax(cl_Z),
-                    np.nanmin(cl_Z)
-                ])
+        # Loop over co-clusters
+        for ir, r in enumerate(row_clusters):
+            idx_rows, = np.where(self.row_clusters == r)
+            for ic, c in enumerate(col_clusters):
+                idx_cols, = np.where(self.col_clusters == c)
+                rr, cc = np.meshgrid(idx_rows, idx_cols)
+                Z = self.Z[rr, cc]
 
-                self.stat_measures = np.vstack((self.stat_measures, cl_stat))
+                idx = np.ravel_multi_index(
+                    (ir, ic),
+                    (len(row_clusters), len(col_clusters))
+                )
 
-        # Normalize all statistic measures to [0, 1]
-        self.stat_measures_norm = []
-        descale = []
-        for sm in self.stat_measures.T:
-            minimum = np.nanmin(sm, axis=0)
-            maximum = np.nanmax(sm, axis=0)
-            sm_norm = np.divide((sm - minimum), (maximum - minimum))
-            self.stat_measures_norm.append(sm_norm)
+                self.stat_measures[idx, 0] = Z.mean()
+                self.stat_measures[idx, 1] = Z.std()
+                self.stat_measures[idx, 2] = np.percentile(Z, 5)
+                self.stat_measures[idx, 3] = np.percentile(Z, 95)
+                self.stat_measures[idx, 4] = Z.max()
+                self.stat_measures[idx, 4] = Z.min()
 
-        self.stat_measures_norm = np.array(self.stat_measures_norm).T
+        # Normalize all statistics to [0, 1]
+        minimum = self.stat_measures.min(axis=0)
+        maximum = self.stat_measures.max(axis=0)
+        self.stat_measures_norm = np.divide(
+            (self.stat_measures - minimum),
+            (maximum - minimum)
+        )
+
+        # Set statistics to zero if all its values are identical (max == min)
+        self.stat_measures_norm[np.isnan(self.stat_measures_norm)] = 0.
 
     def _compute_sum_var(self, kmeans_cc):
         """
