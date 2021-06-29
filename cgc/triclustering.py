@@ -120,7 +120,7 @@ class Triclustering(object):
         self.results.write(filename=self.output_filename)
         return self.results
 
-    def run_with_dask(self, client=None, low_memory=False):
+    def run_with_dask(self, client=None, low_memory=True):
         """
         Run the tri-clustering with Dask
 
