@@ -98,3 +98,42 @@ def _human_size(size_bytes, out_unit=None):
     s = size_bytes / p
 
     return s, unit[i]
+
+
+def calculate_cocluster_averages(Z, row_clusters, col_clusters,
+                                 nclusters_row=None, nclusters_col=None):
+    """
+    Calculate the co-cluster averages from the data matrix and the row-
+    and column-cluster assignment arrays.
+
+    :param Z: data matrix (m x n)
+    :param row_clusters: row clusters (array with size m)
+    :param col_clusters: column clusters (array with size n)
+    :param nclusters_row: number of row clusters. If not provided,
+        determined from the number of unique elements in row_clusters
+    :param nclusters_col: number of column clusters. If not provided,
+        determined from the number of unique elements in col_clusters
+    :return: cocluster averages (nclusters_row, nclusters_col). Co-clusters
+        which are not populated are assigned NaN values.
+    """
+    row_clusters = np.array(row_clusters)
+    col_clusters = np.array(col_clusters)
+
+    _row_clusters = np.unique(row_clusters)
+    _col_clusters = np.unique(col_clusters)
+
+    nclusters_row = len(_row_clusters) if nclusters_row is None \
+        else nclusters_row
+    nclusters_col = len(_col_clusters) if nclusters_col is None \
+        else nclusters_col
+
+    avg = np.full((nclusters_row, nclusters_col), np.nan)
+
+    # Loop over co-clusters
+    for r in _row_clusters:
+        idx_rows, = np.where(row_clusters == r)
+        for c in _col_clusters:
+            idx_cols, = np.where(col_clusters == c)
+            ir, ic = np.meshgrid(idx_rows, idx_cols)
+            avg[r, c] = Z[ir, ic].mean()
+    return avg
