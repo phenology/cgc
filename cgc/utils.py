@@ -30,8 +30,8 @@ def mem_estimate_coclustering_numpy(n_rows,
 
     # Size of major matrix
     Z = _est_arr_size((n_rows, n_cols))
-    C = _est_arr_size((n_cols, nclusters_col), 4)
-    R = _est_arr_size((n_rows, nclusters_row), 4)
+    C = _est_arr_size((n_cols, nclusters_col), 1)
+    R = _est_arr_size((n_rows, nclusters_row), 1)
 
     # First call _distance
     Y1 = _est_arr_size((n_cols, nclusters_row))
