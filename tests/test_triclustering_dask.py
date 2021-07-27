@@ -52,7 +52,8 @@ class TestInitializeClusters:
 class TestTriclustering:
     def test_small_matrix(self, client):
         np.random.seed(1234)
-        Z = np.random.permutation(da.arange(60)).reshape((3, 4, 5))
+        Z = np.random.permutation(np.arange(60)).reshape((3, 4, 5))
+        Z = da.from_array(Z)
         ncl_row = 3
         ncl_col = 4
         ncl_bnd = 2
@@ -88,11 +89,11 @@ class TestTriclustering:
             col_clusters_init=np.mod(np.arange(nel_col), ncl_col),
             bnd_clusters_init=np.mod(np.arange(nel_bnd), ncl_bnd)
         )
-        np.testing.assert_array_equal(np.sort(np.unique(row_cl)),
+        np.testing.assert_array_equal(np.sort(np.unique(row_cl.compute())),
                                       np.arange(ncl_row))
-        np.testing.assert_array_equal(np.sort(np.unique(col_cl)),
+        np.testing.assert_array_equal(np.sort(np.unique(col_cl.compute())),
                                       np.arange(ncl_col))
-        np.testing.assert_array_equal(np.sort(np.unique(bnd_cl)),
+        np.testing.assert_array_equal(np.sort(np.unique(bnd_cl.compute())),
                                       np.arange(ncl_bnd))
 
     def test_as_many_clusters_as_elements(self, client):
