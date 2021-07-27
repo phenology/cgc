@@ -109,7 +109,11 @@ class Kmeans(object):
                 self.stat_measures_norm)
             var_list = np.hstack((var_list, self._compute_sum_var(kmeans_cc)))
             kmeans_cc_list.append(kmeans_cc)
-        idx_k = min(np.where(var_list < self.var_thres)[0])
+        idx_var_below_thres, = np.where(var_list < self.var_thres)
+        if len(idx_var_below_thres) == 0:
+            raise ValueError(f"No k-value has variance below "
+                             f"the threshold: {self.var_thres}")
+        idx_k = min(idx_var_below_thres, key=lambda x: self.k_range[x])
         self.results.var_list = var_list
         self.results.k_value = self.k_range[idx_k]
         self.kmeans_cc = kmeans_cc_list[idx_k]
