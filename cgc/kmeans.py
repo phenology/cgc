@@ -68,17 +68,24 @@ class Kmeans(object):
 
         self.Z = Z
 
-        if len(np.unique(row_clusters)) > n_row_clusters:
-            print('Setting "n_row_clusters" to {}, \
-            accoding to the number of unique elements in "row_clusters".'.
-                  format(len(np.unique(row_clusters))))
-            self.n_row_clusters = len(np.unique(row_clusters))
+        if not max(self.row_clusters) < self.n_row_clusters:
+            raise ValueError("row_clusters include labels >= n_row_clusters")
+        if not max(self.col_clusters) < self.n_col_clusters:
+            raise ValueError("col_clusters include labels >= n_col_clusters")
 
-        if len(np.unique(col_clusters)) > n_col_clusters:
-            print('Setting "col_clusters" to {}, \
-            accoding to the number of unique elements in "col_clusters".'.
-                  format(len(np.unique(col_clusters))))
-            self.n_col_clusters = len(np.unique(col_clusters))
+        if not min(self.k_range) > 0:
+            raise ValueError("All k-values in k_range must be > 0")
+
+        nonempty_row_cl = len(np.unique(self.row_clusters))
+        nonempty_col_cl = len(np.unique(self.col_clusters))
+        max_k = nonempty_row_cl * nonempty_col_cl
+        max_k_input = max(self.k_range)
+        if max_k_input > max_k:
+            raise ValueError("The maximum k-value exceeds the "
+                             "number of (non-empty) co-clusters")
+        elif max_k_input > max_k * 0.8:
+            logger.warning("k_range includes large k-values (80% "
+                           "of the number of co-clusters or more)")
 
     def compute(self):
         """
