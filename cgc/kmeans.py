@@ -199,36 +199,39 @@ class Kmeans(object):
         """
         Export elbow curve plot
         """
-        k_range = self.results.input_parameters['k_range']
-        var_thres = self.results.input_parameters['var_thres']
-        plt.plot(k_range, self.results.var_list)  # kmean curve
-        plt.plot([min(k_range), max(k_range)],
-                 [var_thres, var_thres],
+        plt.plot(self.k_range, self.results.var_list, marker='o')
+        plt.plot([min(self.k_range), max(self.k_range)],
+                 [self.var_thres, self.var_thres],
                  color='r',
                  linestyle='--')  # Threshold
         plt.plot([self.results.k_value, self.results.k_value],
                  [min(self.results.var_list), max(self.results.var_list)],
                  color='g',
                  linestyle='--')  # Selected k
-        xtick_step = int((max(k_range) - min(k_range)) / 6)
-        ytick_step = int((max(self.results.var_list)
-                          - min(self.results.var_list)) / 6)
-        plt.xticks(range(min(k_range), max(k_range), xtick_step))
-        plt.xlim(min(k_range), max(k_range))
-        plt.ylim(min(self.results.var_list), max(self.results.var_list))
-        plt.text(max(k_range) - 2 * xtick_step,
-                 var_thres + ytick_step / 4,
-                 'threshold={}'.format(var_thres),
+        x_min, x_max = min(self.k_range), max(self.k_range)
+        y_min, y_max = min(self.results.var_list), max(self.results.var_list)
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        plt.text(0.7,
+                 min(
+                    (self.var_thres-y_min)/(y_max-y_min) + 0.1,
+                    0.9
+                 ),
+                 'threshold={}'.format(self.var_thres),
                  color='r',
-                 fontsize=12)
-        plt.text(self.results.k_value + xtick_step / 4,
-                 max(self.results.var_list) - ytick_step,
+                 fontsize=12,
+                 transform=plt.gca().transAxes)
+        plt.text(min(
+                    (self.results.k_value-x_min)/(x_max-x_min) + 0.1,
+                    0.9
+                 ),
+                 0.7,
                  'k={}'.format(self.results.k_value),
                  color='g',
-                 fontsize=12)
+                 fontsize=12,
+                 transform=plt.gca().transAxes)
         plt.xlabel('k value', fontsize=20)
         plt.ylabel('Sum of variance', fontsize=20)
-        plt.grid(True)
         plt.savefig(output_plot,
                     format='png',
                     transparent=True,
