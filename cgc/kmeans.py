@@ -68,17 +68,24 @@ class Kmeans(object):
 
         self.Z = Z
 
-        if len(np.unique(row_clusters)) > n_row_clusters:
-            print('Setting "n_row_clusters" to {}, \
-            accoding to the number of unique elements in "row_clusters".'.
-                  format(len(np.unique(row_clusters))))
-            self.n_row_clusters = len(np.unique(row_clusters))
+        if not max(self.row_clusters) < self.n_row_clusters:
+            raise ValueError("row_clusters include labels >= n_row_clusters")
+        if not max(self.col_clusters) < self.n_col_clusters:
+            raise ValueError("col_clusters include labels >= n_col_clusters")
 
-        if len(np.unique(col_clusters)) > n_col_clusters:
-            print('Setting "col_clusters" to {}, \
-            accoding to the number of unique elements in "col_clusters".'.
-                  format(len(np.unique(col_clusters))))
-            self.n_col_clusters = len(np.unique(col_clusters))
+        if not min(self.k_range) > 0:
+            raise ValueError("All k-values in k_range must be > 0")
+
+        nonempty_row_cl = len(np.unique(self.row_clusters))
+        nonempty_col_cl = len(np.unique(self.col_clusters))
+        max_k = nonempty_row_cl * nonempty_col_cl
+        max_k_input = max(self.k_range)
+        if max_k_input > max_k:
+            raise ValueError("The maximum k-value exceeds the "
+                             "number of (non-empty) co-clusters")
+        elif max_k_input > max_k * 0.8:
+            logger.warning("k_range includes large k-values (80% "
+                           "of the number of co-clusters or more)")
 
     def compute(self):
         """
@@ -102,7 +109,11 @@ class Kmeans(object):
                 self.stat_measures_norm)
             var_list = np.hstack((var_list, self._compute_sum_var(kmeans_cc)))
             kmeans_cc_list.append(kmeans_cc)
-        idx_k = min(np.where(var_list < self.var_thres)[0])
+        idx_var_below_thres, = np.where(var_list < self.var_thres)
+        if len(idx_var_below_thres) == 0:
+            raise ValueError(f"No k-value has variance below "
+                             f"the threshold: {self.var_thres}")
+        idx_k = min(idx_var_below_thres, key=lambda x: self.k_range[x])
         self.results.var_list = var_list
         self.results.k_value = self.k_range[idx_k]
         self.kmeans_cc = kmeans_cc_list[idx_k]
@@ -188,36 +199,39 @@ class Kmeans(object):
         """
         Export elbow curve plot
         """
-        k_range = self.results.input_parameters['k_range']
-        var_thres = self.results.input_parameters['var_thres']
-        plt.plot(k_range, self.results.var_list)  # kmean curve
-        plt.plot([min(k_range), max(k_range)],
-                 [var_thres, var_thres],
+        plt.plot(self.k_range, self.results.var_list, marker='o')
+        plt.plot([min(self.k_range), max(self.k_range)],
+                 [self.var_thres, self.var_thres],
                  color='r',
                  linestyle='--')  # Threshold
         plt.plot([self.results.k_value, self.results.k_value],
                  [min(self.results.var_list), max(self.results.var_list)],
                  color='g',
                  linestyle='--')  # Selected k
-        xtick_step = int((max(k_range) - min(k_range)) / 6)
-        ytick_step = int((max(self.results.var_list)
-                          - min(self.results.var_list)) / 6)
-        plt.xticks(range(min(k_range), max(k_range), xtick_step))
-        plt.xlim(min(k_range), max(k_range))
-        plt.ylim(min(self.results.var_list), max(self.results.var_list))
-        plt.text(max(k_range) - 2 * xtick_step,
-                 var_thres + ytick_step / 4,
-                 'threshold={}'.format(var_thres),
+        x_min, x_max = min(self.k_range), max(self.k_range)
+        y_min, y_max = min(self.results.var_list), max(self.results.var_list)
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        plt.text(0.7,
+                 min(
+                    (self.var_thres-y_min)/(y_max-y_min) + 0.1,
+                    0.9
+                 ),
+                 'threshold={}'.format(self.var_thres),
                  color='r',
-                 fontsize=12)
-        plt.text(self.results.k_value + xtick_step / 4,
-                 max(self.results.var_list) - ytick_step,
+                 fontsize=12,
+                 transform=plt.gca().transAxes)
+        plt.text(min(
+                    (self.results.k_value-x_min)/(x_max-x_min) + 0.1,
+                    0.9
+                 ),
+                 0.7,
                  'k={}'.format(self.results.k_value),
                  color='g',
-                 fontsize=12)
+                 fontsize=12,
+                 transform=plt.gca().transAxes)
         plt.xlabel('k value', fontsize=20)
         plt.ylabel('Sum of variance', fontsize=20)
-        plt.grid(True)
         plt.savefig(output_plot,
                     format='png',
                     transparent=True,
