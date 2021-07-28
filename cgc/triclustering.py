@@ -125,7 +125,7 @@ class Triclustering(object):
         Run the tri-clustering with Dask
 
         :param client: Dask client
-        :param low_memory: if true, use a memory-conservative algorithm
+        :param low_memory: if false, all runs are submitted to the Dask cluster
         :return: co-clustering results
         """
         self.client = client if client is not None else Client()
@@ -133,7 +133,7 @@ class Triclustering(object):
         if low_memory:
             self._dask_runs_memory()
         else:
-            raise NotImplementedError("Only low-mempry tri-clustering!")
+            raise NotImplementedError("Only low-memory tri-clustering!")
 
         self.results.write(filename=self.output_filename)
         return self.results

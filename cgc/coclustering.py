@@ -78,12 +78,12 @@ class Coclustering(object):
 
         self.client = None
 
-    def run_with_dask(self, client=None, low_memory=False):
+    def run_with_dask(self, client=None, low_memory=True):
         """
         Run the co-clustering with Dask
 
         :param client: Dask client
-        :param low_memory: if true, use a memory-conservative algorithm
+        :param low_memory: if false, all runs are submitted to the Dask cluster
         :return: co-clustering results
         """
         self.client = client if client is not None else Client()
