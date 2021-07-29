@@ -30,12 +30,12 @@ class TestTriclustering:
     def test_run_with_threads(self, triclustering):
         triclustering.run_with_threads(nthreads=2)
         np.testing.assert_equal(triclustering.results.row_clusters,
-                                [1, 1, 0, 3, 4, 0, 2, 2, 0, 0])
+                                [0, 1, 2, 3, 4, 0, 2, 2, 3, 4])
         np.testing.assert_equal(triclustering.results.col_clusters,
-                                [0, 1, 0, 1, 1, 1, 0, 1])
+                                [0, 0, 0, 1, 0, 0, 1, 1])
         np.testing.assert_equal(triclustering.results.bnd_clusters,
-                                [1, 0, 2, 0, 1, 0])
-        assert np.isclose(triclustering.results.error, -69712.35398188536)
+                                [0, 1, 2, 0, 1, 2])
+        assert np.isclose(triclustering.results.error, -70137.85252907207)
 
     def test_nruns_completed(self, triclustering):
         triclustering.run_with_threads(nthreads=1)

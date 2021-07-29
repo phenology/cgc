@@ -8,6 +8,27 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.4.0] - 2021-07-29
+********************
+
+Added
+-----
+* utility function to estimate memory peak for numpy-based coclustering
+* utility function to calculate cluster-based averages
+* added Dask-based tri-clustering implementation
+
+
+Fixed
+-----
+* k-means setup is more robust with respect to setting the range of k values and the threshold on the variance
+* calculation of k-means statistics is faster
+
+
+Changed
+-------
+* new version of tri-clustering algorithm implemented, old version moved to legacy folder
+
+
 [0.3.0] - 2021-04-30
 ********************
 

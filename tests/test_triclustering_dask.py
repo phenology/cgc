@@ -1,7 +1,8 @@
 import numpy as np
+import dask.array as da
 
-from cgc import triclustering_numpy
-from cgc.triclustering_numpy import triclustering
+from cgc import triclustering_dask
+from cgc.triclustering_dask import triclustering
 
 
 class TestDistance:
@@ -15,7 +16,7 @@ class TestDistance:
         Y = np.random.randint(100, size=(k, m, n)).astype('float64')
         Y[0, 3, 1] = 0.  # setting value to zero should not give infinite
         epsilon = 1.e-8
-        distance = triclustering_numpy._distance(Z, Y, epsilon)
+        distance = triclustering_dask._distance(Z, Y, epsilon)
         assert distance.shape == (d, k)
         assert ~np.any(np.isinf(distance))
         target = [
@@ -30,28 +31,29 @@ class TestInitializeClusters:
     def test_all_points_are_assigned(self):
         m = 10
         k = 3
-        clusters = triclustering_numpy._initialize_clusters(m, k)
-        assert set(clusters.tolist()) == {i for i in range(k)}
+        clusters = triclustering_dask._initialize_clusters(m, k)
+        assert set(clusters.compute().tolist()) == {i for i in range(k)}
 
     def test_all_clusters_are_initialized(self):
         # if m == k, all clusters should have initial occupation one
         m = 10
         k = 10
-        clusters = triclustering_numpy._initialize_clusters(m, k)
+        clusters = triclustering_dask._initialize_clusters(m, k)
         assert sorted(clusters) == [i for i in range(k)]
 
     def test_more_clusters_than_elements(self):
         # only the first m clusters should be initialized
         m = 10
         k = 20
-        clusters = triclustering_numpy._initialize_clusters(m, k)
-        assert set(clusters.tolist()) == {i for i in range(m)}
+        clusters = triclustering_dask._initialize_clusters(m, k)
+        assert set(clusters.compute().tolist()) == {i for i in range(m)}
 
 
 class TestTriclustering:
-    def test_small_matrix(self):
+    def test_small_matrix(self, client):
         np.random.seed(1234)
         Z = np.random.permutation(np.arange(60)).reshape((3, 4, 5))
+        Z = da.from_array(Z)
         ncl_row = 3
         ncl_col = 4
         ncl_bnd = 2
@@ -71,7 +73,7 @@ class TestTriclustering:
                                       np.array([1, 0, 0]))
         np.testing.assert_almost_equal(error, -4330.426306789841)
 
-    def test_bigger_matrix(self):
+    def test_bigger_matrix(self, client):
         np.random.seed(1234)
         nel_row = 20
         nel_col = 15
@@ -87,14 +89,14 @@ class TestTriclustering:
             col_clusters_init=np.mod(np.arange(nel_col), ncl_col),
             bnd_clusters_init=np.mod(np.arange(nel_bnd), ncl_bnd)
         )
-        np.testing.assert_array_equal(np.sort(np.unique(row_cl)),
+        np.testing.assert_array_equal(np.sort(np.unique(row_cl.compute())),
                                       np.arange(ncl_row))
-        np.testing.assert_array_equal(np.sort(np.unique(col_cl)),
+        np.testing.assert_array_equal(np.sort(np.unique(col_cl.compute())),
                                       np.arange(ncl_col))
-        np.testing.assert_array_equal(np.sort(np.unique(bnd_cl)),
+        np.testing.assert_array_equal(np.sort(np.unique(bnd_cl.compute())),
                                       np.arange(ncl_bnd))
 
-    def test_as_many_clusters_as_elements(self):
+    def test_as_many_clusters_as_elements(self, client):
         # it should immediately converge (2 iterations)
         ncl_row = 8
         ncl_col = 7
@@ -110,7 +112,7 @@ class TestTriclustering:
         assert conv
         assert niterations == 2
 
-    def test_constant_row_matrix(self):
+    def test_constant_row_matrix(self, client):
         # should give one cluster in rows
         Z = np.repeat(np.arange(135).reshape((9, 15)), 12, axis=0)
         Z = Z.reshape((9, 12, 15))
@@ -123,11 +125,11 @@ class TestTriclustering:
             col_clusters_init=np.mod(np.arange(15), ncl_col),
             bnd_clusters_init=np.mod(np.arange(9), ncl_bnd)
         )
-        assert np.unique(row_cl).size == 1
-        assert np.unique(col_cl).size == ncl_col
-        assert np.unique(bnd_cl).size == ncl_bnd
+        assert np.unique(row_cl.compute()).size == 1
+        assert np.unique(col_cl.compute()).size == ncl_col
+        assert np.unique(bnd_cl.compute()).size == ncl_bnd
 
-    def test_constant_col_matrix(self):
+    def test_constant_col_matrix(self, client):
         # should give one cluster in columns
         Z = np.repeat(np.arange(108), 15).reshape((9, 12, 15))
         ncl_row = 12
@@ -139,11 +141,11 @@ class TestTriclustering:
             col_clusters_init=np.mod(np.arange(15), ncl_col),
             bnd_clusters_init=np.mod(np.arange(9), ncl_bnd)
         )
-        assert np.unique(row_cl).size == ncl_row
-        assert np.unique(col_cl).size == 1
-        assert np.unique(bnd_cl).size == ncl_bnd
+        assert np.unique(row_cl.compute()).size == ncl_row
+        assert np.unique(col_cl.compute()).size == 1
+        assert np.unique(bnd_cl.compute()).size == ncl_bnd
 
-    def test_constant_bnd_matrix(self):
+    def test_constant_bnd_matrix(self, client):
         # should give one cluster in bands
         Z = np.tile(np.arange(180).reshape((12, 15)), (9, 1, 1))
         ncl_row = 12
@@ -155,11 +157,11 @@ class TestTriclustering:
             col_clusters_init=np.mod(np.arange(15), ncl_col),
             bnd_clusters_init=np.mod(np.arange(9), ncl_bnd)
         )
-        assert np.unique(row_cl).size == ncl_row
-        assert np.unique(col_cl).size == ncl_col
-        assert np.unique(bnd_cl).size == 1
+        assert np.unique(row_cl.compute()).size == ncl_row
+        assert np.unique(col_cl.compute()).size == ncl_col
+        assert np.unique(bnd_cl.compute()).size == 1
 
-    def test_constant_rows_and_cols_matrix(self):
+    def test_constant_rows_and_cols_matrix(self, client):
         Z = np.stack([np.full((12, 15), i) for i in range(1, 10)])
         ncl_row = 12
         ncl_col = 15
@@ -170,11 +172,11 @@ class TestTriclustering:
             col_clusters_init=np.mod(np.arange(15), ncl_col),
             bnd_clusters_init=np.mod(np.arange(9), ncl_bnd)
         )
-        assert np.unique(row_cl).size == 1
-        assert np.unique(col_cl).size == 1
-        assert np.unique(bnd_cl).size == ncl_bnd
+        assert np.unique(row_cl.compute()).size == 1
+        assert np.unique(col_cl.compute()).size == 1
+        assert np.unique(bnd_cl.compute()).size == ncl_bnd
 
-    def test_constant_rows_and_bnds_matrix(self):
+    def test_constant_rows_and_bnds_matrix(self, client):
         Z = np.stack([np.full((9, 12), i) for i in range(1, 16)])
         Z = Z.transpose((1, 2, 0))
         ncl_row = 12
@@ -186,11 +188,11 @@ class TestTriclustering:
             col_clusters_init=np.mod(np.arange(15), ncl_col),
             bnd_clusters_init=np.mod(np.arange(9), ncl_bnd)
         )
-        assert np.unique(row_cl).size == 1
-        assert np.unique(col_cl).size == ncl_col
-        assert np.unique(bnd_cl).size == 1
+        assert np.unique(row_cl.compute()).size == 1
+        assert np.unique(col_cl.compute()).size == ncl_col
+        assert np.unique(bnd_cl.compute()).size == 1
 
-    def test_constant_cols_and_bnds_matrix(self):
+    def test_constant_cols_and_bnds_matrix(self, client):
         Z = np.stack([np.full((9, 15), i) for i in range(1, 13)])
         Z = Z.transpose((1, 0, 2))
         ncl_row = 12
@@ -202,11 +204,11 @@ class TestTriclustering:
             col_clusters_init=np.mod(np.arange(15), ncl_col),
             bnd_clusters_init=np.mod(np.arange(9), ncl_bnd)
         )
-        assert np.unique(row_cl).size == ncl_row
-        assert np.unique(col_cl).size == 1
-        assert np.unique(bnd_cl).size == 1
+        assert np.unique(row_cl.compute()).size == ncl_row
+        assert np.unique(col_cl.compute()).size == 1
+        assert np.unique(bnd_cl.compute()).size == 1
 
-    def test_zero_matrix(self):
+    def test_zero_matrix(self, client):
         # special case for the error - and no nan/inf
         Z = np.zeros((8, 9, 10))
         ncl_row = 9

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,9 +25,7 @@ setup(
     author="Netherlands eScience Center",
     author_email='team-atlas@esciencecenter.nl',
     url='https://github.com/phenology/cgc',
-    packages=[
-        'cgc',
-    ],
+    packages=find_packages(),
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,
