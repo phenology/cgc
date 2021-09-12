@@ -103,37 +103,107 @@ def _human_size(size_bytes, out_unit=None):
 def calculate_cocluster_averages(Z, row_clusters, col_clusters,
                                  nclusters_row=None, nclusters_col=None):
     """
-    Calculate the co-cluster averages from the data matrix and the row-
+    Calculate the co-cluster averages from the 2D data array and the row-
     and column-cluster assignment arrays.
 
-    :param Z: data matrix (m x n)
+    :param Z: data array (m x n)
     :param row_clusters: row clusters (array with size m)
     :param col_clusters: column clusters (array with size n)
     :param nclusters_row: number of row clusters. If not provided,
-        determined from the number of unique elements in row_clusters
+        it is set as the number of unique elements in row_clusters
     :param nclusters_col: number of column clusters. If not provided,
-        determined from the number of unique elements in col_clusters
-    :return: cocluster averages (nclusters_row, nclusters_col). Co-clusters
-        which are not populated are assigned NaN values.
+        it is set as the number of unique elements in col_clusters
+    :return: co-cluster averages (nclusters_row, nclusters_col). Co-clusters
+        that are not populated are assigned NaN values.
     """
-    row_clusters = np.array(row_clusters)
-    col_clusters = np.array(col_clusters)
+    return calculate_cluster_feature(
+        Z,
+        np.mean,
+        (row_clusters, col_clusters),
+        (nclusters_row, nclusters_col)
+    )
 
-    _row_clusters = np.unique(row_clusters)
-    _col_clusters = np.unique(col_clusters)
 
-    nclusters_row = len(_row_clusters) if nclusters_row is None \
-        else nclusters_row
-    nclusters_col = len(_col_clusters) if nclusters_col is None \
-        else nclusters_col
+def calculate_tricluster_averages(Z, bnd_clusters, row_clusters, col_clusters,
+                                  nclusters_bnd=None, nclusters_row=None,
+                                  nclusters_col=None):
+    """
+    Calculate the tri-cluster averages from the 3D data array and the band-,
+    row- and column-cluster assignment arrays.
 
-    avg = np.full((nclusters_row, nclusters_col), np.nan)
+    :param Z: data array (d x m x n)
+    :param bnd_clusters: band clusters (array with size d)
+    :param row_clusters: row clusters (array with size m)
+    :param col_clusters: column clusters (array with size n)
+    :param nclusters_bnd: number of band clusters. If not provided,
+        it is set as the number of unique elements in bnd_clusters
+    :param nclusters_row: number of row clusters. If not provided,
+        it is set as the number of unique elements in row_clusters
+    :param nclusters_col: number of column clusters. If not provided,
+        it is set as the number of unique elements in col_clusters
+    :return: tri-cluster averages (nclusters_bnd, nclusters_row, nclusters_col)
+        Tri-clusters that are not populated are assigned NaN values.
+    """
+    return calculate_cluster_feature(
+        Z,
+        np.mean,
+        (bnd_clusters, row_clusters, col_clusters),
+        (nclusters_bnd, nclusters_row, nclusters_col)
+    )
 
-    # Loop over co-clusters
-    for r in _row_clusters:
-        idx_rows, = np.where(row_clusters == r)
-        for c in _col_clusters:
-            idx_cols, = np.where(col_clusters == c)
-            ir, ic = np.meshgrid(idx_rows, idx_cols)
-            avg[r, c] = Z[ir, ic].mean()
-    return avg
+
+def calculate_cluster_feature(Z, function, clusters, nclusters=None, **kwargs):
+    """
+    Calculate feature over clusters
+
+    :param Z:
+    :param function:
+    :param clusters:
+    :param nclusters:
+    :param kwargs:
+    :return:
+    """
+
+    assert len(clusters) == Z.ndim
+
+    labels = [np.unique(c) for c in clusters]
+
+    if nclusters is None:
+        nclusters = [len(label) for label in labels]
+    assert len(nclusters) == Z.ndim
+
+    # sort dimensions from largest to smallest
+    sorted_dims = np.argsort(nclusters)[::-1]
+    features = _calculate_feature(
+        Z,
+        function,
+        labels,
+        clusters,
+        nclusters,
+        sorted_dims,
+        **kwargs
+    )
+    # need to reorder dimensions
+    return features.transpose(sorted_dims)
+
+
+def _calculate_feature(Z, function, labels, clusters, nclusters, axis_order,
+                       **kwargs):
+    features = np.full([nclusters[ax] for ax in axis_order], np.nan)
+    ax, *axis = axis_order
+    for label in labels[ax]:
+        idx, = np.where(clusters[ax] == label)
+        _Z = np.take(Z, idx, axis=ax)
+        if axis:
+            features[label, ...] = _calculate_feature(
+                _Z,
+                function,
+                labels,
+                clusters,
+                nclusters,
+                axis,
+                **kwargs
+            )
+        else:
+            features[label] = function(_Z, **kwargs)
+    return features
