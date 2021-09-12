@@ -1,7 +1,7 @@
 import numpy as np
 import logging
+import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
 
 from .results import Results
 
@@ -14,7 +14,7 @@ class KmeansResults(Results):
     """
     def reset(self):
         self.k_value = None
-        self.measure_list = None
+        self.var_list = None
         self.cl_mean_centroids = None
 
 
@@ -25,9 +25,9 @@ class Kmeans(object):
                  col_clusters,
                  n_row_clusters,
                  n_col_clusters,
-                 k_range=None,
-                 max_k_ratio=0.8,
+                 k_range,
                  kmean_max_iter=100,
+                 var_thres=2.,
                  output_filename=''):
         """
         Set up Kmeans object.
@@ -45,42 +45,40 @@ class Kmeans(object):
         :type n_col_clusters: int
         :param k_range: range of the number of clusters, i.e. value "k"
         :type k_range: range
-        :param max_k_ratio: [description], defaults to 0.8
-        :type max_k_ratio: float, optional
         :param kmean_max_iter: maximum number of iterations of the KMeans
         :type kmean_max_iter: int
+        :param var_thres: threshold of the sum of variance to select k
+        :type var_thres: float
         :param output_filename: name of the file where to write the results
         :type output_filename: str
         """
-
-        self.Z = Z
+        # Input parameters -----------------
         self.row_clusters = row_clusters
         self.col_clusters = col_clusters
         self.n_row_clusters = n_row_clusters
         self.n_col_clusters = n_col_clusters
+        self.k_range = list(k_range)
         self.kmean_max_iter = kmean_max_iter
+        self.var_thres = var_thres
         self.output_filename = output_filename
+        # Input parameters end -------------
 
-        nonempty_row_cl = len(np.unique(self.row_clusters))
-        nonempty_col_cl = len(np.unique(self.col_clusters))
-        max_k = nonempty_row_cl * nonempty_col_cl
-        if k_range is None:
-            self.k_range = list(range(2, int(max_k * max_k_ratio)))
-        else:
-            self.k_range = list(k_range)
+        # store input parameters in results object
+        self.results = KmeansResults(**self.__dict__)
 
-        # Number of row/col clusters should be smaller than the max ID
-        # Since ID starts from 0
+        self.Z = Z
+
         if not max(self.row_clusters) < self.n_row_clusters:
             raise ValueError("row_clusters include labels >= n_row_clusters")
         if not max(self.col_clusters) < self.n_col_clusters:
             raise ValueError("col_clusters include labels >= n_col_clusters")
 
-        # Check minimum k
-        if not min(self.k_range) >= 2:
-            raise ValueError("All k-values in k_range must be >= 2")
+        if not min(self.k_range) > 0:
+            raise ValueError("All k-values in k_range must be > 0")
 
-        # Check maximum k
+        nonempty_row_cl = len(np.unique(self.row_clusters))
+        nonempty_col_cl = len(np.unique(self.col_clusters))
+        max_k = nonempty_row_cl * nonempty_col_cl
         max_k_input = max(self.k_range)
         if max_k_input > max_k:
             raise ValueError("The maximum k-value exceeds the "
@@ -89,15 +87,13 @@ class Kmeans(object):
             logger.warning("k_range includes large k-values (80% "
                            "of the number of co-clusters or more)")
 
-        # store input parameters in results object
-        self.results = KmeansResults(**self.__dict__)
-
     def compute(self):
         """
         Compute statistics for each clustering group.
         Then Loop through the range of k values,
-        and compute the averaged Silhouette measure of each k.
-        Finally select the k with the maximum Silhouette measure
+        and compute the sum of variances of each k.
+        Finally select the smallest k which gives
+        the sum of variances smaller than the threshold.
 
         :return: k-means result object
         """
@@ -105,20 +101,20 @@ class Kmeans(object):
         self._compute_statistic_measures()
 
         # Search for value k
-        silhouette_avg_list = np.array(
-            [])  # List of average silhouette measure of each k value
+        var_list = np.array([])  # List of variance of each k value
         kmeans_cc_list = []
         for k in self.k_range:
             # Compute Kmean
             kmeans_cc = KMeans(n_clusters=k, max_iter=self.kmean_max_iter).fit(
                 self.stat_measures_norm)
-            silhouette_avg = silhouette_score(self.stat_measures_norm,
-                                              kmeans_cc.labels_)
-            silhouette_avg_list = np.append(silhouette_avg_list,
-                                            silhouette_avg)
+            var_list = np.hstack((var_list, self._compute_sum_var(kmeans_cc)))
             kmeans_cc_list.append(kmeans_cc)
-        idx_k = np.argmax(silhouette_avg_list)
-        self.results.measure_list = silhouette_avg_list
+        idx_var_below_thres, = np.where(var_list < self.var_thres)
+        if len(idx_var_below_thres) == 0:
+            raise ValueError(f"No k-value has variance below "
+                             f"the threshold: {self.var_thres}")
+        idx_k = min(idx_var_below_thres, key=lambda x: self.k_range[x])
+        self.results.var_list = var_list
         self.results.k_value = self.k_range[idx_k]
         self.kmeans_cc = kmeans_cc_list[idx_k]
         del kmeans_cc_list
@@ -154,7 +150,8 @@ class Kmeans(object):
         row_clusters = np.unique(self.row_clusters)
         col_clusters = np.unique(self.col_clusters)
         self.stat_measures = np.zeros(
-            (len(row_clusters) * len(col_clusters), 6))
+            (len(row_clusters)*len(col_clusters), 6)
+        )
 
         # Loop over co-clusters
         for ir, r in enumerate(row_clusters):
@@ -165,7 +162,9 @@ class Kmeans(object):
                 Z = self.Z[rr, cc]
 
                 idx = np.ravel_multi_index(
-                    (ir, ic), (len(row_clusters), len(col_clusters)))
+                    (ir, ic),
+                    (len(row_clusters), len(col_clusters))
+                )
 
                 self.stat_measures[idx, 0] = Z.mean()
                 self.stat_measures[idx, 1] = Z.std()
@@ -177,8 +176,63 @@ class Kmeans(object):
         # Normalize all statistics to [0, 1]
         minimum = self.stat_measures.min(axis=0)
         maximum = self.stat_measures.max(axis=0)
-        self.stat_measures_norm = np.divide((self.stat_measures - minimum),
-                                            (maximum - minimum))
+        self.stat_measures_norm = np.divide(
+            (self.stat_measures - minimum),
+            (maximum - minimum)
+        )
 
         # Set statistics to zero if all its values are identical (max == min)
         self.stat_measures_norm[np.isnan(self.stat_measures_norm)] = 0.
+
+    def _compute_sum_var(self, kmeans_cc):
+        """
+        Compute the sum of squared variance of each Kmean cluster
+        """
+
+        # Compute the sum of variance of all points
+        var_sum = np.sum((self.stat_measures_norm -
+                          kmeans_cc.cluster_centers_[kmeans_cc.labels_])**2)
+
+        return var_sum
+
+    def plot_elbow_curve(self, output_plot='./kmean_elbow_curve.png'):
+        """
+        Export elbow curve plot
+        """
+        plt.plot(self.k_range, self.results.var_list, marker='o')
+        plt.plot([min(self.k_range), max(self.k_range)],
+                 [self.var_thres, self.var_thres],
+                 color='r',
+                 linestyle='--')  # Threshold
+        plt.plot([self.results.k_value, self.results.k_value],
+                 [min(self.results.var_list), max(self.results.var_list)],
+                 color='g',
+                 linestyle='--')  # Selected k
+        x_min, x_max = min(self.k_range), max(self.k_range)
+        y_min, y_max = min(self.results.var_list), max(self.results.var_list)
+        plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
+        plt.text(0.7,
+                 min(
+                    (self.var_thres-y_min)/(y_max-y_min) + 0.1,
+                    0.9
+                 ),
+                 'threshold={}'.format(self.var_thres),
+                 color='r',
+                 fontsize=12,
+                 transform=plt.gca().transAxes)
+        plt.text(min(
+                    (self.results.k_value-x_min)/(x_max-x_min) + 0.1,
+                    0.9
+                 ),
+                 0.7,
+                 'k={}'.format(self.results.k_value),
+                 color='g',
+                 fontsize=12,
+                 transform=plt.gca().transAxes)
+        plt.xlabel('k value', fontsize=20)
+        plt.ylabel('Sum of variance', fontsize=20)
+        plt.savefig(output_plot,
+                    format='png',
+                    transparent=True,
+                    bbox_inches="tight")
