@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
 from .results import Results
+from .utils import calculate_cluster_feature
 
 logger = logging.getLogger(__name__)
 
@@ -147,31 +148,20 @@ class Kmeans(object):
         and minimum values, for each co-cluster group.
         Normalize them to [0, 1]
         """
-        row_clusters = np.unique(self.row_clusters)
-        col_clusters = np.unique(self.col_clusters)
-        self.stat_measures = np.zeros(
-            (len(row_clusters)*len(col_clusters), 6)
-        )
+        cl = (self.row_clusters, self.col_clusters)
+        ncl = (self.n_row_clusters, self.n_col_clusters)
 
-        # Loop over co-clusters
-        for ir, r in enumerate(row_clusters):
-            idx_rows, = np.where(self.row_clusters == r)
-            for ic, c in enumerate(col_clusters):
-                idx_cols, = np.where(self.col_clusters == c)
-                rr, cc = np.meshgrid(idx_rows, idx_cols)
-                Z = self.Z[rr, cc]
+        features = np.zeros((*ncl, 6))
+        features[..., 0] = calculate_cluster_feature(self.Z, np.mean, cl, ncl)
+        features[..., 1] = calculate_cluster_feature(self.Z, np.std, cl, ncl)
+        features[..., 2] = calculate_cluster_feature(self.Z, np.percentile, cl,
+                                                     ncl, q=5)
+        features[..., 3] = calculate_cluster_feature(self.Z, np.percentile, cl,
+                                                     ncl, q=95)
+        features[..., 4] = calculate_cluster_feature(self.Z, np.max, cl, ncl)
+        features[..., 5] = calculate_cluster_feature(self.Z, np.min, cl, ncl)
 
-                idx = np.ravel_multi_index(
-                    (ir, ic),
-                    (len(row_clusters), len(col_clusters))
-                )
-
-                self.stat_measures[idx, 0] = Z.mean()
-                self.stat_measures[idx, 1] = Z.std()
-                self.stat_measures[idx, 2] = np.percentile(Z, 5)
-                self.stat_measures[idx, 3] = np.percentile(Z, 95)
-                self.stat_measures[idx, 4] = Z.max()
-                self.stat_measures[idx, 4] = Z.min()
+        self.stat_measures = features[~np.isnan(features)].reshape((-1, 6))
 
         # Normalize all statistics to [0, 1]
         minimum = self.stat_measures.min(axis=0)
