@@ -177,7 +177,7 @@ class Kmeans(object):
                 self.stat_measures[idx, 2] = np.percentile(Z, 5)
                 self.stat_measures[idx, 3] = np.percentile(Z, 95)
                 self.stat_measures[idx, 4] = Z.max()
-                self.stat_measures[idx, 4] = Z.min()
+                self.stat_measures[idx, 5] = Z.min()
 
         # Normalize all statistics to [0, 1]
         minimum = self.stat_measures.min(axis=0)
