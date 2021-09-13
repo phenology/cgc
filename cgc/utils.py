@@ -169,8 +169,14 @@ def calculate_cluster_feature(Z, function, clusters, nclusters=None, **kwargs):
     labels = [np.unique(c) for c in clusters]
 
     if nclusters is None:
-        nclusters = [len(label) for label in labels]
+        nclusters = [None for _ in labels]
+    else:
+        nclusters = [ncl for ncl in nclusters]
+
     assert len(nclusters) == Z.ndim
+
+    nclusters = [ncl if ncl is not None else len(lab)
+                 for ncl, lab in zip(nclusters, labels)]
 
     # sort dimensions from largest to smallest
     sorted_dims = np.argsort(nclusters)[::-1]
