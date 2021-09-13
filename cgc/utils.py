@@ -154,14 +154,25 @@ def calculate_tricluster_averages(Z, row_clusters, col_clusters, bnd_clusters,
 
 def calculate_cluster_feature(Z, function, clusters, nclusters=None, **kwargs):
     """
-    Calculate feature over clusters
+    Calculate feature for clusters. This function works in N dimensions
+    (N=2, 3, ...) making it suitable to calculate features (e.g. averages) for
+    both co-clustering and tri-clustering analysis.
 
-    :param Z:
-    :param function:
-    :param clusters:
-    :param nclusters:
-    :param kwargs:
-    :return:
+    :param Z: data array (N dimensions)
+    :param function: callable, function to run over the cluster elements to
+        calculate the desidered feature. Should take as an input a
+        N-dimensional array and return a scalar
+    :param clusters: iterable with length N. It should contain the cluster
+        labels for each dimension, following the same ordering as for Z
+    :param nclusters: iterable with length N. It should contains the number of
+        clusters in each dimension, following the same ordering as for Z.  If
+        not provided, it is set as the number of unique elements in each
+        dimension
+    :param kwargs: keyword arguments to be passed to the input function
+        together with the input data array for each cluster
+    :return: the desired feature is computed for each cluster and added to an
+        array with N dimensions. It has dimension N and shape equal to
+        nclusters.
     """
 
     assert len(clusters) == Z.ndim
