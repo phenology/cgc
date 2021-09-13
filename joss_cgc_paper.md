@@ -29,7 +29,7 @@ affiliations:
  - name: Independent Researcher
    index: 3
 date: 13 August 2017
-bibliography: joss_paper.bib
+bibliography: joss_cgc_paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
 # https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
