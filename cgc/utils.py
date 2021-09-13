@@ -124,23 +124,23 @@ def calculate_cocluster_averages(Z, row_clusters, col_clusters,
     )
 
 
-def calculate_tricluster_averages(Z, bnd_clusters, row_clusters, col_clusters,
-                                  nclusters_bnd=None, nclusters_row=None,
-                                  nclusters_col=None):
+def calculate_tricluster_averages(Z, row_clusters, col_clusters, bnd_clusters,
+                                  nclusters_row=None, nclusters_col=None,
+                                  nclusters_bnd=None):
     """
     Calculate the tri-cluster averages from the 3D data array and the band-,
     row- and column-cluster assignment arrays.
 
     :param Z: data array (d x m x n)
-    :param bnd_clusters: band clusters (array with size d)
     :param row_clusters: row clusters (array with size m)
     :param col_clusters: column clusters (array with size n)
-    :param nclusters_bnd: number of band clusters. If not provided,
-        it is set as the number of unique elements in bnd_clusters
+    :param bnd_clusters: band clusters (array with size d)
     :param nclusters_row: number of row clusters. If not provided,
         it is set as the number of unique elements in row_clusters
     :param nclusters_col: number of column clusters. If not provided,
         it is set as the number of unique elements in col_clusters
+    :param nclusters_bnd: number of band clusters. If not provided,
+        it is set as the number of unique elements in bnd_clusters
     :return: tri-cluster averages (nclusters_bnd, nclusters_row, nclusters_col)
         Tri-clusters that are not populated are assigned NaN values.
     """
