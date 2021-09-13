@@ -45,7 +45,7 @@ class Kmeans(object):
         :type n_col_clusters: int
         :param k_range: range of the number of clusters, i.e. value "k"
         :type k_range: range
-        :param max_k_ratio: ratio of the maximum k to the total number of 
+        :param max_k_ratio: ratio of the maximum k to the total number of
                             clusters. it will be ignored if "k_range" is given.
                             defaults to 0.8
         :type max_k_ratio: float, optional
