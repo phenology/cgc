@@ -53,7 +53,7 @@ class Kmeans(object):
         :type output_filename: str
         """
 
-        self.Z = Z
+        # Input parameters -----------------
         self.row_clusters = row_clusters
         self.col_clusters = col_clusters
         self.n_row_clusters = n_row_clusters
@@ -68,6 +68,12 @@ class Kmeans(object):
             self.k_range = list(range(2, int(max_k * max_k_ratio)))
         else:
             self.k_range = list(k_range)
+        # Input parameters end -------------
+
+        # Store input parameters in results object
+        self.results = KmeansResults(**self.__dict__)
+
+        self.Z = Z
 
         # Number of row/col clusters should be smaller than the max ID
         # Since ID starts from 0
@@ -89,8 +95,6 @@ class Kmeans(object):
             logger.warning("k_range includes large k-values (80% "
                            "of the number of co-clusters or more)")
 
-        # store input parameters in results object
-        self.results = KmeansResults(**self.__dict__)
 
     def compute(self):
         """
