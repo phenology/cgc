@@ -78,12 +78,11 @@ class TestKmeans(unittest.TestCase):
 
     def test_kvalue_does_not_depend_on_krange_order(self):
         # 4 co-clusters, 2 clusters
-        Z = np.array([
-            [0, 0, 0, 1, 1],
-            [0, 0, 0, 1, 1],
-            [1, 1, 0, 0, 0],
-            [1, 1, 0, 0, 0],
-        ])
+        Z = np.array([[1, 1, 1, 2, 2], 
+                      [1, 1, 1, 2, 2], 
+                      [2, 2, 2, 1, 1],
+                      [2, 2, 2, 1, 1]])
+        Z = Z + np.random.rand(*Z.shape) * 0.1
         row_cluseters = np.array([0, 0, 1, 1])
         col_clusters = np.array([0, 0, 0, 1, 1])
         km = Kmeans(Z=Z,
@@ -91,14 +90,15 @@ class TestKmeans(unittest.TestCase):
                     col_clusters=col_clusters,
                     n_row_clusters=2,
                     n_col_clusters=2,
-                    k_range=range(2, 5))
-        res = km.compute()
-        self.assertEqual(res.k_value, 2)
+                    k_range=range(2, 4))
+        res1 = km.compute()
+        self.assertEqual(res1.k_value, 2)
         km = Kmeans(Z=Z,
                     row_clusters=row_cluseters,
                     col_clusters=col_clusters,
                     n_row_clusters=2,
-                    n_col_clusters=2,
-                    k_range=range(4, 1, -1))
-        res = km.compute()
-        self.assertEqual(res.k_value, 2)
+                    n_col_clusters=3,
+                    k_range=range(3, 1, -1))
+        res2 = km.compute()
+        self.assertEqual(res2.k_value, 2)
+
