@@ -45,8 +45,9 @@ class Kmeans(object):
         :type n_col_clusters: int
         :param k_range: range of the number of clusters, i.e. value "k"
         :type k_range: range
-        :param max_k_ratio: ratio of the maximum k to the total number of clusters.
-                            it will be ignored if "k_range" is given. defaults to 0.8
+        :param max_k_ratio: ratio of the maximum k to the total number of 
+                            clusters. it will be ignored if "k_range" is given.
+                            defaults to 0.8
         :type max_k_ratio: float, optional
         :param kmean_max_iter: maximum number of iterations of the KMeans
         :type kmean_max_iter: int
@@ -95,7 +96,6 @@ class Kmeans(object):
         elif max_k_input > max_k * 0.8:
             logger.warning("k_range includes large k-values (80% "
                            "of the number of co-clusters or more)")
-
 
     def compute(self):
         """
