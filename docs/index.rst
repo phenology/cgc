@@ -22,8 +22,11 @@ have a look at the  `contribution guidelines`_.
 .. _contribution guidelines: https://github.com/phenology/cgc/tree/master/CONTRIBUTING.md
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
-   user_manual
+   coclustering
+   triclustering
+   kmeans
+   utils
    Tutorial <https://cgc-tutorial.readthedocs.io>
