@@ -17,6 +17,8 @@ class Results(object):
     """
     Base class to be inherited by the various calculators. It is meant to
     contain results and metadata of a calculation.
+
+    :param **input_parameters: Input parameters.
     """
     def __init__(self, **input_parameters):
         self.version = __version__
@@ -29,7 +31,8 @@ class Results(object):
         """
         Serialize the object attributes in a JSON file.
 
-        :param filename:
+        :param filename: Name of the file.
+        :type filename: str
         """
         if filename:
             with open(filename, 'w') as f:

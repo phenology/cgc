@@ -14,7 +14,20 @@ logger = logging.getLogger(__name__)
 
 class TriclusteringResults(Results):
     """
-    Contains results and metadata of a tri-clustering calculation
+    Contains results and metadata of a tri-clustering calculation.
+
+    :var row_clusters: Final row cluster assignment.
+    :type row_clusters: numpy.ndarray
+    :var col_clusters: Final column cluster assignment.
+    :type col_clusters: numpy.ndarray
+    :var bnd_clusters: Final band cluster assignment.
+    :type bnd_clusters: numpy.ndarray
+    :var error: Approximation error of the tri-clustering.
+    :type error: float
+    :var nruns_completed: Number of successfully completed runs.
+    :type nruns_completed: int
+    :var nruns_converged: Number of converged runs.
+    :type nruns_converged: int
     """
     row_clusters = None
     col_clusters = None
@@ -26,28 +39,39 @@ class TriclusteringResults(Results):
 
 class Triclustering(object):
     """
-    Perform the tri-clustering analysis of a 3D array
+    Perform a tri-clustering analysis for a three-dimensional array.
+
+    :param Z: Data array for which to run the tri-clustering analysis, with
+        shape (`band`, `row`, `column`).
+    :type Z: numpy.ndarray or dask.array.Array
+    :param nclusters_row: Number of row clusters.
+    :type nclusters_row: int
+    :param nclusters_col: Number of column clusters.
+    :type nclusters_col: int
+    :param nclusters_bnd: Number of band clusters.
+    :type nclusters_bnd: int
+    :param conv_threshold: Convergence threshold for the objective function.
+    :type conv_threshold: float, optional
+    :param max_iterations: Maximum number of iterations.
+    :type max_iterations: int, optional
+    :param nruns: Number of differently-initialized runs.
+    :type nruns: int, optional
+    :param epsilon: Numerical parameter, avoids zero arguments in the
+        logarithm that appears in the expression of the objective function.
+    :type epsilon: float, optional
+    :param output_filename: Name of the JSON file where to write the results.
+    :type output_filename: string, optional
+    :param row_clusters_init: Initial row cluster assignment.
+    :type row_clusters_init: numpy.ndarray or array_like, optional
+    :param col_clusters_init: Initial column cluster assignment.
+    :type col_clusters_init: numpy.ndarray or array_like, optional
+    :param bnd_clusters_init: Initial band cluster assignment.
+    :type bnd_clusters_init: numpy.ndarray or array_like, optional
     """
     def __init__(self, Z, nclusters_row, nclusters_col, nclusters_bnd,
                  conv_threshold=1.e-5, max_iterations=1, nruns=1,
                  epsilon=1.e-8, output_filename='', row_clusters_init=None,
                  col_clusters_init=None, bnd_clusters_init=None):
-        """
-        Initialize the object
-
-        :param Z: d x m x n data matrix
-        :param nclusters_row: number of row clusters
-        :param nclusters_col: number of column clusters
-        :param nclusters_bnd: number of band clusters
-        :param conv_threshold: convergence threshold for the objective function
-        :param max_iterations: maximum number of iterations
-        :param nruns: number of differntly-initialized runs
-        :param epsilon: numerical parameter, avoids zero arguments in log
-        :param output_filename: name of the file where to write the clusters
-        :param row_clusters_init: initial row clusters
-        :param col_clusters_init: initial column clusters
-        :param bnd_clusters_init: initial band clusters
-        """
         # Input parameters -----------------
         self.nclusters_row = nclusters_row
         self.nclusters_col = nclusters_col
@@ -80,11 +104,19 @@ class Triclustering(object):
 
     def run_with_threads(self, nthreads=1):
         """
-        Run the tri-clustering using an algorithm based on numpy + threading
-        (only suitable for local runs)
+        Run the tri-clustering using an algorithm based on Numpy plus threading
+        (only suitable for local runs).
 
-        :param nthreads: number of threads
-        :return: tri-clustering results
+        :param nthreads: Number of threads employed to simultaneously run
+            differently-initialized tri-clustering analysis.
+        :type nthreads: int, optional
+        :param low_memory: If True, use a memory-conservative algorithm.
+        :type low_memory: bool, optional
+        :param numba_jit: If True, and low_memory is True, then use Numba
+                          just-in-time compilation to improve the performance.
+        :type numba_jit: bool, optional
+        :return: tri-clustering results.
+        :type: cgc.triclustering.TriclusteringResults
         """
         with ThreadPoolExecutor(max_workers=nthreads) as executor:
             futures = {
@@ -121,11 +153,16 @@ class Triclustering(object):
 
     def run_with_dask(self, client=None, low_memory=True):
         """
-        Run the tri-clustering with Dask
+        Run the tri-clustering analysis using Dask.
 
-        :param client: Dask client
-        :param low_memory: if false, all runs are submitted to the Dask cluster
-        :return: co-clustering results
+        :param client: Dask client. If not specified, the default
+            `LocalCluster` is employed.
+        :type client: dask.distributed.Client, optional
+        :param low_memory: If False, all runs are submitted to the Dask cluster
+            (experimental feature, discouraged).
+        :type low_memory: bool, optional
+        :return: Tri-clustering results.
+        :type: cgc.triclustering.TriclusteringResults
         """
         self.client = client if client is not None else Client()
 

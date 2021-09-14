@@ -19,6 +19,30 @@ class KmeansResults(Results):
 
 
 class Kmeans(object):
+    """
+    Perform a co-clustering refinement using k-means.
+
+    :param Z: m x n matrix of spatial-temporal data. Usually each row is a
+        time-series of a spatial grid.
+    :type Z: numpy.ndarray or dask.array.Array
+    :param row_clusters: m x 1 row cluster array.
+    :type row_clusters: class:`numpy.ndarray`
+    :param col_clusters: n x 1 column cluster array.
+    :type col_clusters: class:`numpy.ndarray`
+    :param n_row_clusters: number of row clusters
+    :type n_row_clusters: int
+    :param n_col_clusters: number of column clusters
+    :type n_col_clusters: int
+    :param k_range: range of the number of clusters, i.e. value "k"
+    :type k_range: range
+    :param max_k_ratio: ratio of the maximum k to the total number of
+        clusters. it will be ignored if "k_range" is given. defaults to 0.8
+    :type max_k_ratio: float, optional
+    :param kmean_max_iter: maximum number of iterations of the KMeans
+    :type kmean_max_iter: int
+    :param output_filename: name of the file where to write the results
+    :type output_filename: str
+    """
     def __init__(self,
                  Z,
                  row_clusters,
@@ -29,31 +53,6 @@ class Kmeans(object):
                  max_k_ratio=0.8,
                  kmean_max_iter=100,
                  output_filename=''):
-        """
-        Set up Kmeans object.
-
-        :param Z: m x n matrix of spatial-temporal data. Usually each row is a
-        time-series of a spatial grid.
-        :type Z: class:`numpy.ndarray`
-        :param row_clusters: m x 1 row cluster array.
-        :type row_clusters: class:`numpy.ndarray`
-        :param col_clusters: n x 1 column cluster array.
-        :type col_clusters: class:`numpy.ndarray`
-        :param n_row_clusters: number of row clusters
-        :type n_row_clusters: int
-        :param n_col_clusters: number of column clusters
-        :type n_col_clusters: int
-        :param k_range: range of the number of clusters, i.e. value "k"
-        :type k_range: range
-        :param max_k_ratio: ratio of the maximum k to the total number of
-                            clusters. it will be ignored if "k_range" is given.
-                            defaults to 0.8
-        :type max_k_ratio: float, optional
-        :param kmean_max_iter: maximum number of iterations of the KMeans
-        :type kmean_max_iter: int
-        :param output_filename: name of the file where to write the results
-        :type output_filename: str
-        """
         # Input parameters -----------------
         self.row_clusters = row_clusters
         self.col_clusters = col_clusters
