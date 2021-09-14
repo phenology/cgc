@@ -13,10 +13,9 @@ class KmeansResults(Results):
     """
     Contains results and metadata of a k-means refinement calculation
     """
-    def reset(self):
-        self.k_value = None
-        self.measure_list = None
-        self.cl_mean_centroids = None
+    k_value = None
+    measure_list = None
+    cl_mean_centroids = None
 
 
 class Kmeans(object):

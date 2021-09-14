@@ -16,13 +16,12 @@ class TriclusteringResults(Results):
     """
     Contains results and metadata of a tri-clustering calculation
     """
-    def reset(self):
-        self.row_clusters = None
-        self.col_clusters = None
-        self.bnd_clusters = None
-        self.error = None
-        self.nruns_completed = 0
-        self.nruns_converged = 0
+    row_clusters = None
+    col_clusters = None
+    bnd_clusters = None
+    error = None
+    nruns_completed = 0
+    nruns_converged = 0
 
 
 class Triclustering(object):
