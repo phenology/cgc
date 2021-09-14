@@ -110,11 +110,6 @@ class Triclustering(object):
         :param nthreads: Number of threads employed to simultaneously run
             differently-initialized tri-clustering analysis.
         :type nthreads: int, optional
-        :param low_memory: If True, use a memory-conservative algorithm.
-        :type low_memory: bool, optional
-        :param numba_jit: If True, and low_memory is True, then use Numba
-                          just-in-time compilation to improve the performance.
-        :type numba_jit: bool, optional
         :return: tri-clustering results.
         :type: cgc.triclustering.TriclusteringResults
         """
@@ -151,26 +146,18 @@ class Triclustering(object):
         self.results.write(filename=self.output_filename)
         return self.results
 
-    def run_with_dask(self, client=None, low_memory=True):
+    def run_with_dask(self, client=None):
         """
         Run the tri-clustering analysis using Dask.
 
         :param client: Dask client. If not specified, the default
             `LocalCluster` is employed.
         :type client: dask.distributed.Client, optional
-        :param low_memory: If False, all runs are submitted to the Dask cluster
-            (experimental feature, discouraged).
-        :type low_memory: bool, optional
         :return: Tri-clustering results.
         :type: cgc.triclustering.TriclusteringResults
         """
         self.client = client if client is not None else Client()
-
-        if low_memory:
-            self._dask_runs_memory()
-        else:
-            raise NotImplementedError("Only low-memory tri-clustering!")
-
+        self._dask_runs_memory()
         self.results.write(filename=self.output_filename)
         return self.results
 
