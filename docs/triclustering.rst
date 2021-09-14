@@ -41,7 +41,7 @@ additional argument, which sets the maximum number of clusters along the 'band' 
 .. NOTE::
     The first axis of ``Z`` is assumed to represent the 'band' dimension.
 
-Co-clustering Implementations
+Tri-clustering Implementations
 -----------------------------
 
 Local (Numpy-based)
@@ -72,6 +72,16 @@ the tri-clustering analysis is carried out as:
 .. code-block:: python
 
     results = tc.run_with_dask(client)
+
+Results
+-------
+
+The ``Results`` object returned by ``Triclustering.run_with_threads`` and ``Triclustering.run_with_dask`` contains the
+final row, column, and band cluster assigments (``results.row_clusters``, ``results.col_clusters``, and
+``results.bnd_clusters``, respectively) as well as the approximation error of the tri-clustering (``results.error``).
+Few other metadata are also present, including the input parameters employed to setup the analysis
+(``results.input_parameters``).
+
 
 API
 ---
