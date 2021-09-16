@@ -22,10 +22,8 @@ class KmeansResults(Results):
 class Kmeans(object):
     def __init__(self,
                  Z,
-                 row_clusters,
-                 col_clusters,
-                 n_row_clusters,
-                 n_col_clusters,
+                 clusters,
+                 nclusters,
                  k_range=None,
                  max_k_ratio=0.8,
                  kmean_max_iter=100,
@@ -33,17 +31,12 @@ class Kmeans(object):
         """
         Set up Kmeans object.
 
-        :param Z: m x n matrix of spatial-temporal data. Usually each row is a
-        time-series of a spatial grid.
+        :param Z: m x n matrix of spatial-temporal data.
         :type Z: class:`numpy.ndarray`
-        :param row_clusters: m x 1 row cluster array.
-        :type row_clusters: class:`numpy.ndarray`
-        :param col_clusters: n x 1 column cluster array.
-        :type col_clusters: class:`numpy.ndarray`
-        :param n_row_clusters: number of row clusters
-        :type n_row_clusters: int
-        :param n_col_clusters: number of column clusters
-        :type n_col_clusters: int
+        :param clusters: list of cluster arrays.
+        :type clusters: list
+        :param nclusters: number of clusters
+        :type nclusters: int
         :param k_range: range of the number of clusters, i.e. value "k"
         :type k_range: range
         :param max_k_ratio: ratio of the maximum k to the total number of
@@ -56,16 +49,12 @@ class Kmeans(object):
         :type output_filename: str
         """
         # Input parameters -----------------
-        self.row_clusters = row_clusters
-        self.col_clusters = col_clusters
-        self.n_row_clusters = n_row_clusters
-        self.n_col_clusters = n_col_clusters
+        self.clusters = clusters
+        self.nclusters = nclusters
         self.kmean_max_iter = kmean_max_iter
         self.output_filename = output_filename
 
-        nonempty_row_cl = len(np.unique(self.row_clusters))
-        nonempty_col_cl = len(np.unique(self.col_clusters))
-        max_k = nonempty_row_cl * nonempty_col_cl
+        max_k = np.cumprod(self.nclusters)[-1]
         if k_range is None:
             self.k_range = list(range(2, int(max_k * max_k_ratio)))
         else:
@@ -77,12 +66,24 @@ class Kmeans(object):
 
         self.Z = Z
 
-        # Number of row/col clusters should be smaller than the max ID
-        # Since ID starts from 0
-        if not max(self.row_clusters) < self.n_row_clusters:
-            raise ValueError("row_clusters include labels >= n_row_clusters")
-        if not max(self.col_clusters) < self.n_col_clusters:
-            raise ValueError("col_clusters include labels >= n_col_clusters")
+        # Check if Z matches the clusters
+        if Z.ndim != len(clusters):
+            raise ValueError("The number of dimensions of Z is not equal to "
+                             "the number of dimensions of the clusters: "
+                             "{} != {}".format(Z.ndim, len(clusters)))
+        if Z.shape != tuple(len(cl) for cl in clusters):
+            raise ValueError("The shape of Z does not match the shape of the "
+                             "clusters: {} != {}".format(
+                                 Z.shape, tuple(len(cl) for cl in clusters)))
+
+        # The max label per cluster should be smaller than the number of
+        # clusters. Label starts from 0.
+        for cl, ncl, id in zip(clusters, nclusters, range(Z.ndim)):
+            if not max(cl) < ncl:
+                raise ValueError(
+                    "One cluster includes labels >= number of clusters. "
+                    "Cluster dimension order: {}. Label {} >=  ncluster {}.".
+                    format(id, max(cl), ncl))
 
         # Check minimum k
         if not min(self.k_range) >= 2:
@@ -138,14 +139,15 @@ class Kmeans(object):
         cl_mean_centroids = mean_centroids[self.kmeans_cc.labels_]
 
         # Reshape the centroids of means to the shape of cluster matrix,
-        # taking into account non-constructive row/col cluster
-        self.results.cl_mean_centroids = np.full(
-            (self.n_row_clusters, self.n_col_clusters), np.nan)
+        # taking into account non-constructive clusters
+        self.results.cl_mean_centroids = np.full(self.nclusters, np.nan)
         idx = 0
-        for r in np.unique(self.row_clusters):
-            for c in np.unique(self.col_clusters):
-                self.results.cl_mean_centroids[r, c] = cl_mean_centroids[idx]
-                idx = idx + 1
+        cls_exist = np.array(
+            np.meshgrid(*[np.unique(cl) for cl in self.clusters])).T.reshape(
+                -1, len(self.nclusters))
+        for cl in cls_exist:
+            self.results.cl_mean_centroids[tuple(cl)] = cl_mean_centroids[idx]
+            idx = idx + 1
 
         self.results.write(filename=self.output_filename)
         return self.results
@@ -156,18 +158,30 @@ class Kmeans(object):
         and minimum values, for each co-cluster group.
         Normalize them to [0, 1]
         """
-        cl = (self.row_clusters, self.col_clusters)
-        ncl = (self.n_row_clusters, self.n_col_clusters)
 
-        features = np.zeros((*ncl, 6))
-        features[..., 0] = calculate_cluster_feature(self.Z, np.mean, cl, ncl)
-        features[..., 1] = calculate_cluster_feature(self.Z, np.std, cl, ncl)
-        features[..., 2] = calculate_cluster_feature(self.Z, np.percentile, cl,
-                                                     ncl, q=5)
-        features[..., 3] = calculate_cluster_feature(self.Z, np.percentile, cl,
-                                                     ncl, q=95)
-        features[..., 4] = calculate_cluster_feature(self.Z, np.max, cl, ncl)
-        features[..., 5] = calculate_cluster_feature(self.Z, np.min, cl, ncl)
+        features = np.zeros((*self.nclusters, 6))
+        features[...,
+                 0] = calculate_cluster_feature(self.Z, np.mean, self.clusters,
+                                                self.nclusters)
+        features[...,
+                 1] = calculate_cluster_feature(self.Z, np.std, self.clusters,
+                                                self.nclusters)
+        features[..., 2] = calculate_cluster_feature(self.Z,
+                                                     np.percentile,
+                                                     self.clusters,
+                                                     self.nclusters,
+                                                     q=5)
+        features[..., 3] = calculate_cluster_feature(self.Z,
+                                                     np.percentile,
+                                                     self.clusters,
+                                                     self.nclusters,
+                                                     q=95)
+        features[...,
+                 4] = calculate_cluster_feature(self.Z, np.max, self.clusters,
+                                                self.nclusters)
+        features[...,
+                 5] = calculate_cluster_feature(self.Z, np.min, self.clusters,
+                                                self.nclusters)
 
         self.stat_measures = features[~np.isnan(features)].reshape((-1, 6))
 
