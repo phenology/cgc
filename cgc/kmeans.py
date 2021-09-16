@@ -93,10 +93,10 @@ class Kmeans(object):
         max_k_input = max(self.k_range)
         if max_k_input > max_k:
             raise ValueError("The maximum k-value exceeds the "
-                             "number of (non-empty) co-clusters")
+                             "number of (non-empty) clusters")
         elif max_k_input > max_k * 0.8:
             logger.warning("k_range includes large k-values (80% "
-                           "of the number of co-clusters or more)")
+                           "of the number of clusters or more)")
 
     def compute(self):
         """
@@ -113,30 +113,30 @@ class Kmeans(object):
         # Search for value k
         silhouette_avg_list = np.array(
             [])  # List of average silhouette measure of each k value
-        kmeans_cc_list = []
+        kmean_cluster_list = []
         for k in self.k_range:
             # Compute Kmean
-            kmeans_cc = KMeans(n_clusters=k, max_iter=self.kmean_max_iter).fit(
+            kmean_cluster = KMeans(n_clusters=k, max_iter=self.kmean_max_iter).fit(
                 self.stat_measures_norm)
             silhouette_avg = silhouette_score(self.stat_measures_norm,
-                                              kmeans_cc.labels_)
+                                              kmean_cluster.labels_)
             silhouette_avg_list = np.append(silhouette_avg_list,
                                             silhouette_avg)
-            kmeans_cc_list.append(kmeans_cc)
+            kmean_cluster_list.append(kmean_cluster)
         idx_k = np.argmax(silhouette_avg_list)
         self.results.measure_list = silhouette_avg_list
         self.results.k_value = self.k_range[idx_k]
-        self.kmeans_cc = kmeans_cc_list[idx_k]
-        del kmeans_cc_list
+        self.kmean_cluster = kmean_cluster_list[idx_k]
+        del kmean_cluster_list
 
         # Scale back centroids of the "mean" dimension
-        centroids_norm = self.kmeans_cc.cluster_centers_[:, 0]
+        centroids_norm = self.kmean_cluster.cluster_centers_[:, 0]
         stat_max = np.nanmax(self.stat_measures[:, 0])
         stat_min = np.nanmin(self.stat_measures[:, 0])
         mean_centroids = centroids_norm * (stat_max - stat_min) + stat_min
 
         # Assign centroids to each cluster cell
-        cl_mean_centroids = mean_centroids[self.kmeans_cc.labels_]
+        cl_mean_centroids = mean_centroids[self.kmean_cluster.labels_]
 
         # Reshape the centroids of means to the shape of cluster matrix,
         # taking into account non-constructive clusters
@@ -155,7 +155,7 @@ class Kmeans(object):
     def _compute_statistic_measures(self):
         """
         Compute 6 statistics: Mean, STD, 5 percentile, 95 percentile, maximum
-        and minimum values, for each co-cluster group.
+        and minimum values, for each cluster group.
         Normalize them to [0, 1]
         """
 
