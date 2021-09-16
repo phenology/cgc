@@ -125,6 +125,14 @@ class Kmeans(object):
                                             silhouette_avg)
             kmean_cluster_list.append(kmean_cluster)
         idx_k = np.argmax(silhouette_avg_list)
+        if np.sum(silhouette_avg_list == silhouette_avg_list[idx_k]) > 1:
+            idx_k_list = np.argwhere(
+                silhouette_avg_list == silhouette_avg_list[idx_k]).reshape(
+                    -1).tolist()
+            logger.warning(
+                "Multiple potential k found: {}, picking the smallest one: {}".
+                format([self.k_range[i] for i in idx_k_list],
+                       self.k_range[idx_k]))
         self.results.measure_list = silhouette_avg_list
         self.results.k_value = self.k_range[idx_k]
         self.kmean_cluster = kmean_cluster_list[idx_k]
