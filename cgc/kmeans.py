@@ -116,8 +116,9 @@ class Kmeans(object):
         kmean_cluster_list = []
         for k in self.k_range:
             # Compute Kmean
-            kmean_cluster = KMeans(n_clusters=k, max_iter=self.kmean_max_iter).fit(
-                self.stat_measures_norm)
+            kmean_cluster = KMeans(n_clusters=k,
+                                   max_iter=self.kmean_max_iter).fit(
+                                       self.stat_measures_norm)
             silhouette_avg = silhouette_score(self.stat_measures_norm,
                                               kmean_cluster.labels_)
             silhouette_avg_list = np.append(silhouette_avg_list,
