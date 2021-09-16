@@ -59,6 +59,7 @@ class Kmeans(object):
             self.k_range = list(range(2, int(max_k * max_k_ratio)))
         else:
             self.k_range = list(k_range)
+        self.k_range.sort()
         # Input parameters end -------------
 
         # Store input parameters in results object
