@@ -3,7 +3,7 @@ import logging
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-from .results import Results
+from ..results import Results
 
 logger = logging.getLogger(__name__)
 
