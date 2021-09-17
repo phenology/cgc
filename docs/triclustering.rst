@@ -42,7 +42,7 @@ additional argument, which sets the maximum number of clusters along the 'band' 
     The first axis of ``Z`` is assumed to represent the 'band' dimension.
 
 Tri-clustering Implementations
------------------------------
+------------------------------
 
 Local (Numpy-based)
 *******************

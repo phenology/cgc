@@ -23,10 +23,10 @@ have a look at the  `contribution guidelines`_.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Contents
 
    coclustering
    triclustering
    kmeans
    utils
-   Tutorial <https://cgc-tutorial.readthedocs.io>
+   Tutorials <https://cgc-tutorial.readthedocs.io>
