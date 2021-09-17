@@ -54,7 +54,7 @@ class Kmeans(object):
         self.kmean_max_iter = kmean_max_iter
         self.output_filename = output_filename
 
-        max_k = np.cumprod(self.nclusters)[-1]
+        max_k = np.prod(self.nclusters)
         if k_range is None:
             self.k_range = list(range(2, int(max_k * max_k_ratio)))
         else:
@@ -70,7 +70,7 @@ class Kmeans(object):
         # Check if Z matches the clusters
         if Z.ndim != len(clusters):
             raise ValueError("The number of dimensions of Z is not equal to "
-                             "the number of dimensions of the clusters: "
+                             "the number of labels provided: "
                              "{} != {}".format(Z.ndim, len(clusters)))
         if Z.shape != tuple(len(cl) for cl in clusters):
             raise ValueError("The shape of Z does not match the shape of the "
@@ -82,7 +82,7 @@ class Kmeans(object):
         for cl, ncl, id in zip(clusters, nclusters, range(Z.ndim)):
             if not max(cl) < ncl:
                 raise ValueError(
-                    "One cluster includes labels >= number of clusters. "
+                    "One label array includes elements >= number of clusters. "
                     "Cluster dimension order: {}. Label {} >=  ncluster {}.".
                     format(id, max(cl), ncl))
 
@@ -131,7 +131,8 @@ class Kmeans(object):
                 silhouette_avg_list == silhouette_avg_list[idx_k]).reshape(
                     -1).tolist()
             logger.warning(
-                "Multiple potential k found: {}, picking the smallest one: {}".
+                "Multiple k values with the same silhouette score: {},"
+                "picking the smallest one: {}".
                 format([self.k_range[i] for i in idx_k_list],
                        self.k_range[idx_k]))
         self.results.measure_list = silhouette_avg_list
