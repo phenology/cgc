@@ -6,7 +6,7 @@ Introduction
 
 The ``triclustering`` module provides a generalization of the co-clustering algorithm to three-dimensional arrays (see
 Ref. [#]_). For geospatial data, tri-clustering analyses allow to extend the search for similarity patterns in
-data cubes, thus accounting for a band dimension in addition to space and time.
+data cubes, thus accounting for an extra dimension (the 'band' dimension) in addition to space and time.
 
 .. NOTE:: 
     The search for 'blocks' in arrays with shape (``bands``, ``rows``, ``columns``) is carried out by iteratively
@@ -17,7 +17,20 @@ data cubes, thus accounting for a band dimension in addition to space and time.
 Setup the Analysis
 ------------------
 
-The tri-clustering analysis of an array ``Z`` is setup by creating an instance of ``Triclustering``:
+The tri-clustering analysis of a three-dimensional array ``Z``:
+
+.. code-block:: python
+
+    import numpy as np
+
+    Z = np.array([[[1., 1., 2., 4.],
+                   [1., 1., 2., 4.]],
+                  [[5., 5., 8., 8.],
+                   [5., 5., 8., 8.]],
+                  [[6., 7., 8., 9.],
+                   [6., 7., 9., 8.]]])
+
+is setup by creating an instance of ``Triclustering``:
 
 .. code-block:: python
 
@@ -35,8 +48,8 @@ The tri-clustering analysis of an array ``Z`` is setup by creating an instance o
         output_filename='results.json'  # JSON file where to write output
     )
 
-The input arguments of ``Triclustering`` are identical to the ``Coclustering`` ones (see :doc:`coclustering`) - ``nclusters_bnd`` is the only
-additional argument, which sets the maximum number of clusters along the 'band' dimension.
+The input arguments of ``Triclustering`` are identical to the ``Coclustering`` ones (see :doc:`coclustering`) -
+``nclusters_bnd`` is the only additional argument, which sets the maximum number of clusters along the 'band' dimension.
 
 .. NOTE::
     The first axis of ``Z`` is assumed to represent the 'band' dimension.
@@ -47,8 +60,8 @@ Tri-clustering Implementations
 Local (Numpy-based)
 *******************
 
-As for the co-clustering algorithm (see :doc:`coclustering`), multiple runs of the tri-clustering algorithm can be efficiently computed in
-parallel using threads. In order to run the tri-clustering analysis using 4 threads:
+As for the co-clustering algorithm (see :doc:`coclustering`), multiple runs of the tri-clustering algorithm can be
+efficiently computed in parallel using threads. In order to run the tri-clustering analysis using 4 threads:
 
 .. code-block:: python
 
@@ -76,8 +89,8 @@ the tri-clustering analysis is carried out as:
 Results
 -------
 
-The ``Results`` object returned by ``Triclustering.run_with_threads`` and ``Triclustering.run_with_dask`` contains the
-final row, column, and band cluster assigments (``results.row_clusters``, ``results.col_clusters``, and
+The ``TriclusteringResults`` object returned by ``Triclustering.run_with_threads`` and ``Triclustering.run_with_dask``
+contains the final row, column, and band cluster assigments (``results.row_clusters``, ``results.col_clusters``, and
 ``results.bnd_clusters``, respectively) as well as the approximation error of the tri-clustering (``results.error``).
 Few other metadata are also present, including the input parameters employed to setup the analysis
 (``results.input_parameters``).

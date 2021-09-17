@@ -24,11 +24,9 @@ For an array ``Z``:
 
     import numpy as np
 
-    Z = np.array([
-        [1., 1., 2., 4.],
-        [1., 1., 2., 4.],
-        [3., 3., 3., 5.]
-    ])
+    Z = np.array([[1., 1., 2., 4.],
+                  [1., 1., 2., 4.],
+                  [3., 3., 3., 5.]])
 
 the co-clustering analysis is setup by initializing a ``Coclustering`` object:
 
@@ -127,10 +125,10 @@ experimental and it typically leads to very large memory usages.
 Results
 -------
 
-The ``Results`` object returned by ``Coclustering.run_with_threads`` and ``Coclustering.run_with_dask`` contains the
-final row and column cluster assigments (``results.row_clusters`` and ``results.col_clusters``, respectively) as well
-as the approximation error of the co-clustering (``results.error``). Few other metadata are also present, including the
-input parameters employed to setup the analysis (``results.input_parameters``).
+The ``CoclusteringResults`` object returned by ``Coclustering.run_with_threads`` and ``Coclustering.run_with_dask``
+contains the final row and column cluster assigments (``results.row_clusters`` and ``results.col_clusters``,
+respectively) as well as the approximation error of the co-clustering (``results.error``). Few other metadata are also
+present, including the input parameters employed to setup the analysis (``results.input_parameters``).
 
 API
 ---
