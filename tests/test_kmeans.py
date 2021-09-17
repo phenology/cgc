@@ -1,6 +1,4 @@
-from cgc.results import Results
 import unittest
-from unittest.runner import TextTestResult
 import numpy as np
 
 from cgc.kmeans import Kmeans
