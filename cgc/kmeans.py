@@ -11,7 +11,16 @@ logger = logging.getLogger(__name__)
 
 class KmeansResults(Results):
     """
-    Contains results and metadata of a k-means refinement calculation
+    Contains results and metadata of a k-means refinement calculation.
+
+    :var k_value: Optimal K value (value with maximum Silhouette score).
+    :type k_value: int
+    :var measure_list: List of Silhouette coefficients for all tested k values.
+    :type measure_list: np.ndarray
+    :var cl_mean_centroids: Refined cluster averages computed as the centroids
+        of the clusters resulting from the k-means analysis using `k=k_value`.
+        Initally empty clusters are assigned NaN values.
+    :type cl_mean_centroids: np.ndarray
     """
     k_value = None
     measure_list = None
@@ -20,25 +29,30 @@ class KmeansResults(Results):
 
 class Kmeans(object):
     """
-    Perform a co-clustering refinement using k-means.
+    Perform a clustering refinement using k-means.
+
+    K-means clustering is performed for multiple k values, then the optimal
+    value is selected on the basis of the Silhouette coefficient.
 
     :param Z: Data array (N dimensions).
     :type Z: numpy.ndarray or dask.array.Array
     :param clusters: Iterable with length N. It should contain the cluster
-        labels for each dimension, following the same ordering as for Z
+        labels for each dimension, following the same ordering as for Z.
     :type clusters: tuple, list, or numpy.ndarray
     :param nclusters: Iterable with length N. It should contains the number of
         clusters in each dimension, following the same ordering as for Z.
     :type nclusters: tuple, list, or numpy.ndarray
-    :param k_range: Range of the number of clusters, i.e. value "k"
-    :type k_range: range
-    :param max_k_ratio: Ratio of the maximum k to the total number of
-        clusters. it will be ignored if "k_range" is given. defaults to 0.8
+    :param k_range: Range of k values to test. Default from 2 to
+        a fraction of the number of non-empty clusters (see max_k_ratio).
+    :type k_range: tuple, list, or numpy.ndarray, optional
+    :param max_k_ratio: If k_range is not provided, test all k values from 2
+        to `max_k_ratio*max_k`, where `max_k` is the number of non-empty co- or
+        tri-clusters. It will be ignored if `k_range` is given. Default to 0.8.
     :type max_k_ratio: float, optional
     :param kmean_max_iter: Maximum number of iterations of k-means.
-    :type kmean_max_iter: int
+    :type kmean_max_iter: int, optional
     :param output_filename: Name of the file where to write the results.
-    :type output_filename: str
+    :type output_filename: str, optional
     """
     def __init__(self,
                  Z,
@@ -101,12 +115,12 @@ class Kmeans(object):
 
     def compute(self):
         """
-        Compute statistics for each clustering group.
-        Then Loop through the range of k values,
-        and compute the averaged Silhouette measure of each k.
-        Finally select the k with the maximum Silhouette measure
+        Compute statistics for each clustering group. Then loop through the
+        range of k values, and compute the averaged Silhouette measure of each
+        k value. Finally select the k with the maximum Silhouette measure.
 
-        :return: k-means result object
+        :return: K-means results.
+        :type: cgc.kmeans.KmeansResults
         """
         # Get statistic measures
         self._compute_statistic_measures()
@@ -167,7 +181,7 @@ class Kmeans(object):
         """
         Compute 6 statistics: Mean, STD, 5 percentile, 95 percentile, maximum
         and minimum values, for each cluster group.
-        Normalize them to [0, 1]
+        Normalize them to [0, 1].
         """
 
         features = np.zeros((*self.nclusters, 6))

@@ -1,57 +1,72 @@
-K-means
-=======
+K-means refinement
+==================
 
-The `Kmeans` module is an implementation of `k-means clustering`_ to a co-clustering results.
-In particular, `Kmeans` looks for the smallest value of ``k`` in a provided range such that the
-sum of the cluster variances is smaller than a given threshold. K-means clusters are constructed
-using the following six statistics calculated for each co-cluster cell:
+Introduction
+------------
 
-#. Mean
-#. Standard deviation
-#. 5th percentile
-#. 95th percentile
-#. Maximum value
-#. Minimum value
+The `Kmeans` module is an implementation of the `k-means clustering`_ to refine the results of a co-clustering or
+tri-clustering calculation. This k-mean refinement allows to identify similarity patterns between co- or tri-clusters.
+The following pre-defined features, computed over all elements belonging to the same co- or tri-cluster, are employed
+for the k-means clustering:
 
-A ``Kmeans`` object should be set based on the existing co-clustering results:
+#. Mean value;
+#. Standard deviation;
+#. Minimum value;
+#. Maximum value;
+#. 5th percentile;
+#. 95th percentile;
+
+The implementation, which is based on the `scikit-learn`_ package, tests a range of k values and select the optimal one
+on the basis of the `Silhouette coefficient`_.
+
+.. _scikit-learn: https://scikit-learn.org/stable/index.html
+.. _Silhouette coefficient: https://en.wikipedia.org/wiki/Silhouette_(clustering)
+
+Running the refinement
+----------------------
+
+The k-means refinement should be based on existing co- or tri-clustering results:
+
+.. code-block:: python
+
+    import numpy as np
+
+    Z = np.array([[1., 1., 2., 4.],
+                  [1., 1., 2., 4.],
+                  [3., 3., 3., 5.]])
+    row_clusters = np.array([0, 0, 1, 2])  # 3 clusters
+    col_cluster = np.array([0, 0, 1])  # 2 clusters
+
+One can then setup ``Kmeans`` in the following way:
 
 .. code-block:: python
 
     from cgc.kmeans import Kmeans
 
-    km = Kmeans(Z=Z,
-        row_clusters=results.row_clusters,
-        col_clusters=results.col_clusters,
-        n_row_clusters=results.input_parameters['nclusters_row'],
-        n_col_clusters=results.input_parameters['nclusters_col'],
-        k_range=range(1, 5),
+    km = Kmeans(
+        Z,
+        clusters=(row_clusters, col_cluster),
+        nclusters=(3, 2)
+        k_range=range(2, 5),
         kmean_max_iter=100,
-        var_thres=2.,
-        output_filename='results.json')
+        output_filename='results.json' # JSON file where to write output
+    )
 
-Here we present an example based on the results of co-clustering from the "Co-clustering" section.
-``results.input_parameters['nclusters_row']`` and  ``results.input_parameters['nclusters_col']``
-are the number of row/column clusters.
-``Z`` is the :math:`(m\times n)` input array, also used for co-clustering.
-``k_range`` is the range of ``k`` values to investigate.
-``kmean_max_iter`` is the maximum number of iterations per each ``k`` value.
-``var_thres`` sets the threshold for the selection of the best ``k`` value.
+Here ``k_range`` is the range of ``k`` values to investigate. If not provided, a sensible range will be setup (from 2 to
+a fraction of the number of co- or tri-clusters - the optional `max_k_ratio` argument allows for additional control, see
+:ref:`API<API>`). ``kmean_max_iter`` is the maximum number of iterations employed for the k-means clustering.
 
-The ``compute`` function can be called to compute the k-means results:
+The ``compute`` function is then called to run the k-means refinement:
 
 .. code-block:: python
 
     results = km.compute()
 
-In order to evaluate the outcome of the ``KMeans`` refinement, one can plot the
-computed sum of variances as a function of ``k`` in what is usually known as elbow plot:
+Results
+-------
 
-.. code-block:: python
-
-    km.plot_elbow_curve()
-
-The plot is also functional to select the value of ``var_thres``.
-The optimal ``k`` value and the centroids of the "mean" statistics are stored in:
+The optimal ``k`` value and the k-means-based centroids computed over the co- and tri-cluster averages are stored in the
+KmeansResults object:
 
 .. code-block:: python
 
@@ -60,6 +75,8 @@ The optimal ``k`` value and the centroids of the "mean" statistics are stored in
 
 
 .. _k-means clustering: https://en.wikipedia.org/wiki/K-means_clustering
+
+.. _API:
 
 API
 ---
