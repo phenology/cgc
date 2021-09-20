@@ -113,20 +113,33 @@ def coclustering(Z,
                  row_clusters_init=None,
                  col_clusters_init=None):
     """
-    Run the co-clustering, Numpy-based implementation
+    Run the co-clustering analysis, Numpy-based implementation.
 
-    :param Z: m x n data matrix
-    :param nclusters_row: number of row clusters
-    :param nclusters_col: number of column clusters
-    :param errobj: convergence threshold for the objective function
-    :param niters: maximum number of iterations
-    :param epsilon: numerical parameter, avoids zero arguments in log
-    :param low_memory: boolean, set low memory usage version
-    :param numba_jit: boolean, set numba optimized single node  version
-    :param row_clusters_init: initial row cluster assignment
-    :param col_clusters_init: initial column cluster assignment
-    :return: has converged, number of iterations performed, final row and
-    column clustering, error value
+    :param Z: Data matrix for which to run the co-clustering analysis
+    :type Z: numpy.ndarray
+    :param nclusters_row: Number of row clusters.
+    :type nclusters_row: int
+    :param nclusters_col: Number of column clusters.
+    :type nclusters_col: int
+    :param errobj: Convergence threshold for the objective function.
+    :type errobj: float, optional
+    :param niters: Maximum number of iterations.
+    :type niters: int, optional
+    :param epsilon: Numerical parameter, avoids zero arguments in the
+        logarithm that appears in the expression of the objective function.
+    :type epsilon: float, optional
+    :param low_memory: Make use of a low-memory version of the algorithm.
+    :type low_memory: bool, optional
+    :param numba_jit: Make use of Numba JIT acceleration (only if low_memory
+        is True).
+    :type numba_jit: bool, optional
+    :param row_clusters_init: Initial row cluster assignment.
+    :type row_clusters_init: numpy.ndarray or array_like, optional
+    :param col_clusters_init: Initial column cluster assignment.
+    :type col_clusters_init: numpy.ndarray or array_like, optional
+    :return: Has converged, number of iterations performed, final row and
+    column clustering, approximation error of the co-clustering.
+    :type: tuple
     """
     [m, n] = Z.shape
 

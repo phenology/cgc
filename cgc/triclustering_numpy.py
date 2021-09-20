@@ -26,20 +26,33 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
                   niters, epsilon, row_clusters_init=None,
                   col_clusters_init=None, bnd_clusters_init=None):
     """
-    Run the tri-clustering, Numpy-based implementation
+    Run the tri-clustering analysis, Numpy-based implementation.
 
-    :param Z: d x m x n data matrix
-    :param nclusters_row: number of row clusters
-    :param nclusters_col: number of column clusters
-    :param nclusters_bnd: number of band clusters
-    :param errobj: convergence threshold for the objective function
-    :param niters: maximum number of iterations
-    :param epsilon: numerical parameter, avoids zero arguments in log
-    :param row_clusters_init: initial row cluster assignment
-    :param col_clusters_init: initial column cluster assignment
-    :param bnd_clusters_init: initial band cluster assignment
-    :return: has converged, number of iterations performed, final row,
-    column, and band clustering, error value
+    :param Z: Data array for which to run the tri-clustering analysis, with
+        shape (`band`, `row`, `column`).
+    :type Z: numpy.ndarray
+    :param nclusters_row: Number of row clusters.
+    :type nclusters_row: int
+    :param nclusters_col: Number of column clusters.
+    :type nclusters_col: int
+    :param nclusters_bnd: Number of band clusters.
+    :type nclusters_bnd: int
+    :param errobj: Convergence threshold for the objective function.
+    :type errobj: float, optional
+    :param niters: Maximum number of iterations.
+    :type niters: int, optional
+    :param epsilon: Numerical parameter, avoids zero arguments in the
+        logarithm that appears in the expression of the objective function.
+    :type epsilon: float, optional
+    :param row_clusters_init: Initial row cluster assignment.
+    :type row_clusters_init: numpy.ndarray or array_like, optional
+    :param col_clusters_init: Initial column cluster assignment.
+    :type col_clusters_init: numpy.ndarray or array_like, optional
+    :param bnd_clusters_init: Initial band cluster assignment.
+    :type bnd_clusters_init: numpy.ndarray or array_like, optional
+    :return: Has converged, number of iterations performed, final row, column,
+    and band clustering, approximation error of the tri-clustering.
+    :type: tuple
     """
     [d, m, n] = Z.shape
 
