@@ -6,7 +6,7 @@ Introduction
 
 The ``coclustering`` module provides the functionality to perform the co-clustering analysis of a positive data matrix
 with real-valued elements. The code implements the Bregman block-average co-clustering (BBAC) algorithm from Ref. [#]_
-and it was inspired from the Matlab `code`_ by Srujana Merugu and Arindam Banerjee.
+and it was inspired by the Matlab `code`_ by Srujana Merugu and Arindam Banerjee.
 
 .. _code: http://www.ideal.ece.utexas.edu/software.html
 

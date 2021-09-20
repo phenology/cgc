@@ -5,7 +5,7 @@ Introduction
 ------------
 
 The ``triclustering`` module provides a generalization of the co-clustering algorithm to three-dimensional arrays (see
-Ref. [#]_). For geospatial data, tri-clustering analyses allow to extend the search for similarity patterns in
+Ref. [#]_). For geospatial data, tri-clustering analyses allow extending the search for similarity patterns in
 data cubes, thus accounting for an extra dimension (the 'band' dimension) in addition to space and time.
 
 .. NOTE:: 
@@ -71,7 +71,7 @@ Distributed (Dask-based)
 ************************
 
 Also for the tri-clustering, analysis on distributed systems can be carried out using Dask (see also
-:doc:`coclustering`). Once connection to a Dask cluster is setup:
+:doc:`coclustering`). Once the connection to a Dask cluster is setup:
 
 .. code-block:: python
 
@@ -90,7 +90,7 @@ Results
 -------
 
 The ``TriclusteringResults`` object returned by ``Triclustering.run_with_threads`` and ``Triclustering.run_with_dask``
-contains the final row, column, and band cluster assigments (``results.row_clusters``, ``results.col_clusters``, and
+contains the final row, column, and band cluster assignments (``results.row_clusters``, ``results.col_clusters``, and
 ``results.bnd_clusters``, respectively) as well as the approximation error of the tri-clustering (``results.error``).
 Few other metadata are also present, including the input parameters employed to setup the analysis
 (``results.input_parameters``).

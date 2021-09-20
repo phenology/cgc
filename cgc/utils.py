@@ -177,7 +177,7 @@ def calculate_tricluster_averages(Z, row_clusters, col_clusters, bnd_clusters,
 
 def calculate_cluster_feature(Z, function, clusters, nclusters=None, **kwargs):
     """
-    Calculate feature for clusters. This function works in N dimensions
+    Calculate features for clusters. This function works in N dimensions
     (N=2, 3, ...) making it suitable to calculate features for both co-clusters
     and tri-clusters.
 
