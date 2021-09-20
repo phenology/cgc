@@ -52,7 +52,7 @@ procedure that is considered converged when the error of two consecutive iterati
 
 Multiple runs should be performed in order to limit the influence of the choice of initial cluster assignment on the
 result. A numerical parameter guarantees that no zero-valued arguments are encountered in the logarithm that appears in
-the I-divergence expression, which is employed as objective function. Results are (optionally) written to a JSON file.
+the I-divergence expression, which is employed as an objective function. Results are (optionally) written to a JSON file.
 
 Co-clustering Implementations
 -----------------------------
@@ -70,7 +70,7 @@ co-clustering analysis is run using e.g. 4 threads as:
     results = cc.run_with_threads(nthreads=4)
 
 This first implementation makes use of (fast) matrix multiplications to calculate cluster-based properties, such as
-averages and distances. However, if ``Z``'s dimensions are large, large auxiliary matrices needs to be stored into
+averages and distances. However, if ``Z``'s dimensions are large, large auxiliary matrices need to be stored into
 memory, so that the memory requirement of this implementation quickly becomes a bottleneck.
 
 .. _Numpy: https://numpy.org
@@ -126,7 +126,7 @@ Results
 -------
 
 The ``CoclusteringResults`` object returned by ``Coclustering.run_with_threads`` and ``Coclustering.run_with_dask``
-contains the final row and column cluster assigments (``results.row_clusters`` and ``results.col_clusters``,
+contains the final row and column cluster assignments (``results.row_clusters`` and ``results.col_clusters``,
 respectively) as well as the approximation error of the co-clustering (``results.error``). Few other metadata are also
 present, including the input parameters employed to setup the analysis (``results.input_parameters``).
 

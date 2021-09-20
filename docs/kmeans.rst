@@ -5,7 +5,7 @@ Introduction
 ------------
 
 The `Kmeans` module is an implementation of the `k-means clustering`_ to refine the results of a co-clustering or
-tri-clustering calculation. This k-mean refinement allows to identify similarity patterns between co- or tri-clusters.
+tri-clustering calculation. This k-mean refinement allows identifying similarity patterns between co- or tri-clusters.
 The following pre-defined features, computed over all elements belonging to the same co- or tri-cluster, are employed
 for the k-means clustering:
 
@@ -17,7 +17,7 @@ for the k-means clustering:
 #. 95th percentile;
 
 The implementation, which is based on the `scikit-learn`_ package, tests a range of k values and select the optimal one
-on the basis of the `Silhouette coefficient`_.
+based on the `Silhouette coefficient`_.
 
 .. _scikit-learn: https://scikit-learn.org/stable/index.html
 .. _Silhouette coefficient: https://en.wikipedia.org/wiki/Silhouette_(clustering)
