@@ -8,12 +8,6 @@ The ``triclustering`` module provides a generalization of the co-clustering algo
 Ref. [#]_). For geospatial data, tri-clustering analyses allow extending the search for similarity patterns in
 data cubes, thus accounting for an extra dimension (the 'band' dimension) in addition to space and time.
 
-.. NOTE:: 
-    The search for 'blocks' in arrays with shape (``bands``, ``rows``, ``columns``) is carried out by iteratively
-    optimizing the assignment of clusters in ``rows``, ``columns`` and ``bands``, in this order. The procedure is
-    repeated until convergence. The final cluster assignment might, however, be influenced by the chosen order in
-    which the dimensions are considered. 
-
 Setup the Analysis
 ------------------
 
