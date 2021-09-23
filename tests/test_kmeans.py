@@ -4,14 +4,14 @@ import numpy as np
 from cgc.kmeans import Kmeans
 
 
-def initialize_kmean():
+def init_cocluster():
     """
     Z:
-        [[0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [8, 9, 10, 11],
-        [12, 13, 14, 15],
-        [16, 17, 18, 19]]
+        [[0, 0, 1, 1],
+        [0, 0, 1, 1],
+        [2, 2, 3, 3],
+        [2, 2, 3, 3],
+        [2, 2, 3, 3]]
 
     cluster index:
         [[(0,0), (0,0), (0,1), (0,1)],
@@ -20,32 +20,74 @@ def initialize_kmean():
         [(1,0), (1,0), (1,1), (1,1)],
         [(1,0), (1,0), (1,1), (1,1)]]
     """
-    Z = np.arange(20).reshape((5, 4))
+    Z = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
+                  [2, 2, 3, 3]])
     row_clusters = np.array([0, 0, 1, 1, 1])
     col_clusters = np.array([0, 0, 1, 1])
-    n_row_cluster, n_col_cluster = 3, 2
-    k_range = range(1, 3)
+    nrow_clusters, ncol_clusters = 3, 2  # 1 non populated row/col cluster
+    clusters = [row_clusters, col_clusters]
+    nclusters = [nrow_clusters, ncol_clusters]
+    k_range = range(2, 4)
     kmean_max_iter = 2
-    km = Kmeans(
-        Z=Z,
-        row_clusters=row_clusters,
-        col_clusters=col_clusters,
-        n_row_clusters=n_row_cluster,
-        n_col_clusters=n_col_cluster,
-        k_range=k_range,
-        kmean_max_iter=kmean_max_iter)
+    km = Kmeans(Z=Z,
+                clusters=clusters,
+                nclusters=nclusters,
+                k_range=k_range,
+                kmean_max_iter=kmean_max_iter)
+    return km
+
+
+def init_tricluster():
+    Z1 = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
+                   [2, 2, 3, 3]])
+    Z = np.dstack((Z1, Z1, Z1 + 1, Z1 + 1))
+    row_clusters = np.array([0, 0, 1, 1, 1])
+    col_clusters = np.array([0, 0, 1, 1])
+    band_clusters = np.array([0, 0, 1, 1])
+    nrow_clusters, ncol_clusters, nband_clusters = 2, 2, 2
+    clusters = [row_clusters, col_clusters, band_clusters]
+    nclusters = [nrow_clusters, ncol_clusters, nband_clusters]
+    k_range = range(2, 4)
+    kmean_max_iter = 2
+    km = Kmeans(Z=Z,
+                clusters=clusters,
+                nclusters=nclusters,
+                k_range=k_range,
+                kmean_max_iter=kmean_max_iter)
     return km
 
 
 class TestKmeans(unittest.TestCase):
+    def test_Z_and_cluster_shape_not_match(self):
+        with self.assertRaises(ValueError):
+            Kmeans(Z=np.random.random((5, 5)),
+                   clusters=[[0, 0, 1, 1, 2], [0, 0, 1, 1]],
+                   nclusters=[3, 2])
+
+    def test_Z_and_cluster_dimension_not_match(self):
+        with self.assertRaises(ValueError):
+            Kmeans(Z=np.random.random((5, 4)),
+                   clusters=[[0, 0, 1, 1, 2], [0, 0, 1, 1], [0, 0, 1, 1]],
+                   nclusters=[3, 2, 2])
+
+    def test_max_label_equal_ncluster(self):
+        with self.assertRaises(ValueError):
+            Kmeans(Z=np.random.random((5, 4, 4)),
+                   clusters=[[0, 0, 1, 1, 2], [0, 0, 1, 1], [0, 0, 1, 1]],
+                   nclusters=[3, 2, 1])
+
+    def test_max_label_exceeds_ncluster(self):
+        with self.assertRaises(ValueError):
+            Kmeans(Z=np.random.random((5, 4, 4)),
+                   clusters=[[0, 0, 1, 1, 2], [0, 0, 1, 1], [0, 0, 1, 1]],
+                   nclusters=[2, 2, 2])
+
     def test_kvalues_exceed_number_of_coclusters(self):
         with self.assertRaises(ValueError):
             Kmeans(
                 Z=np.random.random((6, 4)),
-                row_clusters=[0, 0, 1, 1, 2, 2],
-                col_clusters=[0, 0, 1, 1],
-                n_row_clusters=3,
-                n_col_clusters=2,
+                clusters=[[0, 0, 1, 1, 2, 2], [0, 0, 1, 1]],
+                nclusters=[3, 2],
                 k_range=range(1, 8),
             )
 
@@ -53,58 +95,70 @@ class TestKmeans(unittest.TestCase):
         with self.assertRaises(ValueError):
             Kmeans(
                 Z=np.random.random((6, 4)),
-                row_clusters=[0, 0, 1, 1, 2, 2],
-                col_clusters=[0, 0, 1, 1],
-                n_row_clusters=4,
-                n_col_clusters=2,
+                clusters=[[0, 0, 1, 1, 2, 2], [0, 0, 1, 1]],
+                nclusters=[4, 2],
                 k_range=range(1, 8),
             )
 
-    def test_statistic_mesures_mean(self):
-        km = initialize_kmean()
-        km.compute()
+    def test_statistic_coclustering(self):
+        km = init_cocluster()
+        km._compute_statistic_measures()
+        results = np.array([[0., 0., 0., 0., 0., 0.], [1., 0., 1., 1., 1., 1.],
+                            [2., 0., 2., 2., 2., 2.], [3., 0., 3., 3., 3.,
+                                                       3.]])
         self.assertTrue(
-            all(np.array([2.5, 4.5, 12.5, 14.5]) ==
-                km.stat_measures[:, 0]))  # First colummn is mean
+            np.all(results == km.stat_measures))  # First colummn is mean
+
+    def test_kmeam_labels_coclustering(self):
+        km = init_cocluster()
+        km.compute()
+        labels = km.kmean_cluster.labels_
+        self.assertTrue(labels.shape == (4, ))
+        self.assertEqual(labels[0], labels[1])
+        self.assertEqual(labels[2], labels[3])
+
+    def test_statistic_triclustering(self):
+        km = init_tricluster()
+        km._compute_statistic_measures()
+        results = np.array([[0., 0., 0., 0., 0., 0.], [1., 0., 1., 1., 1., 1.],
+                            [1., 0., 1., 1., 1., 1.], [2., 0., 2., 2., 2., 2.],
+                            [2., 0., 2., 2., 2., 2.], [3., 0., 3., 3., 3., 3.],
+                            [3., 0., 3., 3., 3., 3.], [4., 0., 4., 4., 4.,
+                                                       4.]])
+        self.assertTrue(
+            np.all(results == km.stat_measures))  # First colummn is mean
+
+    def test_kvalues_triclustering(self):
+        km = init_tricluster()
+        km.compute()
+        self.assertEqual(km.results.k_value, 3)
 
     def test_statistic_centroids_shape(self):
-        km = initialize_kmean()
+        km = init_cocluster()
         km.compute()
         self.assertEqual((3, 2), km.results.cl_mean_centroids.shape)
 
     def test_centroids_nan(self):
-        km = initialize_kmean()
+        km = init_cocluster()
         km.compute()
         self.assertTrue(all(np.isnan(km.results.cl_mean_centroids[2, :])))
 
     def test_kvalue_does_not_depend_on_krange_order(self):
         # 4 co-clusters, 2 clusters
-        Z = np.array([
-            [0, 0, 1],
-            [0, 0, 1],
-            [1, 1, 0]
-        ])
-        row_cluseters = np.array([0, 0, 1])
-        col_clusters = np.array([0, 0, 1])
-        km = Kmeans(
-            Z=Z,
-            row_clusters=row_cluseters,
-            col_clusters=col_clusters,
-            n_row_clusters=2,
-            n_col_clusters=2,
-            k_range=range(1, 5),
-            var_thres=2.0
-        )
-        res = km.compute()
-        self.assertEqual(res.k_value, 2)
-        km = Kmeans(
-            Z=Z,
-            row_clusters=row_cluseters,
-            col_clusters=col_clusters,
-            n_row_clusters=2,
-            n_col_clusters=2,
-            k_range=range(4, 0, -1),
-            var_thres=2.0
-        )
-        res = km.compute()
-        self.assertEqual(res.k_value, 2)
+        Z = np.array([[1, 1, 1, 2, 2], [1, 1, 1, 2, 2], [2, 2, 2, 1, 1],
+                      [2, 2, 2, 1, 1]])
+        Z = Z + np.random.rand(*Z.shape) * 0.1
+        row_cluseters = np.array([0, 0, 1, 1])
+        col_clusters = np.array([0, 0, 0, 1, 1])
+        km = Kmeans(Z=Z,
+                    clusters=[row_cluseters, col_clusters],
+                    nclusters=[2, 2],
+                    k_range=range(2, 4))
+        res1 = km.compute()
+        self.assertEqual(res1.k_value, 2)
+        km = Kmeans(Z=Z,
+                    clusters=[row_cluseters, col_clusters],
+                    nclusters=[2, 2],
+                    k_range=range(3, 1, -1))
+        res2 = km.compute()
+        self.assertEqual(res2.k_value, 2)
