@@ -8,6 +8,18 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.5.0] - 2021-09-23
+********************
+
+Added
+-----
+* k-means implementation for tri-clustering
+* utility functions to calculate cluster-based averages for tri-clustering
+
+Changed
+-------
+* Best k value in k-means is now selected automatically using the Silhouette score
+
 [0.4.0] - 2021-07-29
 ********************
 

@@ -166,13 +166,13 @@ class Kmeans(object):
         # Reshape the centroids of means to the shape of cluster matrix,
         # taking into account non-constructive clusters
         self.results.cl_mean_centroids = np.full(self.nclusters, np.nan)
-        idx = 0
-        cls_exist = np.array(
-            np.meshgrid(*[np.unique(cl) for cl in self.clusters])).T.reshape(
-                -1, len(self.nclusters))
-        for cl in cls_exist:
-            self.results.cl_mean_centroids[tuple(cl)] = cl_mean_centroids[idx]
-            idx = idx + 1
+        indices = np.meshgrid(
+            *[np.unique(cl) for cl in self.clusters],
+            indexing='ij'
+        )
+        mask = np.zeros_like(self.results.cl_mean_centroids, dtype=bool)
+        mask[tuple(indices)] = True
+        self.results.cl_mean_centroids[mask] = cl_mean_centroids
 
         self.results.write(filename=self.output_filename)
         return self.results
