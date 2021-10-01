@@ -52,21 +52,21 @@ In the case of multi-variate data matrices, it is often the sub-structures/sub-s
 similarity along mutiple/all dimensions which are of the greatest interest. It has, however, long been recognized that 
 traditional 'single-sided' clustering techniques are, in general, inadequate for this purpose. Instead, techniques 
 capable of clustering data along multiple axes simultaneously, often referred to as co- or bi-clustering in the case of 
-two axes or tri-clustering in the case of three axes, are needed, and have seen significant development {} and adoption 
-in fields ranging from bioinformatics {} to finance {} and natural language processing {}.
+two axes or tri-clustering in the case of three axes, are needed, and have seen significant development [] and adoption 
+in fields ranging from bioinformatics [] to finance [] and natural language processing [].
 
 At face value, geo-information science, with ever more and larger data sets of geo-referenced time-series (GTS), would 
 appear to be a natural adopter of co- and tri-clustering. However, immediate adoption was stymied by the initial focus 
 of co- and tri-clustering algorithms on 'significant' clusters, i.e. with values above a threshold {SIM2013}, rather 
 than on a full partitioning of the data as required for clustering analysis of GTS.
-More recently, following the development of a general information theoretical approach {} to partitional co-clustering, 
-Wu et al. {} presented an application of co-clustering to GIS {}, as well as an extension of the method to 
-tri-clustering {}. As they argue, with the explosion of Earth observation and remote sensing (3D)GTS, such methods will 
-become increasingly essential in tackling the large data volumes becoming available.
+More recently, following the development of a general information theoretical approach [@Dhillon:2003] to partitional 
+co-clustering [@Banerjee:2004], Wu et al. presented an application of co-clustering to GIS [@Wu:2015], as well as an 
+extension of the method to tri-clustering [@Wu:2018]. As they argue, with the explosion of Earth observation and remote 
+sensing (3D)GTS, such methods will become increasingly essential in tackling the large data volumes becoming available.
 
 In light of the eminent employability of partitional co- and tri-clustering to GIS, but also the transferability to 
 other domains, this paper presents and publishes the implementation in the Clustering Geo-data Cubes (CGC) package of 
-the co-clustering and tri-custering methods originally developed in {} and {}, respectively.
+the co-clustering and tri-custering methods originally developed in @Wu:2015 and @Wu:2018, respectively.
 
 As outlined below, the package aims to meet the needs of the GIS community, including, in particular, the ability to 
 handle 'big data' and to readily interface with the existing GIS software ecosystem. Nevertheless, the methods remain 
@@ -92,21 +92,21 @@ providing the following features and functionalities:
   the latter, which tackles instead large datasets, the analysis is carried out using distributed data and computation. 
 - **A framework easy to integrate into geospatial analysis workflows.** CGC is written in Python, which is one of the 
   top programming languages for GIS scripting and applications. In the implementation targeting  distributed computing, 
-  CGC makes use of the Dask library, which is widely employed in the field of big geo-data. Numpy and Dask arrays, 
-  which are the data structures employed in CGC, are also employed in the higher-level objects in the Xarray package so 
-  that this versatile and popular tool can be used for data loading and manipulation before ingestion to CGC. 
-  Documentation and tutorials illustrate domain-science examples, applications, and use cases to facilitate community 
-  adoption.   
+  CGC makes use of the Dask library [@Dask:2016], which is widely employed in the field of big geo-data. Numpy and Dask 
+  arrays, which are the data structures employed in CGC, are also employed in the higher-level objects in the Xarray 
+  package [@Hoyer:2017] so that this versatile and popular tool can be used for data loading and manipulation before 
+  ingestion to CGC. Documentation and tutorials illustrate domain-science examples, applications, and use cases to 
+  facilitate community adoption.   
 
 # Algorithms
 
 ## Co-clustering
 
-CGC implements the Bregman block average co-clustering (BBAC) algorithm from Ref. XX (see Algorithm 1 in the article), 
-and it was inspired by the Matlab code by Srujana Merugu and Arindam Banerjee[@Merugu:2007]. The algorithm iteratively 
-optimizes the clustering of rows and columns starting from a random initial assignment. The information loss from the 
-original matrix to the clustered one, which is constructed as the matrix of the co-cluster means, is minimized using a 
-loss function that is based on the I-divergence. To limit the influence of the initial conditions on the final 
+CGC implements the Bregman block average co-clustering (BBAC) algorithm from @Banerjee:2004 (see Algorithm 1 in the 
+article), and it was inspired by the Matlab code by Srujana Merugu and Arindam Banerjee [@Merugu:2004]. The algorithm 
+iteratively optimizes the clustering of rows and columns starting from a random initial assignment. The information loss 
+from the original matrix to the clustered one, which is constructed as the matrix of the co-cluster means, is minimized 
+using a loss function that is based on the I-divergence. To limit the influence of the initial conditions on the final 
 clustering, which might represent a local minimum in the cluster space, multiple differently-initialized runs are 
 carried out.
 
@@ -115,7 +115,7 @@ column-cluster assignments updated to minimize the loss function. Note that in t
 the update in the row- and column-cluster assignments is computed only from the previous iteration's row and column 
 clusters (and the corresponding cluster-based means). The order in which the axes of the input data matrix are 
 considered does not affect the outcome of the co-clustering. This differs from the implementation in the original 
-Matlab code[@Merugu:2007], where the new row-cluster assignments are employed to update the column-cluster assignments 
+Matlab code[@Merugu:2004], where the new row-cluster assignments are employed to update the column-cluster assignments 
 at the same step, leading to an asymmetry in how the clustering of rows and columns is handled.
 
 ## Tri-clustering
@@ -131,11 +131,12 @@ axes of the input data array are provided.
 
 ## Cluster refinement
 
-CGC implements an optional cluster refinement step using the k-means method, as implemented in the scikit-learn package 
-[Pedregosa:2011]. The co- and tri-clusters are classified into a pre-defined number of refined clusters, and this 
-pre-defined number is referred to as $k$. In this step, similar clusters are identified in the co-clustering or 
-tri-clustering results. This identification is performed by computing certain pre-defined features over all elements 
-belonging to the same co- or tri-cluster. CGC employs the following features in the k-means implementation:
+CGC implements an optional cluster refinement step based on the k-means method [Wu:2016]. For this, we exploit the 
+implementation available in the scikit-learn package [@Pedregosa:2011]. The co- and tri-clusters are classified into a 
+pre-defined number of refined clusters, and this pre-defined number is referred to as $k$. In this step, similar 
+clusters are identified in the co-clustering or tri-clustering results. This identification is performed by computing 
+certain pre-defined features over all elements belonging to the same co- or tri-cluster. CGC employs the following 
+features in the k-means implementation:
 
 - Mean value;
 - Standard deviation;
