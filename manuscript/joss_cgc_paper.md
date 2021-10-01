@@ -131,7 +131,7 @@ axes of the input data array are provided.
 
 ## Cluster refinement
 
-CGC implements an optional cluster refinement step based on the k-means method [Wu:2016]. For this, we exploit the 
+CGC implements an optional cluster refinement step based on the k-means method [@Wu:2016]. For this, we exploit the 
 implementation available in the scikit-learn package [@Pedregosa:2011]. The co- and tri-clusters are classified into a 
 pre-defined number of refined clusters, and this pre-defined number is referred to as $k$. In this step, similar 
 clusters are identified in the co-clustering or tri-clustering results. This identification is performed by computing 
