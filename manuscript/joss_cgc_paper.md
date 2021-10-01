@@ -103,39 +103,39 @@ providing the following features and functionalities:
 ## Co-clustering
 
 CGC implements the Bregman block average co-clustering (BBAC) algorithm from Ref. XX (see Algorithm 1 in the article), 
-and it was inspired by the [Matlab code](http://www.ideal.ece.utexas.edu/software.html) by Srujana Merugu and Arindam 
-Banerjee. The algorithm iteratively optimizes the clustering of rows and columns starting from a random initial 
-assignment. The information loss from the original matrix to the clustered one, which is constructed as the matrix of 
-the co-cluster means, is minimized using a loss function that is based on the I-divergence. To limit the influence of 
-the initial conditions on the final clustering, which might represent a local minimum in the cluster space, multiple 
-differently-initialized runs are carried out.
+and it was inspired by the Matlab code by Srujana Merugu and Arindam Banerjee[@Merugu:2007]. The algorithm iteratively 
+optimizes the clustering of rows and columns starting from a random initial assignment. The information loss from the 
+original matrix to the clustered one, which is constructed as the matrix of the co-cluster means, is minimized using a 
+loss function that is based on the I-divergence. To limit the influence of the initial conditions on the final 
+clustering, which might represent a local minimum in the cluster space, multiple differently-initialized runs are 
+carried out.
 
 The iterative cluster optimization involves steps where the cluster-based means are calculated and the row- and 
 column-cluster assignments updated to minimize the loss function. Note that in the CGC implementation of the algorithm, 
 the update in the row- and column-cluster assignments is computed only from the previous iteration's row and column 
 clusters (and the corresponding cluster-based means). The order in which the axes of the input data matrix are 
 considered does not affect the outcome of the co-clustering. This differs from the implementation in the original 
-Matlab code, where the new row-cluster assignments are employed to update the column-cluster assignments at the same 
-step, leading to an asymmetry in how the clustering of rows and columns is handled.
+Matlab code[@Merugu:2007], where the new row-cluster assignments are employed to update the column-cluster assignments 
+at the same step, leading to an asymmetry in how the clustering of rows and columns is handled.
 
 ## Tri-clustering
 
 For tri-clustering, CGC implements the so-called Bregman cube average tri-clustering (BCAT) algorithm, which is the 
-natural generalization of the BBAC algorithm to three dimensions. Also for tri-clustering, the I divergence is employed 
-as the loss function, and multiple runs are carried out to avoid local minima as much as possible. At every iteration, 
-the cluster-based means are calculated and the clusters in the three dimensions updated to minimize the information 
-loss from the original data matrix to its clustered counterpart. As for the CGC co-clustering implementation, only the 
-clusters from the previous iteration (and the corresponding cluster means) are employed to update the tri-cluster 
-assignments. Thus, the tri-clustering outcome is not influenced by the order in which the three axes of the input data 
-array are provided. 
+natural generalization of the BBAC algorithm to three dimensions [@Wu:2018]. Also for tri-clustering, a loss function
+based on the I-divergence is employed and multiple runs are carried out to avoid local minima as much as possible. At 
+every iteration, the cluster-based means are calculated and the clusters in the three dimensions updated to minimize the 
+information loss from the original data matrix to its clustered counterpart. As for the CGC co-clustering 
+implementation, only the clusters from the previous iteration (and the corresponding cluster means) are employed to 
+update the tri-cluster assignments. Thus, the tri-clustering outcome is not influenced by the order in which the three 
+axes of the input data array are provided. 
 
 ## Cluster refinement
 
 CGC implements an optional cluster refinement step using the k-means method, as implemented in the scikit-learn package 
-(Ref XX). The co- and tri-clusters are classified into a pre-defined number of refined clusters, and this pre-defined 
-number is referred to as $k$. In this step, similar clusters are identified in the co-clustering or tri-clustering 
-results. This identification is performed by computing certain pre-defined features over all elements belonging to the 
-same co- or tri-cluster. CGC employs the following features in the k-means implementation:
+[Pedregosa:2011]. The co- and tri-clusters are classified into a pre-defined number of refined clusters, and this 
+pre-defined number is referred to as $k$. In this step, similar clusters are identified in the co-clustering or 
+tri-clustering results. This identification is performed by computing certain pre-defined features over all elements 
+belonging to the same co- or tri-cluster. CGC employs the following features in the k-means implementation:
 
 - Mean value;
 - Standard deviation;
@@ -144,9 +144,8 @@ same co- or tri-cluster. CGC employs the following features in the k-means imple
 - 5th percentile;
 - 95th percentile;
 
-CGC searches for the optimal $k$ value within a given range, using the Silhouette coefficient (Ref XX) as the measure. 
-The optimal $k$ is identified as the value with the highest Silhouette coefficient.
- 
+CGC searches for the optimal $k$ value within a given range, using the Silhouette coefficient [@Rousseeuw:1987] as the 
+measure. The optimal $k$ is identified as the value with the highest Silhouette coefficient. 
 
 # Software package overview 
 The CGC software is structured in the following main modules:
@@ -184,13 +183,13 @@ The CGC software is structured in the following main modules:
 	
 The software package is complemented by an online tutorial that illustrates how to perform cluster analysis of 
 geospatial datasets using CGC. The tutorial exploits a format that is widely employed in the geoscience community, i.e. 
-[Jupyter notebooks](). Notebooks are made directly available via a 
+Jupyter notebooks[@Kluyver:2016]. Notebooks are made directly available via a 
 [dedicated GitHub repository](https://github.com/esciencecenter-digital-skills/tutorial-cgc), but they are also 
 published as [static web pages](https://cgc-tutorial.readthedocs.io) for reference and linked to the 
 [CGC documentation](https://cgc.readthedocs.io) via a 'Tutorials' tab. The tutorials are designed to run on systems with 
 limited CPU/memory capacity, which, together with environment requirement specifications in a standardized format 
 (`conda` YAML file) and binder badges, give users the possibility to easily run the notebooks live on 
-[mybinder.org](https://mybinder.org).
+`mybinder.org` [@Jupyter:2018].
 
 Tutorials cover the following topics:
 
