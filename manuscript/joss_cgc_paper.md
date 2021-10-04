@@ -8,13 +8,13 @@ tags:
   - geospatial
   
 authors:
-  - name: Francesco Nattino  #^[co-first author] # note this makes a footnote saying 'co-first author'
+  - name: Francesco Nattino
     orcid: 0000-0003-3286-0139
     affiliation: "1" # (Multiple affiliations must be quoted)
-  - name: Ou Ku #^[co-first author] # note this makes a footnote saying 'co-first author'
+  - name: Ou Ku 
     orcid: 0000-0002-5373-5209
     affiliation: "1"
-  - name: Meiert W. Grootes #^[corresponding author]
+  - name: Meiert W. Grootes 
     orcid: 0000-0002-5733-4795
     affiliation: "1"
   - name: Emma Izquierdo-Verdiguier
@@ -26,7 +26,6 @@ authors:
   - name: Raul Zurita-Milla
     orcid: 0000-0002-1769-6310
     affiliation: "3"
-  
 
 affiliations:
  - name: Netherlands eScience Center, Science Park 140, 1098 XG Amsterdam, The Netherlands
@@ -36,7 +35,7 @@ affiliations:
  - name: Faculty of Geo-Information Science and Earth Observation (ITC), University of Twente, PO Box 217, 7500 AE, Enschede, the Netherlands
    index: 3
    
-date: XX October 2021
+date: 4 October 2021
 bibliography: joss_cgc_paper.bib
 
 ---
@@ -49,7 +48,7 @@ clustering techniques - algorithmic prescriptions for identifying (sub-)groups o
 this regard. 
 
 In the case of multi-variate data matrices, it is often the sub-structures/sub-spaces characterized by simultaneous 
-similarity along mutiple/all dimensions which are of the greatest interest. It has, however, long been recognized that 
+similarity along multiple/all dimensions which are of the greatest interest. It has, however, long been recognized that 
 traditional 'single-sided' clustering techniques are, in general, inadequate for this purpose. Instead, techniques 
 capable of clustering data along multiple axes simultaneously, often referred to as co- or bi-clustering in the case of 
 two axes or tri-clustering in the case of three axes, are needed, and have seen significant development [] and adoption 
@@ -57,16 +56,16 @@ in fields ranging from bioinformatics [] to finance [] and natural language proc
 
 At face value, geo-information science, with ever more and larger data sets of geo-referenced time-series (GTS), would 
 appear to be a natural adopter of co- and tri-clustering. However, immediate adoption was stymied by the initial focus 
-of co- and tri-clustering algorithms on 'significant' clusters, i.e. with values above a threshold {SIM2013}, rather 
+of co- and tri-clustering algorithms on 'significant' clusters, i.e. with values above a threshold [], rather 
 than on a full partitioning of the data as required for clustering analysis of GTS.
-More recently, following the development of a general information theoretical approach [@Dhillon:2003] to partitional 
+More recently, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional 
 co-clustering [@Banerjee:2004], Wu et al. presented an application of co-clustering to GIS [@Wu:2015], as well as an 
 extension of the method to tri-clustering [@Wu:2018]. As they argue, with the explosion of Earth observation and remote 
 sensing (3D)GTS, such methods will become increasingly essential in tackling the large data volumes becoming available.
 
 In light of the eminent employability of partitional co- and tri-clustering to GIS, but also the transferability to 
 other domains, this paper presents and publishes the implementation in the Clustering Geo-data Cubes (CGC) package of 
-the co-clustering and tri-custering methods originally developed in @Wu:2015 and @Wu:2018, respectively.
+the co-clustering and tri-clustering methods originally developed in @Wu:2015 and @Wu:2018, respectively.
 
 As outlined below, the package aims to meet the needs of the GIS community, including, in particular, the ability to 
 handle 'big data' and to readily interface with the existing GIS software ecosystem. Nevertheless, the methods remain 
@@ -133,7 +132,7 @@ axes of the input data array are provided.
 
 CGC implements an optional cluster refinement step based on the k-means method [@Wu:2016]. For this, we exploit the 
 implementation available in the scikit-learn package [@Pedregosa:2011]. The co- and tri-clusters are classified into a 
-pre-defined number of refined clusters, and this pre-defined number is referred to as $k$. In this step, similar 
+pre-defined number of refined clusters and this pre-defined number is referred to as $k$. In this step, similar 
 clusters are identified in the co-clustering or tri-clustering results. This identification is performed by computing 
 certain pre-defined features over all elements belonging to the same co- or tri-cluster. CGC employs the following 
 features in the k-means implementation:
