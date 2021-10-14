@@ -69,8 +69,6 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     col_clusters = da.array(col_clusters_init) \
         if col_clusters_init is not None \
         else _initialize_clusters(n, nclusters_col, chunks=col_chunks)
-    R = _setup_cluster_matrix(nclusters_row, row_clusters)
-    C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -88,6 +86,8 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
         logger.debug('num of populated clusters: row {}, col {}'.format(
                         da.sum(nel_row_clusters > 0).compute(),
                         da.sum(nel_col_clusters > 0).compute()))
+        R = _setup_cluster_matrix(nclusters_row, row_clusters)
+        C = _setup_cluster_matrix(nclusters_col, col_clusters)
         nel_clusters = da.outer(nel_row_clusters, nel_col_clusters)
         CoCavg = (da.matmul(da.matmul(R.T, Z), C) + Gavg * epsilon) / \
                  (nel_clusters + epsilon)
@@ -96,22 +96,20 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
         d_row = _distance(Z, da.matmul(C, CoCavg.T), epsilon)
         # Assign to best row cluster
         row_clusters = da.argmin(d_row, axis=1)
-        R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
         # Calculate distance based on column approximation
         d_col = _distance(Z.T, da.matmul(R, CoCavg), epsilon)
         # Assign to best column cluster
         col_clusters = da.argmin(d_col, axis=1)
-        C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
         # Error value (actually just the column components really)
         old_e = e
         minvals = da.min(d_col, axis=1)
         # power 1 divergence, power 2 euclidean
         e = da.sum(da.power(minvals, 1))
-        row_clusters, R, col_clusters, C, e = client.persist([row_clusters, R,
-                                                              col_clusters, C,
-                                                              e])
+        row_clusters, col_clusters, e = client.persist([row_clusters,
+                                                        col_clusters,
+                                                        e])
         if run_on_worker:
             # this is workaround for e.compute() for a function that runs
             # on a worker with multiple threads

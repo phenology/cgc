@@ -66,9 +66,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         else _initialize_clusters(n, nclusters_col)
     bnd_clusters = bnd_clusters_init if bnd_clusters_init is not None \
         else _initialize_clusters(d, nclusters_bnd)
-    R = _setup_cluster_matrix(nclusters_row, row_clusters)
-    C = _setup_cluster_matrix(nclusters_col, col_clusters)
-    B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -90,6 +87,10 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         nel_clusters = np.einsum('i,j->ij', nel_row_clusters, nel_col_clusters)
         nel_clusters = np.einsum('i,jk->ijk', nel_bnd_clusters, nel_clusters)
 
+        R = _setup_cluster_matrix(nclusters_row, row_clusters)
+        C = _setup_cluster_matrix(nclusters_col, col_clusters)
+        B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
+
         # calculate tri-cluster averages (epsilon takes care of empty clusters)
         # first sum values in each tri-cluster ..
         TriCavg = np.einsum('ij,ilm->jlm', B, Z)  # .. along band axis
@@ -105,7 +106,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         idx = (1, 0, 2)
         d_row = _distance(Z.transpose(idx), avg_unpck.transpose(idx), epsilon)
         row_clusters = np.argmin(d_row, axis=1)
-        R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
         # unpack tri-cluster averages ..
         avg_unpck = np.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
@@ -114,7 +114,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         idx = (2, 0, 1)
         d_col = _distance(Z.transpose(idx), avg_unpck.transpose(idx), epsilon)
         col_clusters = np.argmin(d_col, axis=1)
-        C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
         # unpack tri-cluster averages ..
         avg_unpck = np.einsum('ij,kjl->kil', R, TriCavg)  # .. along row axis
@@ -122,7 +121,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         # use these for the band cluster assignment
         d_bnd = _distance(Z, avg_unpck, epsilon)
         bnd_clusters = np.argmin(d_bnd, axis=1)
-        B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
 
         # Error value (actually just the band component really)
         old_e = e

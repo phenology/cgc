@@ -147,15 +147,11 @@ def coclustering(Z,
         row_clusters = np.array(row_clusters_init)
     else:
         row_clusters = _initialize_clusters(m, nclusters_row)
-    if not low_memory:
-        R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
     if col_clusters_init is not None:
         col_clusters = np.array(col_clusters_init)
     else:
         col_clusters = _initialize_clusters(n, nclusters_col)
-    if not low_memory:
-        C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -179,33 +175,29 @@ def coclustering(Z,
                 CoCavg = _cluster_dot(Z, row_clusters, col_clusters,
                                       nclusters_row, nclusters_col)
         else:
+            R = _setup_cluster_matrix(nclusters_row, row_clusters)
+            C = _setup_cluster_matrix(nclusters_col, col_clusters)
             CoCavg = np.dot(np.dot(R.T, Z), C)
         CoCavg += Gavg * epsilon
         CoCavg /= nel_clusters + epsilon
 
-        # Calculate distance based on row approximation and assign best cluster
+        # Calculate distances based on approximation and assign best clusters
         if low_memory:
             if numba_jit:
-                row_clusters, _ = _min_dist_numba(Z, col_clusters, CoCavg.T,
-                                                  epsilon)
-            else:
-                row_clusters, _ = _min_dist_lowmem(Z, col_clusters, CoCavg.T,
+                _row_clusters, _ = _min_dist_numba(Z, col_clusters, CoCavg.T,
                                                    epsilon)
-        else:
-            row_clusters, _ = _min_dist(Z, C, CoCavg.T, epsilon)
-            R = _setup_cluster_matrix(nclusters_row, row_clusters)
-
-        # Calculate distance based on col approximation and assign best cluster
-        if low_memory:
-            if numba_jit:
                 col_clusters, dist = _min_dist_numba(Z.T, row_clusters, CoCavg,
                                                      epsilon)
+                row_clusters = _row_clusters
             else:
+                _row_clusters, _ = _min_dist_lowmem(Z, col_clusters, CoCavg.T,
+                                                    epsilon)
                 col_clusters, dist = _min_dist_lowmem(Z.T, row_clusters,
                                                       CoCavg, epsilon)
+                row_clusters = _row_clusters
         else:
+            row_clusters, _ = _min_dist(Z, C, CoCavg.T, epsilon)
             col_clusters, dist = _min_dist(Z.T, R, CoCavg, epsilon)
-            C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
         # Error value (actually just the column components really)
         old_e = e
