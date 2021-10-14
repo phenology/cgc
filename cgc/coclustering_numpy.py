@@ -6,17 +6,18 @@ import numba
 logger = logging.getLogger(__name__)
 
 
-def _distance(Z, Y, epsilon):
+def _distance(Z, Y):
     """ Distance function """
-    Y = Y + epsilon
     # The first term below is equal to one row of: da.dot(da.ones(m, n), Y)
     # with Z.shape = (m, n) and Y.shape = (n, k)
-    return Y.sum(axis=0, keepdims=True) - np.dot(Z, np.log(Y))
+    sum = Y.sum(axis=0, keepdims=True)
+    logY = np.log(Y, out=Y, where=(Y > 0))
+    return sum - np.dot(Z, logY)
 
 
-def _min_dist(Z, M, CoCavg, epsilon):
+def _min_dist(Z, M, CoCavg):
     Y = np.dot(M, CoCavg)
-    d = _distance(Z, Y, epsilon)
+    d = _distance(Z, Y)
     return np.argmin(d, axis=1), np.min(d, axis=1)
 
 
@@ -157,8 +158,6 @@ def coclustering(Z,
     s = 0
     converged = False
 
-    Gavg = Z.mean()
-
     while (not converged) & (s < niters):
         logger.debug(f'Iteration # {s} ..')
         # Calculate cluster based averages
@@ -178,8 +177,7 @@ def coclustering(Z,
             R = _setup_cluster_matrix(nclusters_row, row_clusters)
             C = _setup_cluster_matrix(nclusters_col, col_clusters)
             CoCavg = np.dot(np.dot(R.T, Z), C)
-        CoCavg += Gavg * epsilon
-        CoCavg /= nel_clusters + epsilon
+        np.divide(CoCavg, nel_clusters, out=CoCavg, where=(nel_clusters > 0))
 
         # Calculate distances based on approximation and assign best clusters
         if low_memory:
@@ -196,8 +194,8 @@ def coclustering(Z,
                                                       CoCavg, epsilon)
                 row_clusters = _row_clusters
         else:
-            row_clusters, _ = _min_dist(Z, C, CoCavg.T, epsilon)
-            col_clusters, dist = _min_dist(Z.T, R, CoCavg, epsilon)
+            row_clusters, _ = _min_dist(Z, C, CoCavg.T)
+            col_clusters, dist = _min_dist(Z.T, R, CoCavg)
 
         # Error value (actually just the column components really)
         old_e = e
