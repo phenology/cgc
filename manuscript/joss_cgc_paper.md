@@ -73,29 +73,28 @@ widely applicable and can easily be applied in other domains as well.
 
 # Statement of need 
 
-The CGC package targets a specific audience, that is researchers in the field of geo- and climate science. In 
-particular, it aims to meet the community need for a tool able to accurately cluster geospatial data such as GTS by 
-providing the following features and functionalities:
+The CGC package focuses on the needs of geographers and geoscientist. In 
+particular, it aims to meet the community need for a tool than can accurately cluster multi-dimensional data by providing the following features and functionalities:
 
-- **Partitional co- and tri-clustering algorithms, as suitable to work with (multi-band) spatiotemporal raster data.** 
+- **Partitional co- and tri-clustering algorithms, as suitable to work with spatiotemporal (multi-dimensional) data.** 
   CGC entails algorithms that are based on information theory and that are designed to simultaneously group elements 
   into disjoint clusters along all the input array axes. These methods are advantageous over single-sided clustering in 
   that they provide a strategy to identify patterns that unfold across multiple dimensions (e.g. space and time). In 
   addition, CGC provides the functionality to perform a cluster refinement over the identified co- and tri-clusters. 
   This post-processing step has the goal to reduce the number of clusters by grouping them based on similarity, 
-  facilitating the identification and visualization of patterns. 
-- **A scalable approach, able to efficiently perform cluster analyses on both small and big data sets.** CGC offers 
+  facilitating the identification and visualization of patterns.
+- **A scalable approach to efficiently perform cluster analyses on both small and big data sets.** CGC offers 
   solutions for a wide range of data set sizes by providing co- and tri-clustering implementations designed to run on 
   either a single machine or on a compute cluster. For the former, which tackles input data arrays that largely fit 
   into memory, one can exploit parallelization of independent analysis runs, taking advantage of multi-core CPUs. For 
   the latter, which tackles instead large datasets, the analysis is carried out using distributed data and computation. 
 - **A framework easy to integrate into geospatial analysis workflows.** CGC is written in Python, which is one of the 
-  top programming languages for GIS scripting and applications. In the implementation targeting  distributed computing, 
+  top programming languages for geospatial scripting and applications. In the implementation targeting distributed computing, 
   CGC makes use of the Dask library [@Dask:2016], which is widely employed in the field of big geo-data. Numpy and Dask 
   arrays, which are the data structures employed in CGC, are also employed in the higher-level objects in the Xarray 
   package [@Hoyer:2017] so that this versatile and popular tool can be used for data loading and manipulation before 
   ingestion to CGC. Documentation and tutorials illustrate domain-science examples, applications, and use cases to 
-  facilitate community adoption.   
+  facilitate community adoption.
 
 # Algorithms
 
@@ -112,30 +111,24 @@ carried out.
 The iterative cluster optimization involves steps where the cluster-based means are calculated and the row- and 
 column-cluster assignments updated to minimize the loss function. Note that in the CGC implementation of the algorithm, 
 the update in the row- and column-cluster assignments is computed only from the previous iteration's row and column 
-clusters (and the corresponding cluster-based means). The order in which the axes of the input data matrix are 
-considered does not affect the outcome of the co-clustering. This differs from the implementation in the original 
-Matlab code[@Merugu:2004], where the new row-cluster assignments are employed to update the column-cluster assignments 
-at the same step, leading to an asymmetry in how the clustering of rows and columns is handled.
+clusters (and the corresponding cluster-based means). Contrarily to the original MATLAB implementation [@Merugu:2004], this makes the algorithm independent from the order in which the dimensions are considered, while still leading to an optimal clustering solution.
 
 ## Tri-clustering
 
 For tri-clustering, CGC implements the so-called Bregman cube average tri-clustering (BCAT) algorithm, which is the 
-natural generalization of the BBAC algorithm to three dimensions [@Wu:2018]. Also for tri-clustering, a loss function
+natural generalization of the BBAC algorithm to three dimensions [@Wu:2018]. A loss function
 based on the I-divergence is employed and multiple runs are carried out to avoid local minima as much as possible. At 
 every iteration, the cluster-based means are calculated and the clusters in the three dimensions updated to minimize the 
-information loss from the original data matrix to its clustered counterpart. As for the CGC co-clustering 
+information loss from the original data matrix to its clustered counterpart. Similar the CGC co-clustering 
 implementation, only the clusters from the previous iteration (and the corresponding cluster means) are employed to 
 update the tri-cluster assignments. Thus, the tri-clustering outcome is not influenced by the order in which the three 
-axes of the input data array are provided. 
+axes of the input data array are provided.
 
 ## Cluster refinement
 
-CGC implements an optional cluster refinement step based on the k-means method [@Wu:2016]. For this, we exploit the 
-implementation available in the scikit-learn package [@Pedregosa:2011]. The co- and tri-clusters are classified into a 
-pre-defined number of refined clusters and this pre-defined number is referred to as $k$. In this step, similar 
-clusters are identified in the co-clustering or tri-clustering results. This identification is performed by computing 
-certain pre-defined features over all elements belonging to the same co- or tri-cluster. CGC employs the following 
-features in the k-means implementation:
+The CGC package implements an optional cluster refinement step based on the k-means method [@Wu:2016]. For this, we exploit the 
+k-mean implementation available in the scikit-learn package [@Pedregosa:2011]. The co- and tri-clusters are grouped into $k$ 
+pre-defined clusters. This grouping is based on statistical properties of the co- or tri-clusters and helps to better capture the patterns hidden in the data. The CGC package employs the following statistical properties:
 
 - Mean value;
 - Standard deviation;
@@ -144,8 +137,7 @@ features in the k-means implementation:
 - 5th percentile;
 - 95th percentile;
 
-CGC searches for the optimal $k$ value within a given range, using the Silhouette coefficient [@Rousseeuw:1987] as the 
-measure. The optimal $k$ is identified as the value with the highest Silhouette coefficient. 
+The CGC searches for the optimal k value is selected within a given range, using the Silhouette metric coefficient [@Rousseeuw:1987].
 
 # Software package overview 
 The CGC software is structured in the following main modules:
@@ -177,12 +169,11 @@ The CGC software is structured in the following main modules:
 
 - [`kmeans`](https://cgc.readthedocs.io/en/latest/kmeans.html), which implements the k-means cluster refinement step for 
   both co- and tri-clustering.
-- [`utils`](https://https://cgc.readthedocs.io/en/latest/utils.html), which includes a collection of utility functions. 
+- [`utils`](https://https://cgc.readthedocs.io/en/latest/utils.html), which includes a collection of utility functions e.g. memory consumption estimation and cluster averaging. 
  
 # Tutorial 
 	
-The software package is complemented by an online tutorial that illustrates how to perform cluster analysis of 
-geospatial datasets using CGC. The tutorial exploits a format that is widely employed in the geoscience community, i.e. 
+The software package is complemented by an [online tutorial](https://cgc-tutorial.readthedocs.io/en/latest/) that illustrates how to perform cluster analysis of geospatial datasets using CGC. The tutorial exploits a format that is widely employed in the geoscience community, i.e. 
 Jupyter notebooks[@Kluyver:2016]. Notebooks are made directly available via a 
 [dedicated GitHub repository](https://github.com/esciencecenter-digital-skills/tutorial-cgc), but they are also 
 published as [static web pages](https://cgc-tutorial.readthedocs.io) for reference and linked to the 
@@ -203,15 +194,11 @@ likely to make it easier for users to carry out cluster analysis using CGC in ot
  
 # Acknowledgements
 
-The authors acknowledge Dr. Yifat Dzigan for the helpful discussions and support and Dr. Romulo Goncalves for the 
-preliminary work that lead to the development of the software package presented here. 
+The authors would like to thank Dr. Yifat Dzigan for the helpful discussions and support and Dr. Romulo Goncalves for the 
+preliminary work that lead to the development of the software package presented here. We also would like to thank SURF for providing computational resources to test the first versions of the CGC package.  
  
 # Author contributions 
 
-The Netherlands eScience Center team (F.N., M.W.G., and O.K.) took care of most of the software implementation, 
-contributed to the algorithm design and testing, and wrote most of the manuscript. 
-E.I.V. 
-S.G.
-R.Z.M.
+The Netherlands eScience Center team (F.N., M.W.G., and O.K.) took care of most of the software implementation, contributed to the algorithm design and testing, and wrote most of the manuscript. All co-authors contributed to the conceptualization of the work, which was led by R.Z.M. and E.I.V.. F.N, M.W.G and O.K prepared The first draft of the tutorials, and wrote the initial draft of this manuscript. F.N. suggested changes to the co-and tri-clustering algorithm. R.Z.M., E.I.V. and S.K. led the design of experiments to test and improve the CGC package. R.Z.M. and E.I.V helped to improve the tutorials. SK provided the required computational resources to run the experiments and tutorials. All co-authors reviewed and edited the final document.  
 
 # References
