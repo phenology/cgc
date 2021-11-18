@@ -119,7 +119,7 @@ For tri-clustering, CGC implements the so-called Bregman cube average tri-cluste
 natural generalization of the BBAC algorithm to three dimensions [@Wu:2018]. A loss function
 based on the I-divergence is employed and multiple runs are carried out to avoid local minima as much as possible. At 
 every iteration, the cluster-based means are calculated and the clusters in the three dimensions updated to minimize the 
-information loss from the original data matrix to its clustered counterpart. Similar the CGC co-clustering 
+information loss from the original data matrix to its clustered counterpart. Similar to the CGC co-clustering 
 implementation, only the clusters from the previous iteration (and the corresponding cluster means) are employed to 
 update the tri-cluster assignments. Thus, the tri-clustering outcome is not influenced by the order in which the three 
 axes of the input data array are provided.
