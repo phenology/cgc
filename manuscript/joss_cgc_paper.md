@@ -40,35 +40,27 @@ bibliography: joss_cgc_paper.bib
 
 ---
 
+
+
 # Introduction
 
-Faced with the increasing ubiquity of large datasets across most scientific domains, data mining techniques have become 
-essential to extracting patterns, i.e valorizing the data for knowledge development and/or decision making. Data 
-clustering techniques - algorithmic prescriptions for identifying (sub-)groups of similar elements - play a key role in 
-this regard. 
+Faced with the increasing ubiquity of large datasets, data mining techniques have become 
+essential to extracting patterns and generating insights. In this regard, clustering techniques, which aim to identify groups or subgroups with simmilar propertties within a larger data set, are becoming ever more popular.
 
-In the case of multi-variate data matrices, it is often the sub-structures/sub-spaces characterized by simultaneous 
-similarity along multiple/all dimensions which are of the greatest interest. It has, however, long been recognized that 
-traditional 'single-sided' clustering techniques are, in general, inadequate for this purpose. Instead, techniques 
-capable of clustering data along multiple axes simultaneously, often referred to as co- or bi-clustering in the case of 
-two axes or tri-clustering in the case of three axes, are needed, and have seen significant development [] and adoption 
-in fields ranging from bioinformatics [] to finance [] and natural language processing [].
+In the case of multi-variate data, however, traditional one dimensional clustering techniques, which marginalize over the other variables, may obfuscate clusters present in the data [@Hartigan:1972][@cheng:2000]. Therefore, techniques capable of grouping data along multiple axes simultaneously are needed. These techniques are referred to as co- or bi-clustering in the case of two axes or tri-clustering in the case of three axes and have seen significant development and adoption 
+in fields ranging from bioinformatics [@Cheng:2000] to finance [@Shi:2018] and natural language processing [@Dhillon2001].
 
-At face value, geo-information science, with ever more and larger data sets of geo-referenced time-series (GTS), would 
-appear to be a natural adopter of co- and tri-clustering. However, immediate adoption was stymied by the initial focus 
-of co- and tri-clustering algorithms on 'significant' clusters, i.e. with values above a threshold [], rather 
-than on a full partitioning of the data as required for clustering analysis of GTS.
-More recently, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional 
-co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to GIS [@Wu:2015], as well as an 
+With many large datasets referring to geographical phenomena and either describing time varying properties (so-called GTS - georeferenced time series, including, e.g. satellite image time series) or providing multi-dimensional information about a given location or phenomenon, geo-information science is a further natural field of employment for co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geo-information science [@Wu:2015], as well as an 
 extension of the method to tri-clustering [@Wu:2018]. As they argue, with the explosion of Earth observation and remote 
-sensing (3D)GTS, such methods will become increasingly essential in tackling the large data volumes becoming available.
+sensing, and therefore GTS in three dimensions, such methods will become increasingly essential in tackling the large data volumes becoming available.    
 
-In light of the eminent employability of partitional co- and tri-clustering to GIS, but also the transferability to 
+
+In light of the eminent employability of partitional co- and tri-clustering to geo-information science, but also the transferability to 
 other domains, this paper presents and publishes the implementation in the Clustering Geo-data Cubes (CGC) package of 
 the co-clustering and tri-clustering methods originally developed in @Wu:2015 and @Wu:2018, respectively.
 
-As outlined below, the package aims to meet the needs of the GIS community, including, in particular, the ability to 
-handle 'big data' and to readily interface with the existing GIS software ecosystem. Nevertheless, the methods remain 
+As outlined below, the package aims to meet the needs of the geo-information science community, including, in particular, the ability to 
+handle 'big data' and to readily interface with the existing geographic information system (GIS) software ecosystem. Nevertheless, the methods remain 
 widely applicable and can easily be applied in other domains as well.
 
 # Statement of need 
