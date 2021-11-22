@@ -39,8 +39,9 @@ date: 18 November 2021
 bibliography: joss_cgc_paper.bib
 
 ---
+# Abstract
 
-
+Data cubes, i.e., datasets whose variables are expressed as a function of multiple dimensions (e.g., space, time, band), are ubiquitous in the field of Earth observation and geoscience. Clustering techniques encompassing the full dimensionality of the data are necessary to identify patterns that extend across multiple axes in such datasets. Clustering Geodata Cubes (CGC) is a Python package designed to enable this class of analyses, especially targeting multi-dimensional geospatial datasets. It provides the functionality to perform co- and tri-cluster analysis, offering scalable implementations that suit both small and large datasets. 
 
 # Introduction
 
