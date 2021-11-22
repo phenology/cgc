@@ -45,17 +45,16 @@ bibliography: joss_cgc_paper.bib
 # Introduction
 
 Faced with the increasing ubiquity of large datasets, data mining techniques have become 
-essential to extracting patterns and generating insights. In this regard, clustering techniques, which aim to identify groups or subgroups with simmilar propertties within a larger data set, are becoming ever more popular.
+essential to extracting patterns and generating insights. In this regard, clustering techniques, which aim to identify groups or subgroups with similar properties within a larger data set, are becoming ever more popular.
 
-In the case of multi-variate data, however, traditional one dimensional clustering techniques, which marginalize over the other variables, may obfuscate clusters present in the data [@Hartigan:1972][@cheng:2000]. Therefore, techniques capable of grouping data along multiple axes simultaneously are needed. These techniques are referred to as co- or bi-clustering in the case of two axes or tri-clustering in the case of three axes and have seen significant development and adoption 
+In the case of multi-variate data, however, traditional one-dimensional clustering techniques, which marginalize over the other variables, may obfuscate clusters present in the data [@Hartigan:1972][@cheng:2000]. Therefore, techniques capable of grouping data along multiple axes simultaneously are needed. These techniques are referred to as co- or bi-clustering in the case of two axes or tri-clustering in the case of three axes and have seen significant development and adoption 
 in fields ranging from bioinformatics [@Cheng:2000] to finance [@Shi:2018] and natural language processing [@Dhillon2001].
 
-With many large datasets referring to geographical phenomena and either describing time varying properties (so-called GTS - georeferenced time series, including, e.g. satellite image time series) or providing multi-dimensional information about a given location or phenomenon, geo-information science is a further natural field of employment for co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geo-information science [@Wu:2015], as well as an 
+With many large datasets referring to geographical phenomena and either describing time-varying properties (so-called GTS - georeferenced time series, including, e.g. satellite image time series) or providing multi-dimensional information about a given location or phenomenon (e.g. in weather and climate datasets), geo-information science is a further natural field of employment for co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geo-information science [@Wu:2015], as well as an 
 extension of the method to tri-clustering [@Wu:2018]. As they argue, with the explosion of Earth observation and remote 
 sensing, and therefore GTS in three dimensions, such methods will become increasingly essential in tackling the large data volumes becoming available.    
 
-
-In light of the eminent employability of partitional co- and tri-clustering to geo-information science, but also the transferability to 
+In light of the eminent employability of partitional co- and tri-clustering to geo-information science and Earth observation, but also the transferability to 
 other domains, this paper presents and publishes the implementation in the Clustering Geo-data Cubes (CGC) package of 
 the co-clustering and tri-clustering methods originally developed in @Wu:2015 and @Wu:2018, respectively.
 
@@ -66,7 +65,7 @@ widely applicable and can easily be applied in other domains as well.
 # Statement of need 
 
 The CGC package focuses on the needs of geographers and geoscientist. In particular, it aims to meet the community need 
-for a tool than can accurately cluster multi-dimensional data by providing the following features and functionalities:
+for a tool that can accurately cluster multi-dimensional data by providing the following features and functionalities:
 
 - **Partitional co- and tri-clustering algorithms, as suitable to work with spatiotemporal (multi-dimensional) data.** 
   CGC entails algorithms that are based on information theory and that are designed to simultaneously group elements 
@@ -76,10 +75,11 @@ for a tool than can accurately cluster multi-dimensional data by providing the f
   This post-processing step has the goal to reduce the number of clusters by grouping them based on similarity, 
   facilitating the identification and visualization of patterns.
 - **A scalable approach to efficiently perform cluster analyses on both small and big data sets.** CGC offers 
-  solutions for a wide range of data set sizes by providing co- and tri-clustering implementations designed to run on 
-  either a single machine or on a compute cluster. For the former, which tackles input data arrays that largely fit 
-  into memory, one can exploit parallelization of independent analysis runs, taking advantage of multi-core CPUs. For 
-  the latter, which tackles instead large datasets, the analysis is carried out using distributed data and computation. 
+  solutions to make efficient use of the available computational resources and to tackle a wide range of data set sizes.
+  It provides co- and tri-clustering implementations designed to run on either a single machine or on a compute cluster.
+  For the former, which tackles input data arrays that largely fit into memory, one can exploit parallelization of 
+  independent analysis runs, taking advantage of multi-core CPUs. For the latter, which tackles instead large datasets,
+  the analysis is carried out using distributed data and computation. 
 - **A framework easy to integrate into geospatial analysis workflows.** CGC is written in Python, which is one of the 
   top programming languages for geospatial scripting and applications. In the implementation targeting distributed computing, 
   CGC makes use of the Dask library [@Dask:2016], which is widely employed in the field of big geo-data. Numpy and Dask 
@@ -146,8 +146,9 @@ The CGC software is structured in the following main modules, whose details are 
       usage of machines with multi-core CPUs.
     - A [second Numpy-based implementation](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based-low-memory-footprint) 
       that replaces some of the vectorized operations with looping to reduce the need for large work arrays, leading to 
-      a much-reduced memory footprint. While the reduced memory requirement comes at the cost of performance, the loss 
-      can be mitigated through a feature that activates Numba’s just-in-time compilation for some of the critical steps.  
+      a much-reduced memory footprint (negligible with respect to the size of the data matrix). While the reduced memory
+      requirement comes at the cost of performance ("for" loops in Python are slow), the loss can be mitigated through a 
+      feature that activates Numba’s just-in-time compilation for some of the critical steps.  
     - An [implementation based on the Dask library](https://cgc.readthedocs.io/en/latest/coclustering.html#distributed-dask-based), 
       targeting data sets whose size would prevent analyses on a single machine. In particular, Dask arrays are 
       employed to process the data in chunks, which are distributed across the nodes of a compute cluster. The runs to 
@@ -193,6 +194,6 @@ preliminary work that lead to the development of the software package presented 
  
 # Author contributions 
 
-All co-authors contributed to the conceptualization of the work, which was led by R.Z.M. and E.I.V.. F.N, M.W.G and O.K prepared the first draft of the tutorials, and wrote the initial draft of this manuscript. F.N. suggested changes to the co-and tri-clustering algorithm. R.Z.M., E.I.V. and S.K. led the design of experiments to test and improve the CGC package. R.Z.M. and E.I.V helped to improve the tutorials. S.K. provided the required computational resources to run the experiments and tutorials and made suggestions for code optimizations. All co-authors reviewed and edited the final document.  
+All co-authors contributed to the conceptualization of the work, which was led by R.Z.M. and E.I.V.. F.N., M.W.G., and O.K. prepared the first draft of the tutorials, and wrote the initial draft of this manuscript. F.N. suggested changes to the co- and tri-clustering algorithms. R.Z.M., E.I.V., and S.K. led the design of experiments to test and improve the CGC package. R.Z.M. and E.I.V. helped to improve the tutorials. S.K. provided the required computational resources to run the experiments and tutorials and made suggestions for code optimizations. All co-authors reviewed and edited the final document.  
 
 # References
