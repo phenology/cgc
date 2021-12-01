@@ -1,7 +1,6 @@
 import pytest
 
 import numpy as np
-import dask.array as da
 
 from cgc.coclustering import Coclustering
 
@@ -14,7 +13,6 @@ def coclustering():
     Z = np.random.randint(100, size=(m, n)).astype('float64')
     return Coclustering(Z, nclusters_row=ncl_row, nclusters_col=ncl_col,
                         conv_threshold=1.e-5, max_iterations=100, nruns=1,
-                        epsilon=1.e-8,
                         row_clusters_init=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
                         col_clusters_init=[0, 1, 0, 1, 0, 1, 0, 1]
                         )
@@ -65,14 +63,6 @@ class TestCoclustering:
         np.testing.assert_equal(coclustering.results.col_clusters,
                                 [0, 1, 0, 0, 0, 1, 0, 1])
         assert np.isclose(coclustering.results.error, -11503.89447245418)
-
-    def test_dask_performance_raises_error(self, client):
-        m, n = 10, 8
-        Z = np.random.randint(100, size=(m, n)).astype('float64')
-        cc = Coclustering(Z, nclusters_row=5, nclusters_col=2,
-                          epsilon="epsilon")  # wrong data type for epsilon
-        with pytest.raises(TypeError):
-            cc.run_with_dask()
 
     def test_nruns_completed_threads(self, coclustering):
         coclustering.run_with_threads(nthreads=1)
