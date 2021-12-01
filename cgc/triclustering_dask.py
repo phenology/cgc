@@ -75,8 +75,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
     s = 0
     converged = False
 
-    Gavg = Z.mean()
-
     while (not converged) & (s < niters):
         logger.debug(f'Iteration # {s} ..')
         # Calculate number of elements in each tri-cluster

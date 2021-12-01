@@ -52,9 +52,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
     """
     [d, m, n] = Z.shape
 
-    # Calculate average
-    Gavg = Z.mean()
-
     # Initialize cluster assignments
     row_clusters = row_clusters_init if row_clusters_init is not None \
         else _initialize_clusters(m, nclusters_row)
