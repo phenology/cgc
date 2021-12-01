@@ -182,7 +182,7 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters,
             C = _setup_cluster_matrix(col_cluster_labels, col_clusters)
             CoCavg = np.dot(np.dot(R.T, Z), C)
         CoCavg = CoCavg / nel_clusters
-        print(CoCavg)
+
         # Calculate distances based on approximation and assign best clusters
         if low_memory:
             if numba_jit:
@@ -204,7 +204,6 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters,
         else:
             row_clusters, _ = _min_dist(Z, C, CoCavg.T)
             col_clusters, dist = _min_dist(Z.T, R, CoCavg)
-            print(row_clusters, col_clusters)
 
         row_clusters = np.take(row_cluster_labels, row_clusters)
         col_clusters = np.take(col_cluster_labels, col_clusters)
