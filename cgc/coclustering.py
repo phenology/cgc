@@ -65,7 +65,6 @@ class Coclustering(object):
                  conv_threshold=1.e-5,
                  max_iterations=1,
                  nruns=1,
-                 epsilon=1.e-8,
                  output_filename='',
                  row_clusters_init=None,
                  col_clusters_init=None):
@@ -75,7 +74,6 @@ class Coclustering(object):
         self.conv_threshold = conv_threshold
         self.max_iterations = max_iterations
         self.nruns = nruns
-        self.epsilon = epsilon
         self.output_filename = output_filename
         self.row_clusters_init = row_clusters_init
         self.col_clusters_init = col_clusters_init
