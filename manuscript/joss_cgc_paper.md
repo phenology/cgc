@@ -41,91 +41,69 @@ bibliography: joss_cgc_paper.bib
 ---
 # Abstract
 
-Data cubes, i.e., datasets whose variables are expressed as a function of multiple dimensions (e.g., space, time, band), are ubiquitous in the field of Earth observation and geoscience. Clustering techniques encompassing the full dimensionality of the data are necessary to identify patterns that extend across multiple axes in such datasets. Clustering Geodata Cubes (CGC) is a Python package designed to enable this class of analyses, especially targeting multi-dimensional geospatial datasets. It provides the functionality to perform co- and tri-cluster analysis, offering scalable implementations that suit both small and large datasets. 
+Multidimensional data cubes are increasingly ubiquitous, in particular in the geosciences. Clustering techniques encompassing their full dimensionality are necessary to identify patterns "hidden" within these cubes. Clustering Geodata Cubes (CGC) is a Python package designed for partitional clustering, identifying grouops of similar data acros two (e.g. spatial and temporal) or three (e.g. spatial, temporal, and thematic) dimensions. CGC provides efficient and scalable co- and tri-clustering functionality appropriate to analyze  both small and large datasets as well as the cluster refinement and visualization functionality that support users in their quest to make sense of complex datasets.   
+
+
+
 
 # Introduction
 
 Faced with the increasing ubiquity of large datasets, data mining techniques have become 
 essential to extracting patterns and generating insights. In this regard, clustering techniques, which aim to identify groups or subgroups with similar properties within a larger data set, are becoming ever more popular.
 
-In the case of multi-variate data, however, traditional one-dimensional clustering techniques, which marginalize over the other variables, may obfuscate clusters present in the data [@Hartigan:1972;@Cheng:2000]. Therefore, techniques capable of grouping data along multiple axes simultaneously are needed. These techniques are referred to as co- or bi-clustering in the case of two axes or tri-clustering in the case of three axes and have seen significant development and adoption 
+Traditional clustering tecniques focus on a single dimension and may therefore obfuscate relevant groups [@Hartigan:1972;@Cheng:2000]. Therefore, clustering techniques capable of simulaneously grouping data along multiple dimensions are needed. These techniques - referred to as co- or bi-clustering and tri-clustering in the case of two and three dimensions, respecctively - have seen significant development and adoption 
 in fields ranging from bioinformatics [@Cheng:2000] to finance [@Shi:2018] and natural language processing [@Dhillon:2001].
 
-With many large datasets referring to geographical phenomena and either describing time-varying properties (so-called GTS - georeferenced time series, including, e.g. satellite image time series) or providing multi-dimensional information about a given location or phenomenon (e.g. in weather and climate datasets), geo-information science is a further natural field of employment for co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geo-information science [@Wu:2015], as well as an 
-extension of the method to tri-clustering [@Wu:2018]. As they argue, with the explosion of Earth observation and remote 
-sensing, and therefore GTS in three dimensions, such methods will become increasingly essential in tackling the large data volumes becoming available.    
+The recent exponential growth of multidimensional data referring to geographical features (e.g., time series of satellite images) has resulted in a wide variety of geo-data cubes, which can benefit from co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geo-information science [@Wu:2015], as well as an 
+extension of that method to three dimensions [@Wu:2018], with these advanced clustering methods becoming increasingly essential to tackling complex multidimensional data cubes. 
 
-In light of the eminent employability of partitional co- and tri-clustering to geo-information science and Earth observation, but also the transferability to 
-other domains, this paper presents and publishes the implementation in the Clustering Geo-data Cubes (CGC) package of 
-the co-clustering and tri-clustering methods originally developed in @Wu:2015 and @Wu:2018, respectively.
 
-As outlined below, the package aims to meet the needs of the geo-information science community, including, in particular, the ability to 
-handle 'big data' and to readily interface with the existing geographic information system (GIS) software ecosystem. Nevertheless, the methods remain 
-widely applicable and can easily be applied in other domains as well.
+In light of the eminent employability of partitional co- and tri-clustering to geospatial disciplines like geo-information science and Earth observation, and the transferability to 
+other (geo)scientific domains, this paper presents the Clustering Geo-data Cubes (CGC) package, which facilitates the efficient use of 
+the co-clustering and tri-clustering methods presented in @Wu:2015 and @Wu:2018.
+
+As outlined below, the package aims to meet the needs of the geospatial data scientists, including the ability to 
+handle 'big (geo)-data' and to readily interface with the wider open source software ecosystem speialized in geospatial data analysis. Nevertheless, the methods implemented in the CGC package remain 
+widely applicable and can easily be applied in other domains.
 
 # Statement of need 
 
-The CGC package focuses on the needs of geographers and geoscientist. In particular, it aims to meet the community need 
-for a tool that can accurately cluster multi-dimensional data by providing the following features and functionalities:
+The CGC package focuses on the needs of geospatial data scientists who require tools to make sense of multi-dimensional data cubes by providing the following features and functionalities:
 
-- **Partitional co- and tri-clustering algorithms, as suitable to work with spatiotemporal (multi-dimensional) data.** 
-  CGC entails algorithms that are based on information theory and that are designed to simultaneously group elements 
-  into disjoint clusters along all the input array axes. These methods are advantageous over single-sided clustering in 
-  that they provide a strategy to identify patterns that unfold across multiple dimensions (e.g. space and time). In 
-  addition, CGC provides the functionality to perform a cluster refinement over the identified co- and tri-clusters. 
-  This post-processing step has the goal to reduce the number of clusters by grouping them based on similarity, 
-  facilitating the identification and visualization of patterns.
-- **A scalable approach to efficiently perform cluster analyses on both small and big data sets.** CGC offers 
-  solutions to make efficient use of the available computational resources and to tackle a wide range of data set sizes.
-  It provides co- and tri-clustering implementations designed to run on either a single machine or on a compute cluster.
-  For the former, which tackles input data arrays that largely fit into memory, one can exploit parallelization of 
-  independent analysis runs, taking advantage of multi-core CPUs. For the latter, which tackles instead large datasets,
-  the analysis is carried out using distributed data and computation. 
-- **A framework easy to integrate into geospatial analysis workflows.** CGC is written in Python, which is one of the 
-  top programming languages for geospatial scripting and applications. In the implementation targeting distributed computing, 
-  CGC makes use of the Dask library [@Dask:2016], which is widely employed in the field of big geo-data. Numpy and Dask 
-  arrays, which are common data structures in Python, are employed as input and output data types in CGC. These 
-  structures are also employed in the higher-level objects in the Xarray package [@Hoyer:2017], so that this versatile 
-  and popular tool can be used for data loading and manipulation before and after analyses with CGC. Documentation and 
-  tutorials illustrate domain-science examples, applications, and use cases to facilitate community adoption. To make 
-  CGC findable and easy to install and to provide a platform for issue tracking, the development takes place in a
-  [publicly accessible repository](https://github.com/phenology/cgc), the package is distributed via the 
-  Python Package Index (PyPI), and code-release snapshots are archived on Zenodo. Software quality and reliability are
-  guaranteed via unit tests implemented in the continuous integration cycle.
+- **Partitional co- and tri-clustering methods suitable for spatiotemporal (multi-dimensional) data.** 
+  CGC includes clustering methods designed to simultaneously group elements into disjoint clusters along two or three dimensions. These methods are advantageous over single-sided clustering in that they provide a strategy to identify patterns that unfold across multiple dimensions (e.g. space and time). In addition, CGC provides functionality to refine the identified co- and tri-clusters. This post-processing step reduces the number of clusters to facilitate the identification and visualization of patterns.
+ 
+- **Scalable clustering of small and big data sets.**
+  CGG offers functionality to efficiently utilize available computational resources (ranging from single machines to computing clusters) and to tackle a wide range of data set sizes.
+  For single machine execution the package offers optimized support of multi-core CPUs and/or system memory. For large data sets GCC supports the use of distributed data and computation on computing clusters
+
+
+- **Easy integration into geospatial analysis workflows.** CGC is written in Python, which is widely used for geospatial scripting an
+  applications, and employs Numpy and Dask [@Dask:2016] arrays as input and output data types, guaranteeing seamless integration to the Python ecosystem and interoperability with the Dask library[@Dask:2016] prevalent in the field of big geo-data. This furthermore ensures the interoperability of CGC with the Xarray package [@Hoyer:2017], so that this versatile 
+  and popular tool can be used for data loading and manipulation before and after analyses with CGC.
+
+- **Ease of use and reproducibility.**
+  To facilitate community use and adoption, documentation and tutorials illustrating domain-science examples, applications, and use cases are available via the [publicly accessible repository](https://github.com/phenology/cgc), where development takes place and which provides a platfroom for issue tracking. CGC is distributed via the 
+  Python Package Index (PyPI), and code-release snapshots archived on Zenodo facilitate reproducible analysis.
+
 
 # Algorithms
 
 ## Co-clustering
+CGC implements the Bregman block average co-clustering (BBAC) algorithm from @Banerjee:2007 as inspired by the MATLAB code of [@Merugu:2004].
+Briefly, the BBAC algorithm iteratively optimizes the clustering of rows and columns of a data matrix starting from a random initial assignment until convergence. The information loss from the original matrix to the clustered one, which is constructed as the matrix of the co-cluster means, is minimized using a loss function that is based on the I-divergence. CGC also supports a user defined convergence threshold. To limit the influence of the initial conditions on the final clustering and to avoid local mininma several runs are carried out, with the cluster assignments from the lowest loss function value ultimately being selected.
 
-CGC implements the Bregman block average co-clustering (BBAC) algorithm from @Banerjee:2007 (see Algorithm 1 in the 
-article), and it was inspired by the Matlab code by Srujana Merugu and Arindam Banerjee [@Merugu:2004]. The algorithm 
-iteratively optimizes the clustering of rows and columns starting from a random initial assignment. The information loss 
-from the original matrix to the clustered one, which is constructed as the matrix of the co-cluster means, is minimized 
-using a loss function that is based on the I-divergence. The algorithm is considered converged when the difference in 
-loss function between two consecutive optimization steps is smaller than a provided threshold. To limit the influence of 
-the initial conditions on the final clustering, which might represent a local minimum in the cluster space, multiple 
-differently-initialized runs are carried out. Ultimately, the cluster assignment is selected from the run that leads to 
-the lowest loss-function value.
+Note that in the CGC implementation of the algorithm, the update in the row- and column-cluster assignments is computed only from the previous iteration’s row and column. Contrarily to the original MATLAB implementation (Merugu and Banerjee 2004), this makes the algorithm independent of the order in which the dimensions are considered, while still leading to a (locally) optimal clustering solution. 
 
-The iterative cluster optimization involves steps where the cluster-based means are calculated and the row- and 
-column-cluster assignments updated to minimize the loss function. Note that in the CGC implementation of the algorithm, 
-the update in the row- and column-cluster assignments is computed only from the previous iteration's row and column 
-clusters (and the corresponding cluster-based means). Contrarily to the original MATLAB implementation [@Merugu:2004], 
-this makes the algorithm independent of the order in which the dimensions are considered, while still leading to a 
-(locally) optimal clustering solution.
+
 
 ## Tri-clustering
+For tri-clustering CGC implements the so-called Bregman cube average tri-clustering (BCAT) algorithm, which is the 
+natural generalization of the BBAC algorithm to three dimensions [@Wu:2018]. The algorithmic implementation with respect to the loss function and the update schema are analogous to that described above for the co-clustering. Importantly, the tri-clustering outcome is independent of the order in which the three dimensions of the input array are provided.
 
-For tri-clustering, CGC implements the so-called Bregman cube average tri-clustering (BCAT) algorithm, which is the 
-natural generalization of the BBAC algorithm to three dimensions [@Wu:2018]. A loss function
-based on the I-divergence is employed and multiple runs are carried out to avoid local minima as much as possible. At 
-every iteration, the cluster-based means are calculated and the clusters in the three dimensions updated to minimize the 
-information loss from the original data matrix to its clustered counterpart. Similar to the CGC co-clustering 
-implementation, only the clusters from the previous iteration (and the corresponding cluster means) are employed to 
-update the tri-cluster assignments. Thus, the tri-clustering outcome is not influenced by the order in which the three 
-axes of the input data array are provided.
 
 ## Cluster refinement
+The CGC package implements an optional, secondary cluster refinement step based on the k-means method [@Wu:2016] and optimized using the Silhouette metric [@Rousseeuw:1987] as implemented in the scikit-learn package [@Pedregosa:2011]. When   
 
 The CGC package implements an optional cluster refinement step based on the k-means method [@Wu:2016]. For this, we exploit the 
 k-means implementation available in the scikit-learn package [@Pedregosa:2011]. The co- and tri-clusters are grouped into $k$ 
@@ -134,28 +112,22 @@ the patterns hidden in the data. The statistical properties employed by CGC are 
 [package documentation](https://cgc.readthedocs.io). The optimal k value is selected within a given range, using the Silhouette metric [@Rousseeuw:1987].
 
 # Software package overview 
-The CGC software is structured in the following main modules, whose details are described in the 
+The CGC software is structured in the following main modules, details of which are described in the 
 [online package documentation](https://cgc.readthedocs.io):
 
-- [`coclustering`](https://cgc.readthedocs.io/en/latest/coclustering.html#), which offers access to all the available 
-  implementations of the same co-clustering algorithm:
+- [`coclustering`](https://cgc.readthedocs.io/en/latest/coclustering.html#), containing the following implementations of the co-clustering algorithm:
 
-    - An [implementation based on Numpy](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based), as 
-      suitable to run the algorithm on a single machine. In this implementation, vectorized operations between work 
-      arrays are exploited to efficiently calculate cluster-based means and to optimize the cluster assignments. 
-      Multiple differently-initialized runs can be run in parallel using the threading library, allowing to make optimal 
-      usage of machines with multi-core CPUs.
-    - A [second Numpy-based implementation](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based-low-memory-footprint) 
-      that replaces some of the vectorized operations with looping to reduce the need for large work arrays, leading to 
-      a much-reduced memory footprint (negligible with respect to the size of the data matrix). While the reduced memory
-      requirement comes at the cost of performance ("for" loops in Python are slow), the loss can be mitigated through a 
-      feature that activates Numba’s just-in-time compilation for some of the critical steps.  
-    - An [implementation based on the Dask library](https://cgc.readthedocs.io/en/latest/coclustering.html#distributed-dask-based), 
-      targeting data sets whose size would prevent analyses on a single machine. In particular, Dask arrays are 
-      employed to process the data in chunks, which are distributed across the nodes of a compute cluster. The runs to 
-      sample initial conditions are executed sequentially to keep memory requirements to the minimum.  
+    - The [Numpy-based, vectorized single machine implemetation with threading support for optimal usage of multi-core CPUs.](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based)
 
-- [`triclustering`](https://cgc.readthedocs.io/en/latest/triclustering.html), which offers access to all tri-clustering 
+    - The [Numpy-based single machine implementation with a reducued memory footprint](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based-low-memory-footprint). This implementation trades performance for low memory usage, but uses Numba's
+     just-in-time compilattion to mitigate performance loss.
+
+    - The [Dask-library-based implementation](https://cgc.readthedocs.io/en/latest/coclustering.html#distributed-dask-based). This 
+      implemenation provides support for clustering large, out-of-core data sets by distributing the computation across multiple nodes using dassk arrays. 
+
+      
+
+- [`triclustering`](https://cgc.readthedocs.io/en/latest/triclustering.html), containing the following tri-clustering 
   implementations:
 
     - A [Numpy-based implementation](https://cgc.readthedocs.io/en/latest/triclustering.html#local-numpy-based) 
@@ -169,9 +141,8 @@ The CGC software is structured in the following main modules, whose details are 
  
 # Tutorial 
 	
-The software package is complemented by an [online tutorial](https://cgc-tutorial.readthedocs.io) that illustrates how to perform cluster analysis of geospatial datasets using CGC. The tutorial exploits a format that is widely employed in the geoscience community, i.e. 
-Jupyter notebooks[@Kluyver:2016]. Notebooks are made directly available via a 
-[dedicated GitHub repository](https://github.com/esciencecenter-digital-skills/tutorial-cgc), but they are also 
+The software package is complemented by an [online tutorial](https://cgc-tutorial.readthedocs.io) (in the form of Jupyter notebooks[@Kluyver:2016]) that illustrates how to perform cluster analysis of geospatial datasets using CGC. Notebooks are made directly available via a 
+[dedicated GitHub repository](https://github.com/esciencecenter-digital-skills/tutorial-cgc), and are also 
 published as [static web pages](https://cgc-tutorial.readthedocs.io) for reference and linked to the 
 [CGC documentation](https://cgc.readthedocs.io) via a 'Tutorials' tab. The tutorials are designed to run on systems with 
 limited CPU/memory capacity, which, together with environment requirement specifications in a standardized format 
