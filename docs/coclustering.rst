@@ -41,7 +41,6 @@ the co-clustering analysis is setup by initializing a ``Coclustering`` object:
         max_iterations=100,  # maximum number of iterations
         conv_threshold=1.e-5,  # error convergence threshold 
         nruns=10,  # number of differently-initialized runs
-        epsilon=1.e-8,  # numerical parameter
         output_filename='results.json'  # JSON file where to write output
     )
 
