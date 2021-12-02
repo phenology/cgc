@@ -8,6 +8,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+Changed
+-------
+* Numerical parameter epsilon is removed, which should lead to some improvement in the algorithm when empty clusters are present
+
 [0.5.0] - 2021-09-23
 ********************
 
