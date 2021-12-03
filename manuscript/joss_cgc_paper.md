@@ -149,7 +149,7 @@ likely to make it easier for users to carry out cluster analysis using CGC in ot
 # Acknowledgements
 
 The authors would like to thank Dr. Yifat Dzigan for the helpful discussions and support and Dr. Romulo Goncalves for the 
-preliminary work that led to the development of the software package presented here. We also would like to thank SURF for providing computational resources to test the first versions of the CGC package via the EINF-XXXX grant.  
+preliminary work that led to the development of the software package presented here. We also would like to thank SURF for providing computational resources to test the first versions of the CGC package via the e-infra190130 grant.  
  
 # Author contributions 
 
