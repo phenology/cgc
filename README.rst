@@ -120,7 +120,7 @@ The code has been developed as a collaborative effort between the `ITC, Universi
 `High spatial resolution phenological modelling at continental scales`_.
 
 .. _ITC, University of Twente: https://www.itc.nl
-.. _High spatial resolution phenological modelling at continental scales: https://www.esciencecenter.nl/projects/high-spatial-resolution-phenological-modelling-at-continental-scales/
+.. _High spatial resolution phenological modelling at continental scales: https://research-software.nl/projects/1334
 .. _the Netherlands eScience Center: https://www.esciencecenter.nl
 
 This package was created with `Cookiecutter <https://github.com/audreyr/cookiecutter>`_ and the
