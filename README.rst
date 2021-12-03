@@ -93,7 +93,7 @@ Contributing
 
 If you want to contribute to the development of cgc, have a look at the `contribution guidelines`_.
 
-.. _contribution guidelines: https://github.com/phenology/cgc/tree/master/CONTRIBUTING.md
+.. _contribution guidelines: https://github.com/phenology/cgc/tree/master/CONTRIBUTING.rst
 
 License
 -------
