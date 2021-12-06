@@ -146,9 +146,9 @@ class Kmeans(object):
                     -1).tolist()
             logger.warning(
                 "Multiple k values with the same silhouette score: {},"
-                "picking the smallest one: {}".
-                format([self.k_range[i] for i in idx_k_list],
-                       self.k_range[idx_k]))
+                "picking the smallest one: {}".format(
+                    [self.k_range[i] for i in idx_k_list],
+                    self.k_range[idx_k]))
         self.results.measure_list = silhouette_avg_list
         self.results.k_value = self.k_range[idx_k]
         self.kmean_cluster = kmean_cluster_list[idx_k]
@@ -166,10 +166,8 @@ class Kmeans(object):
         # Reshape the centroids of means to the shape of cluster matrix,
         # taking into account non-constructive clusters
         self.results.cl_mean_centroids = np.full(self.nclusters, np.nan)
-        indices = np.meshgrid(
-            *[np.unique(cl) for cl in self.clusters],
-            indexing='ij'
-        )
+        indices = np.meshgrid(*[np.unique(cl) for cl in self.clusters],
+                              indexing='ij')
         mask = np.zeros_like(self.results.cl_mean_centroids, dtype=bool)
         mask[tuple(indices)] = True
         self.results.cl_mean_centroids[mask] = cl_mean_centroids
@@ -213,8 +211,7 @@ class Kmeans(object):
         # Normalize all statistics to [0, 1]
         minimum = self.stat_measures.min(axis=0)
         maximum = self.stat_measures.max(axis=0)
-        self.stat_measures_norm = np.divide((self.stat_measures - minimum),
-                                            (maximum - minimum))
-
-        # Set statistics to zero if all its values are identical (max == min)
-        self.stat_measures_norm[np.isnan(self.stat_measures_norm)] = 0.
+        self.stat_measures_norm = np.divide(
+            (self.stat_measures - minimum), (maximum - minimum),
+            out=np.zeros_like((self.stat_measures)),
+            where=(maximum - minimum) != 0)
