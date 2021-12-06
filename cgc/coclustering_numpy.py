@@ -19,28 +19,6 @@ def _min_dist(Z, M, CoCavg):
     return np.argmin(d, axis=1), np.min(d, axis=1)
 
 
-def _min_dist_lowmem(Z, clusters, labels, CoCavg):
-    m, n = Z.shape
-    l, k = CoCavg.shape
-
-    # Extend the matrix of cluster averages to include empty clusters
-    CoCavg_ext = np.full((np.max(labels) + 1, k), np.nan)
-    CoCavg_ext[labels, :] = CoCavg
-    Y = CoCavg_ext[clusters]
-    sum = Y.sum(axis=0)
-
-    min_d = np.full(m, np.nan_to_num(np.inf))  # Initialize with largest float
-    clusters_new = np.zeros(m, dtype=np.int)
-    for ir in range(k):
-        # Calculate distance for cluster ir
-        d = sum[ir] - np.dot(Z, np.log(Y[:, ir]))
-        # If distance is smaller then previous assignment, reassign
-        smaller = d < min_d
-        min_d = smaller * d + ~smaller * min_d
-        clusters_new = smaller * ir + ~smaller * clusters_new
-    return clusters_new, min_d
-
-
 @numba.jit(nopython=True, nogil=True, cache=True)
 def _min_dist_numba(Z, clusters, labels, CoCavg, max=np.nan_to_num(np.inf)):
     m, n = Z.shape
@@ -75,21 +53,6 @@ def _setup_cluster_matrix(cluster_labels, cluster_idx):
     return np.equal.outer(cluster_idx, cluster_labels)
 
 
-def _cluster_dot(Z, row_clusters, col_clusters, row_cluster_labels,
-                 col_cluster_labels):
-    """
-    To replace np.dot(np.dot(R.T, Z), C), where R and C are occupation matrices
-    """
-    product = np.zeros((len(row_cluster_labels), len(col_cluster_labels)))
-    for ircl, rcl in enumerate(row_cluster_labels):
-        idx_rcl, = np.where(row_clusters == rcl)
-        for iccl, ccl in enumerate(col_cluster_labels):
-            idx_ccl, = np.where(col_clusters == ccl)
-            ir, ic = np.meshgrid(idx_rcl, idx_ccl)
-            product[ircl, iccl] = Z[ir, ic].sum()
-    return product
-
-
 @numba.jit(nopython=True, nogil=True, parallel=True, cache=True)
 def _cluster_dot_numba(Z, row_clusters, col_clusters, row_cluster_labels,
                        col_cluster_labels):
@@ -112,8 +75,13 @@ def _cluster_dot_numba(Z, row_clusters, col_clusters, row_cluster_labels,
     return product
 
 
-def coclustering(Z, nclusters_row, nclusters_col, errobj, niters,
-                 low_memory=False, numba_jit=False, row_clusters_init=None,
+def coclustering(Z,
+                 nclusters_row,
+                 nclusters_col,
+                 errobj,
+                 niters,
+                 low_memory=False,
+                 row_clusters_init=None,
                  col_clusters_init=None):
     """
     Run the co-clustering analysis, Numpy-based implementation.
@@ -128,11 +96,9 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters,
     :type errobj: float, optional
     :param niters: Maximum number of iterations.
     :type niters: int, optional
-    :param low_memory: Make use of a low-memory version of the algorithm.
+    :param low_memory: Make use of a low-memory version of the algorithm with
+        Numba JIT acceleration
     :type low_memory: bool, optional
-    :param numba_jit: Make use of Numba JIT acceleration (only if low_memory
-        is True).
-    :type numba_jit: bool, optional
     :param row_clusters_init: Initial row cluster assignment.
     :type row_clusters_init: numpy.ndarray or array_like, optional
     :param col_clusters_init: Initial column cluster assignment.
@@ -165,18 +131,12 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters,
         row_cluster_labels, = nel_row_clusters.nonzero()
         col_cluster_labels, = nel_col_clusters.nonzero()
         logger.debug('num of populated clusters: row {}, col {}'.format(
-                        len(row_cluster_labels),
-                        len(col_cluster_labels)))
+            len(row_cluster_labels), len(col_cluster_labels)))
         nel_clusters = np.outer(nel_row_clusters[row_cluster_labels],
                                 nel_col_clusters[col_cluster_labels])
         if low_memory:
-            if numba_jit:
-                CoCavg = _cluster_dot_numba(Z, row_clusters, col_clusters,
-                                            row_cluster_labels,
-                                            col_cluster_labels)
-            else:
-                CoCavg = _cluster_dot(Z, row_clusters, col_clusters,
-                                      row_cluster_labels, col_cluster_labels)
+            CoCavg = _cluster_dot_numba(Z, row_clusters, col_clusters,
+                                        row_cluster_labels, col_cluster_labels)
         else:
             R = _setup_cluster_matrix(row_cluster_labels, row_clusters)
             C = _setup_cluster_matrix(col_cluster_labels, col_clusters)
@@ -185,22 +145,11 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters,
 
         # Calculate distances based on approximation and assign best clusters
         if low_memory:
-            if numba_jit:
-                _row_clusters, _ = _min_dist_numba(Z, col_clusters,
-                                                   col_cluster_labels,
-                                                   CoCavg.T)
-                col_clusters, dist = _min_dist_numba(Z.T, row_clusters,
-                                                     row_cluster_labels,
-                                                     CoCavg)
-                row_clusters = _row_clusters
-            else:
-                _row_clusters, _ = _min_dist_lowmem(Z, col_clusters,
-                                                    col_cluster_labels,
-                                                    CoCavg.T)
-                col_clusters, dist = _min_dist_lowmem(Z.T, row_clusters,
-                                                      row_cluster_labels,
-                                                      CoCavg)
-                row_clusters = _row_clusters
+            _row_clusters, _ = _min_dist_numba(Z, col_clusters,
+                                               col_cluster_labels, CoCavg.T)
+            col_clusters, dist = _min_dist_numba(Z.T, row_clusters,
+                                                 row_cluster_labels, CoCavg)
+            row_clusters = _row_clusters
         else:
             row_clusters, _ = _min_dist(Z, C, CoCavg.T)
             col_clusters, dist = _min_dist(Z.T, R, CoCavg)
