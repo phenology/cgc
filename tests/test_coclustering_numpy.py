@@ -8,8 +8,8 @@ class TestDistance:
     def test_distance_basic(self):
         # original matrix can contain zeros..
         Z = np.arange(0, 40).reshape(8, 5).astype('float64')
-        row_clusters = np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int32)
-        col_clusters = np.array([0, 0, 0, 1, 1], dtype=np.int32)
+        row_clusters = np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=int)
+        col_clusters = np.array([0, 0, 0, 1, 1], dtype=int)
         # ..not the cluster average
         cc = np.arange(1, 9).reshape(4, 2)
         R = np.eye(4, dtype=bool)[row_clusters]
@@ -117,8 +117,8 @@ class TestLowMemoryNumba:
     def test_distance_lowmem_numba(self):
         # original matrix can contain zeros..
         Z = np.arange(0, 40).reshape(8, 5).astype('float64')
-        row_clusters = np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int32)
-        col_clusters = np.array([0, 0, 0, 1, 1], dtype=np.int32)
+        row_clusters = np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=int)
+        col_clusters = np.array([0, 0, 0, 1, 1], dtype=int)
         # ..not the cluster average
         cc = np.arange(1, 9).reshape(4, 2)
         R = np.eye(4, dtype=bool)[row_clusters]
@@ -138,10 +138,10 @@ class TestLowMemoryNumba:
 
     def test_dot_clustering_lowmem_numba(self):
         Z = np.arange(0, 40).reshape(8, 5).astype('float64')
-        row_clusters = np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=np.int32)
-        col_clusters = np.array([0, 0, 0, 1, 1], dtype=np.int32)
-        R = np.eye(4, dtype=np.int32)[row_clusters]
-        C = np.eye(2, dtype=np.int32)[col_clusters]
+        row_clusters = np.array([0, 0, 1, 1, 2, 2, 3, 3], dtype=int)
+        col_clusters = np.array([0, 0, 0, 1, 1], dtype=int)
+        R = np.eye(4, dtype=int)[row_clusters]
+        C = np.eye(2, dtype=int)[col_clusters]
         CoCavg = np.dot(np.dot(R.T, Z), C)
         CoCavg_numba = (coclustering_numpy._cluster_dot_numba(
             Z, row_clusters, col_clusters, np.arange(4), np.arange(2)))
