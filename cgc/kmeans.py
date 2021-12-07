@@ -53,6 +53,18 @@ class Kmeans(object):
     :type kmean_max_iter: int, optional
     :param output_filename: Name of the file where to write the results.
     :type output_filename: str, optional
+
+    :Example:
+
+    >>> import numpy as np
+    >>> Z = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
+                   [2, 2, 3, 3]])
+    >>> clusters = [np.array([0, 0, 1, 1, 1]), np.array([0, 0, 1, 1])]
+    >>> km = Kmeans(Z=Z,
+                clusters=clusters,
+                nclusters=[2, 2],
+                k_range= range(2, 4),
+                kmean_max_iter=2)
     """
     def __init__(self,
                  Z,

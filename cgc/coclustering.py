@@ -57,6 +57,17 @@ class Coclustering(object):
     :type row_clusters_init: numpy.ndarray or array_like, optional
     :param col_clusters_init: Initial column cluster assignment.
     :type col_clusters_init: numpy.ndarray or array_like, optional
+
+    :Example:
+
+    >>> import numpy as np
+    >>> Z = np.random.randint(100, size=(10, 8)).astype('float64')
+    >>> cc = Coclustering(Z,
+                          nclusters_row=5,
+                          nclusters_col=4,
+                          max_iterations=50,
+                          nruns=10)
+
     """
     def __init__(self,
                  Z,
