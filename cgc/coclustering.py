@@ -51,9 +51,6 @@ class Coclustering(object):
     :type max_iterations: int, optional
     :param nruns: Number of differently-initialized runs.
     :type nruns: int, optional
-    :param epsilon: Numerical parameter, avoids zero arguments in the
-        logarithm that appears in the expression of the objective function.
-    :type epsilon: float, optional
     :param output_filename: Name of the JSON file where to write the results.
     :type output_filename: string, optional
     :param row_clusters_init: Initial row cluster assignment.
@@ -68,7 +65,6 @@ class Coclustering(object):
                  conv_threshold=1.e-5,
                  max_iterations=1,
                  nruns=1,
-                 epsilon=1.e-8,
                  output_filename='',
                  row_clusters_init=None,
                  col_clusters_init=None):
@@ -78,7 +74,6 @@ class Coclustering(object):
         self.conv_threshold = conv_threshold
         self.max_iterations = max_iterations
         self.nruns = nruns
-        self.epsilon = epsilon
         self.output_filename = output_filename
         self.row_clusters_init = row_clusters_init
         self.col_clusters_init = col_clusters_init
@@ -146,7 +141,6 @@ class Coclustering(object):
                                 self.nclusters_col,
                                 self.conv_threshold,
                                 self.max_iterations,
-                                self.epsilon,
                                 low_memory,
                                 numba_jit,
                                 row_clusters_init=self.row_clusters_init,
@@ -180,7 +174,6 @@ class Coclustering(object):
                 self.nclusters_col,
                 self.conv_threshold,
                 self.max_iterations,
-                self.epsilon,
                 row_clusters_init=self.row_clusters_init,
                 col_clusters_init=self.col_clusters_init
             )
@@ -209,7 +202,6 @@ class Coclustering(object):
                        self.nclusters_col,
                        self.conv_threshold,
                        self.max_iterations,
-                       self.epsilon,
                        row_clusters_init=self.row_clusters_init,
                        col_clusters_init=self.col_clusters_init,
                        run_on_worker=True,

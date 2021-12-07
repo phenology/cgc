@@ -15,7 +15,7 @@ def triclustering():
     Z = np.random.randint(100, size=(d, m, n)).astype('float64')
     return Triclustering(Z, nclusters_row=ncl_row, nclusters_col=ncl_col,
                          nclusters_bnd=ncl_bnd, conv_threshold=1.e-5,
-                         max_iterations=100, nruns=1, epsilon=1.e-8,
+                         max_iterations=100, nruns=1,
                          row_clusters_init=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
                          col_clusters_init=[0, 1, 0, 1, 0, 1, 0, 1],
                          bnd_clusters_init=[0, 1, 2, 0, 1, 2])
