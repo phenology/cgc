@@ -114,10 +114,7 @@ class Coclustering(object):
         self.results.write(filename=self.output_filename)
         return self.results
 
-    def run_with_threads(self,
-                         nthreads=1,
-                         low_memory=False,
-                         numba_jit=False):
+    def run_with_threads(self, nthreads=1, low_memory=False):
         """
         Run the co-clustering using an algorithm based on Numpy plus threading
         (only suitable for local runs).
@@ -125,11 +122,9 @@ class Coclustering(object):
         :param nthreads: Number of threads employed to simultaneously run
             differently-initialized co-clustering analysis.
         :type nthreads: int, optional
-        :param low_memory: If True, use a memory-conservative algorithm.
+        :param low_memory: Make use of a low-memory version of the algorithm
+            with Numba JIT acceleration
         :type low_memory: bool, optional
-        :param numba_jit: If True, and low_memory is True, then use Numba
-                          just-in-time compilation to improve the performance.
-        :type numba_jit: bool, optional
         :return: Co-clustering results.
         :type: cgc.coclustering.CoclusteringResults
         """
@@ -142,7 +137,6 @@ class Coclustering(object):
                                 self.conv_threshold,
                                 self.max_iterations,
                                 low_memory,
-                                numba_jit,
                                 row_clusters_init=self.row_clusters_init,
                                 col_clusters_init=self.col_clusters_init)
                 for _ in range(self.nruns)
@@ -175,8 +169,7 @@ class Coclustering(object):
                 self.conv_threshold,
                 self.max_iterations,
                 row_clusters_init=self.row_clusters_init,
-                col_clusters_init=self.col_clusters_init
-            )
+                col_clusters_init=self.col_clusters_init)
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
@@ -195,18 +188,18 @@ class Coclustering(object):
         simultaneously submitted to the scheduler (experimental, discouraged).
         """
         Z = self.client.scatter(self.Z)
-        futures = [self.client.submit(
-                       coclustering_dask.coclustering,
-                       Z,
-                       self.nclusters_row,
-                       self.nclusters_col,
-                       self.conv_threshold,
-                       self.max_iterations,
-                       row_clusters_init=self.row_clusters_init,
-                       col_clusters_init=self.col_clusters_init,
-                       run_on_worker=True,
-                       pure=False)
-                   for _ in range(self.nruns)]
+        futures = [
+            self.client.submit(coclustering_dask.coclustering,
+                               Z,
+                               self.nclusters_row,
+                               self.nclusters_col,
+                               self.conv_threshold,
+                               self.max_iterations,
+                               row_clusters_init=self.row_clusters_init,
+                               col_clusters_init=self.col_clusters_init,
+                               run_on_worker=True,
+                               pure=False) for _ in range(self.nruns)
+        ]
         for future, result in dask.distributed.as_completed(futures,
                                                             with_results=True):
             logger.info(f'Retrieving run {self.results.nruns_completed} ..')

@@ -11,11 +11,14 @@ def coclustering():
     m, n = 10, 8
     ncl_row, ncl_col = 5, 2
     Z = np.random.randint(100, size=(m, n)).astype('float64')
-    return Coclustering(Z, nclusters_row=ncl_row, nclusters_col=ncl_col,
-                        conv_threshold=1.e-5, max_iterations=100, nruns=1,
+    return Coclustering(Z,
+                        nclusters_row=ncl_row,
+                        nclusters_col=ncl_col,
+                        conv_threshold=1.e-5,
+                        max_iterations=100,
+                        nruns=1,
                         row_clusters_init=[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-                        col_clusters_init=[0, 1, 0, 1, 0, 1, 0, 1]
-                        )
+                        col_clusters_init=[0, 1, 0, 1, 0, 1, 0, 1])
 
 
 class TestCoclustering:
@@ -33,15 +36,6 @@ class TestCoclustering:
 
     def test_run_with_threads_lowmem(self, coclustering):
         coclustering.run_with_threads(nthreads=2, low_memory=True)
-        np.testing.assert_equal(coclustering.results.row_clusters,
-                                [0, 0, 2, 4, 1, 0, 1, 2, 3, 4])
-        np.testing.assert_equal(coclustering.results.col_clusters,
-                                [0, 1, 0, 0, 0, 1, 0, 1])
-        assert np.isclose(coclustering.results.error, -11503.89447245418)
-
-    def test_run_with_threads_numba(self, coclustering):
-        coclustering.run_with_threads(nthreads=2, low_memory=True,
-                                      numba_jit=True)
         np.testing.assert_equal(coclustering.results.row_clusters,
                                 [0, 0, 2, 4, 1, 0, 1, 2, 3, 4])
         np.testing.assert_equal(coclustering.results.col_clusters,
