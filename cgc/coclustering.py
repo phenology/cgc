@@ -1,4 +1,5 @@
 import concurrent.futures
+import copy
 import dask.distributed
 import logging
 
@@ -117,7 +118,7 @@ class Coclustering(object):
             self._dask_runs_performance()
 
         self.results.write(filename=self.output_filename)
-        return self.results
+        return copy.copy(self.results)
 
     def run_with_threads(self, nthreads=1, low_memory=False):
         """
@@ -161,7 +162,7 @@ class Coclustering(object):
                     self.results.error = e
                 self.results.nruns_completed += 1
         self.results.write(filename=self.output_filename)
-        return self.results
+        return copy.copy(self.results)
 
     def _dask_runs_memory(self):
         """ Memory efficient Dask implementation: sequential runs. """
