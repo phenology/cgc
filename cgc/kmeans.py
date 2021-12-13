@@ -13,18 +13,22 @@ class KmeansResults(Results):
     """
     Contains results and metadata of a k-means refinement calculation.
 
+    :param input_parameters: Input arguments to :class:`cgc.kmeans.Kmeans`.
+    :type input_parameters: dict
     :var k_value: Optimal K value (value with maximum Silhouette score).
-    :type k_value: int
+    :vartype k_value: int
     :var measure_list: List of Silhouette coefficients for all tested k values.
-    :type measure_list: np.ndarray
+    :vartype measure_list: np.ndarray
     :var cl_mean_centroids: Refined cluster averages computed as the centroids
         of the clusters resulting from the k-means analysis using `k=k_value`.
         Initally empty clusters are assigned NaN values.
-    :type cl_mean_centroids: np.ndarray
+    :vartype cl_mean_centroids: np.ndarray
     """
-    k_value = None
-    measure_list = None
-    cl_mean_centroids = None
+    def __init__(self, **input_parameters):
+        self.k_value = None
+        self.measure_list = None
+        self.cl_mean_centroids = None
+        super().__init__(**input_parameters)
 
 
 class Kmeans(object):

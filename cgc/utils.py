@@ -29,7 +29,7 @@ def mem_estimate_coclustering_numpy(n_rows,
     :param nclusters_col: Number of column clusters.
     :type nclusters_col: int
     :param out_unit: Output units, choose between "B", "KB", "MB", "GB"
-    :type out_unit: str
+    :type out_unit: str, optional
     :return: Estimated memory usage, unit, peak.
     :type: tuple
     """

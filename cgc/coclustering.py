@@ -17,22 +17,27 @@ class CoclusteringResults(Results):
     """
     Contains results and metadata of a co-clustering calculation.
 
+    :param input_parameters: Input arguments to
+        :class:`cgc.coclustering.Coclustering`.
+    :type input_parameters: dict
     :var row_clusters: Final row cluster assignment.
-    :type row_clusters: numpy.ndarray
+    :vartype row_clusters: numpy.ndarray
     :var col_clusters: Final column cluster assignment.
-    :type col_clusters: numpy.ndarray
+    :vartype col_clusters: numpy.ndarray
     :var error: Approximation error of the co-clustering.
-    :type error: float
+    :vartype error: float
     :var nruns_completed: Number of successfully completed runs.
-    :type nruns_completed: int
+    :vartype nruns_completed: int
     :var nruns_converged: Number of converged runs.
-    :type nruns_converged: int
+    :vartype nruns_converged: int
     """
-    row_clusters = None
-    col_clusters = None
-    error = None
-    nruns_completed = 0
-    nruns_converged = 0
+    def __init__(self, **input_parameters):
+        self.row_clusters = None
+        self.col_clusters = None
+        self.error = None
+        self.nruns_completed = 0
+        self.nruns_converged = 0
+        super().__init__(**input_parameters)
 
 
 class Coclustering(object):
