@@ -130,6 +130,7 @@ class Triclustering(object):
                 logger.info(f'Error = {e}')
                 if converged:
                     logger.info(f'Run converged in {niters} iterations')
+                    self.results.nruns_converged += 1
                 else:
                     logger.warning(f'Run not converged in {niters} iterations')
                 if self.results.error is None or e < self.results.error:
