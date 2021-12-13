@@ -133,6 +133,7 @@ class Triclustering(object):
             for future in concurrent.futures.as_completed(futures):
                 logger.info(f'Waiting for run {self.results.nruns_completed}')
                 converged, niters, row, col, bnd, e = future.result()
+                self.results.nruns_completed += 1
                 logger.info(f'Error = {e}')
                 if converged:
                     logger.info(f'Run converged in {niters} iterations')
@@ -143,7 +144,9 @@ class Triclustering(object):
                     self.results.col_clusters = col
                     self.results.bnd_clusters = bnd
                     self.results.error = e
-                self.results.nruns_completed += 1
+                    self.results.write(filename=self.output_filename)
+
+        # write final results
         self.results.write(filename=self.output_filename)
         return copy.copy(self.results)
 
@@ -178,6 +181,7 @@ class Triclustering(object):
                     col_clusters_init=self.col_clusters_init,
                     bnd_clusters_init=self.bnd_clusters_init
                 )
+            self.results.nruns_completed += 1
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
@@ -189,7 +193,4 @@ class Triclustering(object):
                 self.results.col_clusters = col.compute()
                 self.results.bnd_clusters = bnd.compute()
                 self.results.error = e
-            self.results.nruns_completed += 1
-
-    def run_serial(self):
-        raise NotImplementedError
+                self.results.write(filename=self.output_filename)

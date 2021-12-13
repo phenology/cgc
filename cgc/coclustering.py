@@ -150,6 +150,7 @@ class Coclustering(object):
             for future in concurrent.futures.as_completed(futures):
                 logger.info(f'Retrieving run {self.results.nruns_completed}')
                 converged, niters, row, col, e = future.result()
+                self.results.nruns_completed += 1
                 logger.info(f'Error = {e}')
                 if converged:
                     logger.info(f'Run converged in {niters} iterations')
@@ -160,7 +161,9 @@ class Coclustering(object):
                     self.results.row_clusters = row
                     self.results.col_clusters = col
                     self.results.error = e
-                self.results.nruns_completed += 1
+                    self.results.write(filename=self.output_filename)
+
+        # write final results
         self.results.write(filename=self.output_filename)
         return copy.copy(self.results)
 
@@ -176,6 +179,7 @@ class Coclustering(object):
                 self.max_iterations,
                 row_clusters_init=self.row_clusters_init,
                 col_clusters_init=self.col_clusters_init)
+            self.results.nruns_completed += 1
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
@@ -186,7 +190,7 @@ class Coclustering(object):
                 self.results.row_clusters = row.compute()
                 self.results.col_clusters = col.compute()
                 self.results.error = e
-            self.results.nruns_completed += 1
+                self.results.write(filename=self.output_filename)
 
     def _dask_runs_performance(self):
         """
@@ -210,6 +214,7 @@ class Coclustering(object):
                                                             with_results=True):
             logger.info(f'Retrieving run {self.results.nruns_completed} ..')
             converged, niters, row, col, e = result
+            self.results.nruns_completed += 1
             logger.info(f'Error = {e}')
             if converged:
                 logger.info(f'Run converged in {niters} iterations')
@@ -220,4 +225,4 @@ class Coclustering(object):
                 self.results.row_clusters = row.compute()
                 self.results.col_clusters = col.compute()
                 self.results.error = e
-            self.results.nruns_completed += 1
+                self.results.write(filename=self.output_filename)
