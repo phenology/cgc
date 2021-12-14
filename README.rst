@@ -59,6 +59,7 @@ CGC: Clustering Geo-Data Cubes
 Clustering Geo-Data Cubes (CGC) is a Python package to perform clustering analysis for multidimensional geospatial data.
 The included tools allow the user to efficiently run tasks in parallel on local and distributed systems.
 
+The Clustering Geo-Data Cubes (CGC) package focuses on the needs of geospatial data scientists who require tools to make sense of multi-dimensional data cubes. It provides the functionality to perform **co-cluster** and **tri-cluster** analyses on both local and distributed systems.
 Installation
 ------------
 
@@ -86,7 +87,23 @@ Run tests (including coverage) with:
 Documentation
 -------------
 
-The project's full documentation can be found `here <https://cgc.readthedocs.io/en/latest/>`_.
+The project's full API documentation can be found `here <https://cgc.readthedocs.io/en/latest/>`_. Including:
+
+- `Co-clustering <https://cgc.readthedocs.io/en/latest/coclustering.html>`_
+- `Tri-clustering <https://cgc.readthedocs.io/en/latest/triclustering.html>`_
+- `K-means refinement <https://cgc.readthedocs.io/en/latest/kmeans.html>`_
+- `Utility Functions <https://cgc.readthedocs.io/en/latest/utils.html>`_
+
+Examples of CGC applications on real geo-spatial data:
+
+- `Co-clustering application <https://cgc-tutorial.readthedocs.io/en/latest/notebooks/coclustering.html>`_
+- `Tri-clustering application <https://cgc-tutorial.readthedocs.io/en/latest/notebooks/triclustering.html>`_
+
+Tutorial
+--------
+
+The tutorial of CGC can be found  `here <https://cgc-tutorial.readthedocs.io/en/latest/index.html>`_.
+
 
 Contributing
 ------------
