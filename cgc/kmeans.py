@@ -57,7 +57,7 @@ class Kmeans(object):
     :Example:
 
     >>> import numpy as np
-    >>> Z = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
+    >>> Z = np.array([[4, 4, 1, 1], [4, 4, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
                    [2, 2, 3, 3]])
     >>> clusters = [np.array([0, 0, 1, 1, 1]), np.array([0, 0, 1, 1])]
     >>> km = Kmeans(Z=Z,
