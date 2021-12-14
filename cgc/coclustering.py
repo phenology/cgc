@@ -61,7 +61,7 @@ class Coclustering(object):
     :Example:
 
     >>> import numpy as np
-    >>> Z = np.random.randint(100, size=(10, 8)).astype('float64')
+    >>> Z = np.random.randint(1, 100, size=(10, 8)).astype('float64')
     >>> cc = Coclustering(Z,
                           nclusters_row=5,
                           nclusters_col=4,

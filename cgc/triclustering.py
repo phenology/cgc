@@ -68,7 +68,7 @@ class Triclustering(object):
     :Example:
 
     >>> import numpy as np
-    >>> Z = np.random.randint(100, size=(6, 10, 8)).astype('float64')
+    >>> Z = np.random.randint(1, 100, size=(6, 10, 8)).astype('float64')
     >>> tc = Triclustering(Z,
                           nclusters_row=5,
                           nclusters_col=4,
