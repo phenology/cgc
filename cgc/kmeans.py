@@ -15,8 +15,8 @@ class KmeansResults(Results):
 
     :var k_value: Optimal K value (value with maximum Silhouette score).
     :type k_value: int
-    :var km_labels: Refined clusters labels. It is a 2D- (for colustering)
-                    or 3D- (for triustering) array, with the shape of
+    :var km_labels: Refined clusters labels. It is a 2D- (for coclustering)
+                    or 3D- (for triclustering) array, with the shape of
                     `nclusters`. The value at location (band, row, column)
                     represents the refined cluster label of the corresponding
                     band/row/column cluster combination.
