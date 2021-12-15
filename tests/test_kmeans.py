@@ -107,8 +107,7 @@ class TestKmeans(unittest.TestCase):
         results = np.array([[0., 0., 0., 0., 0., 0.], [1., 0., 1., 1., 1., 1.],
                             [1., 0., 1., 1., 1., 1.], [0., 0., 0., 0., 0.,
                                                        0.]])
-        self.assertTrue(
-            np.all(results == km.stat_measures))  # First colummn is mean
+        self.assertTrue(np.all(results == km.stat_measures_norm))
 
     def test_kmean_labels_coclustering(self):
         km = init_cocluster_km()
@@ -129,13 +128,15 @@ class TestKmeans(unittest.TestCase):
     def test_statistic_triclustering(self):
         km = init_tricluster_km()
         km._compute_statistic_measures()
-        results = np.array([[0., 0., 0., 0., 0., 0.], [1., 0., 1., 1., 1., 1.],
-                            [1., 0., 1., 1., 1., 1.], [0., 0., 0., 0., 0., 0.],
-                            [1., 0., 1., 1., 1., 1.], [2., 0., 2., 2., 2., 2.],
-                            [2., 0., 2., 2., 2., 2.], [1., 0., 1., 1., 1.,
-                                                       1.]])
-        self.assertTrue(
-            np.all(results == km.stat_measures))  # First colummn is mean
+        results = np.array([[0.,   0., 0., 0., 0., 0.],
+                            [0.5, 0., 0.5, 0.5, 0.5, 0.5],
+                            [0.5, 0., 0.5, 0.5, 0.5, 0.5],
+                            [0., 0., 0., 0., 0., 0.],
+                            [0.5, 0., 0.5, 0.5, 0.5, 0.5],
+                            [1., 0., 1., 1., 1., 1.],
+                            [1., 0., 1., 1., 1., 1.],
+                            [0.5, 0., 0.5, 0.5, 0.5, 0.5]])
+        self.assertTrue(np.all(results == km.stat_measures_norm))
 
     def test_kvalues_triclustering(self):
         km = init_tricluster_km()
