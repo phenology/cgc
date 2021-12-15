@@ -188,11 +188,3 @@ class TestKmeans(unittest.TestCase):
                     k_range=range(3, 1, -1))
         res2 = km.compute()
         self.assertEqual(res2.k_value, 2)
-
-
-if __name__ == "__main__":
-    t = TestKmeans()
-    # t.test_kmean_labels_coclustering()
-    # t.test_kmean_labels_triclustering()
-    # t.test_statistic_coclustering()
-    t.test_statistic_triclustering()
