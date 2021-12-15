@@ -98,6 +98,10 @@ For tri-clustering CGC implements the so-called Bregman cube average tri-cluster
 The CGC package implements an optional, secondary cluster refinement step based on the k-means method [@Wu:2016] and optimized using the Silhouette metric [@Rousseeuw:1987] as implemented in the scikit-learn package [@Pedregosa:2011]. This secondary grouping is based on statistical properties of the co- or tri-clusters (see the [package documentation](https://cgc.readthedocs.io)) and helps to better capture the patterns hidden in the data.   
 
 
+# Related Software
+Within the Python ecosystem a number of co-/bi-clustering implementations based on a range of algorithms exist. However, prominent examples are often focused on very specific applications, such as the CoCLust package, designed for term document clustering. More general packages such as the, e.g. the Spectral Coclustering implementation in scikit-learn are often focussed on specific classes of problems, i.e. those of block-diagonal form, or make use of euclidean distances applied to the construcuted cluster values in the determining and evaluating these.
+In comparison, CGC makes use of an informattion theory based distance metric which consider the global information content of the matrix. Furthermore, CGC is also uniquely designed from the outset for performant use with 'big data'. 
+
 # Software package overview 
 The CGC software is structured in the following main modules, details of which are described in the 
 [online package documentation](https://cgc.readthedocs.io):
