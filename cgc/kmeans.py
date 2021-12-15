@@ -15,6 +15,12 @@ class KmeansResults(Results):
 
     :var k_value: Optimal K value (value with maximum Silhouette score).
     :type k_value: int
+    :var km_labels: Refined clusters labels. It is a 2D- (for coclustering)
+                    or 3D- (for triclustering) array, with the shape of
+                    `nclusters`. The value at location (band, row, column)
+                    represents the refined cluster label of the corresponding
+                    band/row/column cluster combination.
+    :type km_labels: np.ndarray
     :var measure_list: List of Silhouette coefficients for all tested k values.
     :type measure_list: np.ndarray
     :var cl_mean_centroids: Refined cluster averages computed as the centroids
@@ -23,6 +29,7 @@ class KmeansResults(Results):
     :type cl_mean_centroids: np.ndarray
     """
     k_value = None
+    km_labels = None
     measure_list = None
     cl_mean_centroids = None
 
@@ -183,6 +190,11 @@ class Kmeans(object):
         mask = np.zeros_like(self.results.cl_mean_centroids, dtype=bool)
         mask[tuple(indices)] = True
         self.results.cl_mean_centroids[mask] = cl_mean_centroids
+
+        # Make a lookup matrix from un-refined clusters to Kmean clusters
+        km_labels = np.full(self.nclusters, np.nan)
+        km_labels[mask] = self.kmean_cluster.labels_
+        self.results.km_labels = km_labels
 
         self.results.write(filename=self.output_filename)
         return self.results

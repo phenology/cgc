@@ -4,14 +4,14 @@ import numpy as np
 from cgc.kmeans import Kmeans
 
 
-def init_cocluster():
+def init_cocluster_km():
     """
     Z:
         [[0, 0, 1, 1],
         [0, 0, 1, 1],
-        [2, 2, 3, 3],
-        [2, 2, 3, 3],
-        [2, 2, 3, 3]]
+        [1, 1, 0, 0],
+        [1, 1, 0, 0],
+        [1, 1, 0, 0]]
 
     cluster index:
         [[(0,0), (0,0), (0,1), (0,1)],
@@ -20,8 +20,8 @@ def init_cocluster():
         [(1,0), (1,0), (1,1), (1,1)],
         [(1,0), (1,0), (1,1), (1,1)]]
     """
-    Z = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
-                  [2, 2, 3, 3]])
+    Z = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [1, 1, 0, 0], [1, 1, 0, 0],
+                  [1, 1, 0, 0]])
     row_clusters = np.array([0, 0, 1, 1, 1])
     col_clusters = np.array([0, 0, 1, 1])
     nrow_clusters, ncol_clusters = 3, 2  # 1 non populated row/col cluster
@@ -37,16 +37,17 @@ def init_cocluster():
     return km
 
 
-def init_tricluster():
-    Z1 = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
-                   [2, 2, 3, 3]])
-    Z = np.dstack((Z1, Z1, Z1 + 1, Z1 + 1))
-    row_clusters = np.array([0, 0, 1, 1, 1])
+def init_tricluster_km():
+    Z1 = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [1, 1, 0, 0]])
+    Z = np.full((4, 3, 4), 0)
+    Z[:2] = Z1
+    Z[2:] = Z1 + 1
+    row_clusters = np.array([0, 0, 1])
     col_clusters = np.array([0, 0, 1, 1])
     band_clusters = np.array([0, 0, 1, 1])
     nrow_clusters, ncol_clusters, nband_clusters = 2, 2, 2
-    clusters = [row_clusters, col_clusters, band_clusters]
-    nclusters = [nrow_clusters, ncol_clusters, nband_clusters]
+    clusters = [band_clusters, row_clusters, col_clusters]
+    nclusters = [nband_clusters, nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
     kmean_max_iter = 2
     km = Kmeans(Z=Z,
@@ -101,45 +102,70 @@ class TestKmeans(unittest.TestCase):
             )
 
     def test_statistic_coclustering(self):
-        km = init_cocluster()
+        km = init_cocluster_km()
         km._compute_statistic_measures()
         results = np.array([[0., 0., 0., 0., 0., 0.], [1., 0., 1., 1., 1., 1.],
-                            [2., 0., 2., 2., 2., 2.], [3., 0., 3., 3., 3.,
-                                                       3.]])
+                            [1., 0., 1., 1., 1., 1.], [0., 0., 0., 0., 0.,
+                                                       0.]])
         self.assertTrue(
             np.all(results == km.stat_measures))  # First colummn is mean
 
-    def test_kmeam_labels_coclustering(self):
-        km = init_cocluster()
+    def test_kmean_labels_coclustering(self):
+        km = init_cocluster_km()
         km.compute()
-        labels = km.kmean_cluster.labels_
-        self.assertTrue(labels.shape == (4, ))
-        self.assertEqual(labels[0], labels[1])
-        self.assertEqual(labels[2], labels[3])
+
+        cl_km_labels = km.results.km_labels  # Refined labels in clusters
+        row_clusters, col_clusters = np.meshgrid(km.clusters[0],
+                                                 km.clusters[1],
+                                                 indexing='ij')
+        Z_km_labels = cl_km_labels[row_clusters,
+                                   col_clusters]  # Refined labels in Z
+
+        # Check all values within the same refined cluster are the same
+        for k in range(km.results.k_value):
+            vk = km.Z[np.where(Z_km_labels == k)]
+            self.assertTrue(np.all(vk == vk[0]))
 
     def test_statistic_triclustering(self):
-        km = init_tricluster()
+        km = init_tricluster_km()
         km._compute_statistic_measures()
         results = np.array([[0., 0., 0., 0., 0., 0.], [1., 0., 1., 1., 1., 1.],
+                            [1., 0., 1., 1., 1., 1.], [0., 0., 0., 0., 0., 0.],
                             [1., 0., 1., 1., 1., 1.], [2., 0., 2., 2., 2., 2.],
-                            [2., 0., 2., 2., 2., 2.], [3., 0., 3., 3., 3., 3.],
-                            [3., 0., 3., 3., 3., 3.], [4., 0., 4., 4., 4.,
-                                                       4.]])
+                            [2., 0., 2., 2., 2., 2.], [1., 0., 1., 1., 1.,
+                                                       1.]])
         self.assertTrue(
             np.all(results == km.stat_measures))  # First colummn is mean
 
     def test_kvalues_triclustering(self):
-        km = init_tricluster()
+        km = init_tricluster_km()
         km.compute()
         self.assertEqual(km.results.k_value, 3)
 
+    def test_kmean_labels_triclustering(self):
+        km = init_tricluster_km()
+        km.compute()
+
+        cl_km_labels = km.results.km_labels  # Refined labels in clusters
+        band_clusters, row_clusters, col_clusters = np.meshgrid(km.clusters[0],
+                                                                km.clusters[1],
+                                                                km.clusters[2],
+                                                                indexing='ij')
+        Z_km_labels = cl_km_labels[band_clusters, row_clusters,
+                                   col_clusters]  # Refined labels in Z
+
+        # Check all values within the same refined cluster are the same
+        for k in range(km.results.k_value):
+            vk = km.Z[np.where(Z_km_labels == k)]
+            self.assertTrue(np.all(vk == vk[0]))
+
     def test_statistic_centroids_shape(self):
-        km = init_cocluster()
+        km = init_cocluster_km()
         km.compute()
         self.assertEqual((3, 2), km.results.cl_mean_centroids.shape)
 
     def test_centroids_nan(self):
-        km = init_cocluster()
+        km = init_cocluster_km()
         km.compute()
         self.assertTrue(all(np.isnan(km.results.cl_mean_centroids[2, :])))
 

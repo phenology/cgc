@@ -42,7 +42,8 @@ is setup by creating an instance of ``Triclustering``:
     )
 
 The input arguments of ``Triclustering`` are identical to the ``Coclustering`` ones (see :doc:`coclustering`) -
-``nclusters_bnd`` is the only additional argument, which sets the maximum number of clusters along the 'band' dimension.
+``nclusters_bnd`` is the only additional argument, which sets the maximum number of clusters along the 'band' dimension. 
+Note that a lower number of clusters can be identified by the algorithm (some of the clusters may remain empty).
 
 .. NOTE::
     The first axis of ``Z`` is assumed to represent the 'band' dimension.
