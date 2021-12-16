@@ -86,7 +86,7 @@ The CGC package focuses on the needs of geospatial data scientists who require t
 CGC implements the Bregman block average co-clustering (BBAC) algorithm from @Banerjee:2007 as inspired by the MATLAB code of [@Merugu:2004].
 Briefly, the BBAC algorithm iteratively optimizes the clustering of rows and columns of a data matrix starting from a random initial assignment until convergence. The information loss from the original matrix to the clustered one, which is constructed as the matrix of the co-cluster means, is minimized using a loss function that is based on the I-divergence. CGC also supports a user defined convergence threshold. To limit the influence of the initial conditions on the final clustering and to avoid local minima several runs are carried out, with the cluster assignments from the lowest loss function value ultimately being selected.
 
-Note that in the CGC implementation of the algorithm, the update in the row- and column-cluster assignments is computed only from the previous iteration’s row and column. Contrarily to the original MATLAB implementation (Merugu and Banerjee 2004), this makes the algorithm independent of the order in which the dimensions are considered, while still leading to a (locally) optimal clustering solution. 
+Note that in the CGC implementation of the algorithm, the update in the row- and column-cluster assignments is computed only from the previous iteration’s row and column. Contrarily to the original MATLAB implementation [@Merugu:2004], this makes the algorithm independent of the order in which the dimensions are considered, while still leading to a (locally) optimal clustering solution. 
 
 
 
@@ -97,6 +97,10 @@ For tri-clustering CGC implements the so-called Bregman cube average tri-cluster
 ## Cluster refinement
 The CGC package implements an optional, secondary cluster refinement step based on the k-means method [@Wu:2016] and optimized using the Silhouette metric [@Rousseeuw:1987] as implemented in the scikit-learn package [@Pedregosa:2011]. This secondary grouping is based on statistical properties of the co- or tri-clusters (see the [package documentation](https://cgc.readthedocs.io)) and helps to better capture the patterns hidden in the data.   
 
+
+# Related Software
+Within the Python ecosystem a number of co-/bi-clustering implementations based on a range of algorithms exist. However, prominent examples are often focused on very specific applications, such as the CoClust package [@Role:2019], designed for term document clustering. More general packages such as, e.g. the spectral co-clustering implementation in scikit-learn [@Pedregosa:2011] are often focussed on specific classes of problems, i.e. those of block-diagonal form, or make use of Euclidean distances applied to the constructed cluster values in determining and evaluating these.
+In comparison, CGC makes use of an information theory based distance metric which considers the global information content of the matrix. Furthermore, CGC is also uniquely designed from the outset for performant use with 'big data'. 
 
 # Software package overview 
 The CGC software is structured in the following main modules, details of which are described in the 
