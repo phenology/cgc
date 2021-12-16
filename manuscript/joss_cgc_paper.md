@@ -39,7 +39,7 @@ date: 18 November 2021
 bibliography: joss_cgc_paper.bib
 
 ---
-# Abstract
+# Summary
 
 Multidimensional data cubes are increasingly ubiquitous, in particular in the geosciences. Clustering techniques encompassing their full dimensionality are necessary to identify patterns "hidden" within these cubes. Clustering Geodata Cubes (CGC) is a Python package designed for partitional clustering, identifying groups of similar data across two (e.g., spatial and temporal) or three (e.g., spatial, temporal, and thematic) dimensions. CGC provides efficient and scalable co- and tri-clustering functionality appropriate to analyze  both small and large datasets as well as the cluster refinement and visualization functionality that support users in their quest to make sense of complex datasets.   
 
@@ -55,10 +55,11 @@ Traditional clustering techniques focus on a single dimension and may therefore 
 The recent exponential growth of multidimensional data referring to geographical features (e.g., time series of satellite images) has resulted in a wide variety of geo-data cubes, which can benefit from co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geo-information science [@Wu:2015], as well as an extension of that method to three dimensions [@Wu:2018], with these advanced clustering methods becoming increasingly essential to tackling complex multidimensional data cubes. 
 
 
-In light of the eminent employability of partitional co- and tri-clustering to geospatial disciplines like geo-information science and Earth observation, and the transferability to other (geo)scientific domains, this paper presents the Clustering Geo-data Cubes (CGC) package, which facilitates the efficient use of the co-clustering and tri-clustering methods presented in @Wu:2015 and @Wu:2018.
+In light of the eminent employability of partitional co- and tri-clustering to geospatial disciplines like geo-information science and Earth observation, and the transferability to other (geo)scientific domains, this paper presents the Clustering Geo-data Cubes (CGC) package, which facilitates the efficient use of the co-clustering and tri-clustering methods presented in @Wu:2015 and @Wu:2018. 
 
 As outlined below, the package aims to meet the needs of the geospatial data scientists, including the ability to 
-handle 'big (geo)-data' and to readily interface with the wider open-source software ecosystem specialized in geospatial data analysis. Nevertheless, the methods implemented in the CGC package remain widely applicable and can easily be applied in other domains.
+handle 'big (geo)-data' and to readily interface with the wider open-source software ecosystem specialized in geospatial data analysis. A case in point is the use of CGC in the (on-going) anlysis of spring on-set and bloom at high spatial resolution (1km) across continental scales in Europe and North America (RZM & EIV in prep.).   
+Nevertheless, the methods implemented in the CGC package remain widely applicable and can easily be applied in other domains.
 
 # Statement of need 
 
