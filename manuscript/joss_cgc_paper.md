@@ -99,7 +99,7 @@ The CGC package implements an optional, secondary cluster refinement step based 
 
 
 # Related Software
-Within the Python ecosystem a number of co-/bi-clustering implementations based on a range of algorithms exist. However, prominent examples are often focused on very specific applications, such as the CoClust package [@Role:2019], designed for term document clustering. More general packages such as the spectral co-clustering implementation in scikit-learn [@Pedregosa:2011] are often focussed on specific classes of problems, i.e. those of block-diagonal form, and/or make use of euclidean distances applied to the construcuted cluster values in the determining and evaluating these.
+Within the Python ecosystem a number of co-/bi-clustering implementations based on a range of algorithms exist. However, prominent examples are often focused on very specific applications, such as the CoClust package [@Role:2019], designed for term document clustering. More general packages such as, e.g. the spectral co-clustering implementation in scikit-learn [@Pedregosa:2011] are often focussed on specific classes of problems, i.e. those of block-diagonal form, or make use of Euclidean distances applied to the constructed cluster values in determining and evaluating these.
 In comparison, CGC makes use of an information theory based distance metric which considers the global information content of the matrix. Furthermore, CGC is also uniquely designed from the outset for performant use with 'big data'. 
 
 # Software package overview 
