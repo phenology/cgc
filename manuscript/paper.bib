@@ -1,4 +1,3 @@
-### example bib entries
 
 @inproceedings{Andrienko:2009,
 	Address = {Atlantic City, NJ, USA},
@@ -17,51 +16,47 @@
 	Bdsk-Url-2 = {https://doi.org/10.1109/VAST.2009.5332584}}
 
 @article{Banerjee:2007,
-	Abstract = {Co-clustering, or simultaneous clustering of rows and columns of a two-dimensional data matrix, is rapidly becoming a powerful data analysis technique. Co-clustering has enjoyed wide success in varied application domains such as text clustering, gene-microarray analysis, natural language processing and image, speech and video analysis. In this paper, we introduce a partitional co-clustering formulation that is driven by the search for a good matrix approximation---every co-clustering is associated with an approximation of the original data matrix and the quality of co-clustering is determined by the approximation error. We allow the approximation error to be measured using a large class of loss functions called Bregman divergences that include squared Euclidean distance and KL-divergence as special cases. In addition, we permit multiple structurally different co-clustering schemes that preserve various linear statistics of the original data matrix. To accomplish the above tasks, we introduce a new minimum Bregman information (MBI) principle that simultaneously generalizes the maximum entropy and standard least squares principles, and leads to a matrix approximation that is optimal among all generalized additive models in a certain natural parameter space. Analysis based on this principle yields an elegant meta algorithm, special cases of which include most previously known alternate minimization based clustering algorithms such as kmeans and co-clustering algorithms such as information theoretic (Dhillon et al., 2003b) and minimum sum-squared residue co-clustering (Cho et al., 2004). To demonstrate the generality and flexibility of our co-clustering framework, we provide examples and empirical evidence on a variety of problem domains and also describe novel co-clustering applications such as missing value prediction and compression of categorical data matrices.},
-	Author = {Banerjee, Arindam and Dhillon, Inderjit and Ghosh, Joydeep and Merugu, Srujana and Modha, Dharmendra S.},
-	Issn = {1532-4435},
-	Journal = {The Journal of Machine Learning Research},
-	Month = dec,
-	Pages = {1919--1986},
-	Title = {A {Generalized} {Maximum} {Entropy} {Approach} to {Bregman} {Co}-clustering and {Matrix} {Approximation}},
-	Volume = {8},
-	Year = {2007}}
-
+	author  = {Arindam Banerjee and Inderjit Dhillon and Joydeep Ghosh and Srujana Merugu and Dharmendra S. Modha},
+  	title   = {A Generalized Maximum Entropy Approach to Bregman Co-clustering and Matrix Approximation},
+  	journal = {Journal of Machine Learning Research},
+  	year    = {2007},
+  	volume  = {8},
+  	number  = {67},
+  	pages   = {1919-1986},
+  	url     = {http://jmlr.org/papers/v8/banerjee07a.html}}
 
 @inproceedings{Cheng:2000,
-  title={Biclustering of expression data.},
-  author={Cheng, Yizong and Church, George M},
-  booktitle={Ismb},
-  volume={8},
-  number={2000},
-  pages={93--103},
-  year={2000}
-}
+	url = {https://www.aaai.org/Library/ISMB/2000/ismb00-010.php},
+	author = {Cheng, Yizong and Church, George M.}, 
+	title = {Biclustering of Expression Data}, 
+	year = {2000}, 
+	isbn = {1577351150}, 
+	publisher = {AAAI Press}, 
+	booktitle = {Proceedings of the Eighth International Conference on Intelligent Systems for Molecular Biology}, 
+	pages = {93–103}, 
+	numpages = {11}}
 
 @Manual{Dask:2016,
 	title = {Dask: Library for dynamic task scheduling},
 	author = {{Dask Development Team}},
 	year = {2016},
-	url = {https://dask.org},
-}
+	url = {https://dask.org}}
 
 @inproceedings{Dhillon:2001,
-author = {Dhillon, Inderjit S.},
-title = {Co-Clustering Documents and Words Using Bipartite Spectral Graph Partitioning},
-year = {2001},
-isbn = {158113391X},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-url = {https://doi.org/10.1145/502512.502550},
-doi = {10.1145/502512.502550},
-abstract = {Both document clustering and word clustering are well studied problems. Most existing algorithms cluster documents and words separately but not simultaneously. In this paper we present the novel idea of modeling the document collection as a bipartite graph between documents and words, using which the simultaneous clustering problem can be posed as a bipartite graph partitioning problem. To solve the partitioning problem, we use a new spectral co-clustering algorithm that uses the second left and right singular vectors of an appropriately scaled word-document matrix to yield good bipartitionings. The spectral algorithm enjoys some optimality properties; it can be shown that the singular vectors solve a real relaxation to the NP-complete graph bipartitioning problem. We present experimental results to verify that the resulting co-clustering algorithm works well in practice.},
-booktitle = {Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
-pages = {269–274},
-numpages = {6},
-location = {San Francisco, California},
-series = {KDD '01}
-}																																																																																																																																																															
-
+	author = {Dhillon, Inderjit S.},
+	title = {Co-Clustering Documents and Words Using Bipartite Spectral Graph Partitioning},
+	year = {2001},
+	isbn = {158113391X},
+	publisher = {Association for Computing Machinery},
+	address = {New York, NY, USA},
+	url = {https://doi.org/10.1145/502512.502550},
+	doi = {10.1145/502512.502550},
+	abstract = {Both document clustering and word clustering are well studied problems. Most existing algorithms cluster documents and words separately but not simultaneously. In this paper we present the novel idea of modeling the document collection as a bipartite graph between documents and words, using which the simultaneous clustering problem can be posed as a bipartite graph partitioning problem. To solve the partitioning problem, we use a new spectral co-clustering algorithm that uses the second left and right singular vectors of an appropriately scaled word-document matrix to yield good bipartitionings. The spectral algorithm enjoys some optimality properties; it can be shown that the singular vectors solve a real relaxation to the NP-complete graph bipartitioning problem. We present experimental results to verify that the resulting co-clustering algorithm works well in practice.},
+	booktitle = {Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+	pages = {269–274},
+	numpages = {6},
+	location = {San Francisco, California},
+	series = {KDD '01}}																																																																																																																																																															
 
 @inproceedings{Dhillon:2003,
 	Address = {Washington, D.C.},
@@ -171,7 +166,6 @@ series = {KDD '01}
 	url = {https://eprints.soton.ac.uk/403913/},
 	abstract = {It is increasingly necessary for researchers in all fields to write computer code, and in order to reproduce research results, it is important that this code is published. We present Jupyter notebooks, a document format for publishing code, results and explanations in a form that is both readable and executable. We discuss various tools and use cases for notebook documents.}}
 
-
  @misc{Merugu:2004,
 	year = {2004},
 	title={Bregman {Co}-clustering code in {Matlab}},
@@ -234,13 +228,12 @@ series = {KDD '01}
 	Bdsk-Url-2 = {https://doi.org/10.1016/0377-0427(87)90125-7}}
 
 @article{Shi:2018,
-  title={Discovering the Trading Pattern of Financial Market Participants: Comparison of Two Co-Clustering Methods},
-  author={Guangwei Shi and Liying Ren and Zhongchen Miao and Jian Gao and Yanzhe Che and Jidong Lu},
-  journal={IEEE Access},
-  year={2018},
-  volume={6},
-  pages={14431-14438}
-}
+  	title={Discovering the Trading Pattern of Financial Market Participants: Comparison of Two Co-Clustering Methods},
+  	author={Guangwei Shi and Liying Ren and Zhongchen Miao and Jian Gao and Yanzhe Che and Jidong Lu},
+  	journal={IEEE Access},
+  	year={2018},
+  	volume={6},
+  	pages={14431-14438}}
 
 @article{Wu:2015,
 	Author = {Wu, Xiaojing and Zurita-Milla, Raul and Kraak, Menno-Jan},
