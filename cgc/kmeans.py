@@ -15,23 +15,23 @@ class KmeansResults(Results):
 
     :var k_value: Optimal K value (value with maximum Silhouette score).
     :type k_value: int
-    :var km_labels: Refined clusters labels. It is a 2D- (for coclustering)
-                    or 3D- (for triclustering) array, with the shape of
-                    `nclusters`. The value at location (band, row, column)
-                    represents the refined cluster label of the corresponding
-                    band/row/column cluster combination.
-    :type km_labels: np.ndarray
+    :var labels: Refined clusters labels. It is a 2D- (for coclustering)
+                 or 3D- (for triclustering) array, with the shape of
+                 `nclusters`. The value at location (band, row, column)
+                 represents the refined cluster label of the corresponding
+                 band/row/column cluster combination.
+    :type labels: np.ndarray
     :var measure_list: List of Silhouette coefficients for all tested k values.
     :type measure_list: np.ndarray
-    :var cl_mean_centroids: Refined cluster averages computed as the centroids
-        of the clusters resulting from the k-means analysis using `k=k_value`.
-        Initally empty clusters are assigned NaN values.
-    :type cl_mean_centroids: np.ndarray
+    :var cluster_averages: Refined cluster averages. They are computed as means
+        over all elements of the co-/tri-clusters assigned to the refined
+        clusters. Initially empty clusters are assigned NaN values.
+    :type cluster_averages: np.ndarray
     """
     k_value = None
-    km_labels = None
+    labels = None
     measure_list = None
-    cl_mean_centroids = None
+    cluster_averages = None
 
 
 class Kmeans(object):
@@ -179,10 +179,10 @@ class Kmeans(object):
         # Make a lookup matrix from un-refined clusters to Kmean clusters
         km_labels = np.full(self.nclusters, np.nan)
         km_labels[mask] = labels
-        self.results.km_labels = km_labels
+        self.results.labels = km_labels
 
         # Calculate the means over the refined clusters
-        cl_mean_centroids = np.full(self.nclusters, np.nan)
+        cluster_averages = np.full(self.nclusters, np.nan)
         for label in range(self.results.k_value):
             label_sum = 0.
             label_n_elements = 0
@@ -194,8 +194,8 @@ class Kmeans(object):
                 label_n_elements += np.prod([len(idx_x) for idx_x in idx])
                 idx = np.meshgrid(*idx, indexing='ij')
                 label_sum += self.Z[tuple(idx)].sum()
-            cl_mean_centroids[clusters] = label_sum / label_n_elements
-        self.results.cl_mean_centroids = cl_mean_centroids
+            cluster_averages[clusters] = label_sum / label_n_elements
+        self.results.cluster_averages = cluster_averages
 
         self.results.write(filename=self.output_filename)
         return self.results

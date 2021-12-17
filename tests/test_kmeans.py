@@ -136,7 +136,7 @@ class TestKmeans(unittest.TestCase):
         km = init_cocluster_km()
         km.compute()
 
-        cl_km_labels = km.results.km_labels  # Refined labels in clusters
+        cl_km_labels = km.results.labels  # Refined labels in clusters
         row_clusters, col_clusters = np.meshgrid(km.clusters[0],
                                                  km.clusters[1],
                                                  indexing='ij')
@@ -170,7 +170,7 @@ class TestKmeans(unittest.TestCase):
         km = init_tricluster_km()
         km.compute()
 
-        cl_km_labels = km.results.km_labels  # Refined labels in clusters
+        cl_km_labels = km.results.labels  # Refined labels in clusters
         band_clusters, row_clusters, col_clusters = np.meshgrid(km.clusters[0],
                                                                 km.clusters[1],
                                                                 km.clusters[2],
@@ -186,7 +186,7 @@ class TestKmeans(unittest.TestCase):
     def test_centroid_values(self):
         km = init_cocluster_km()
         km.compute()
-        self.assertEqual((3, 2), km.results.cl_mean_centroids.shape)
+        self.assertEqual((3, 2), km.results.cluster_averages.shape)
         target_centroids = np.array([
             [0., 1.],
             [1., 0.],
@@ -195,7 +195,7 @@ class TestKmeans(unittest.TestCase):
         self.assertTrue(
             np.allclose(
                 target_centroids,
-                km.results.cl_mean_centroids,
+                km.results.cluster_averages,
                 equal_nan=True
             )
         )
@@ -203,7 +203,7 @@ class TestKmeans(unittest.TestCase):
     def test_centroid_values_for_km_with_noise(self):
         km = init_cocluster_km_with_noise()
         km.compute()
-        self.assertEqual((3, 2), km.results.cl_mean_centroids.shape)
+        self.assertEqual((3, 2), km.results.cluster_averages.shape)
         target_centroids = np.array([
             [0.07, 1.08],
             [1.08, 0.07],
@@ -212,7 +212,7 @@ class TestKmeans(unittest.TestCase):
         self.assertTrue(
             np.allclose(
                 target_centroids,
-                km.results.cl_mean_centroids,
+                km.results.cluster_averages,
                 equal_nan=True
             )
         )
@@ -220,7 +220,7 @@ class TestKmeans(unittest.TestCase):
     def test_centroids_nan(self):
         km = init_cocluster_km()
         km.compute()
-        self.assertTrue(all(np.isnan(km.results.cl_mean_centroids[2, :])))
+        self.assertTrue(all(np.isnan(km.results.cluster_averages[2, :])))
 
     def test_kvalue_does_not_depend_on_krange_order(self):
         # 4 co-clusters, 2 clusters
