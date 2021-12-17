@@ -230,7 +230,7 @@ def calculate_cluster_feature(Z, function, clusters, nclusters=None, **kwargs):
         **kwargs
     )
     # need to reorder dimensions
-    return features.transpose(sorted_dims)
+    return features.transpose(np.argsort(sorted_dims))
 
 
 def _calculate_feature(Z, function, labels, clusters, nclusters, axis_order,

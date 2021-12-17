@@ -56,9 +56,6 @@ class Triclustering(object):
     :type max_iterations: int, optional
     :param nruns: Number of differently-initialized runs.
     :type nruns: int, optional
-    :param epsilon: Numerical parameter, avoids zero arguments in the
-        logarithm that appears in the expression of the objective function.
-    :type epsilon: float, optional
     :param output_filename: Name of the JSON file where to write the results.
     :type output_filename: string, optional
     :param row_clusters_init: Initial row cluster assignment.
@@ -67,11 +64,29 @@ class Triclustering(object):
     :type col_clusters_init: numpy.ndarray or array_like, optional
     :param bnd_clusters_init: Initial band cluster assignment.
     :type bnd_clusters_init: numpy.ndarray or array_like, optional
+
+    :Example:
+
+    >>> import numpy as np
+    >>> Z = np.random.randint(1, 100, size=(6, 10, 8)).astype('float64')
+    >>> tc = Triclustering(Z,
+                          nclusters_row=5,
+                          nclusters_col=4,
+                          max_iterations=50,
+                          nruns=10)
     """
-    def __init__(self, Z, nclusters_row, nclusters_col, nclusters_bnd,
-                 conv_threshold=1.e-5, max_iterations=1, nruns=1,
-                 epsilon=1.e-8, output_filename='', row_clusters_init=None,
-                 col_clusters_init=None, bnd_clusters_init=None):
+    def __init__(self,
+                 Z,
+                 nclusters_row,
+                 nclusters_col,
+                 nclusters_bnd,
+                 conv_threshold=1.e-5,
+                 max_iterations=1,
+                 nruns=1,
+                 output_filename='',
+                 row_clusters_init=None,
+                 col_clusters_init=None,
+                 bnd_clusters_init=None):
         # Input parameters -----------------
         self.nclusters_row = nclusters_row
         self.nclusters_col = nclusters_col
@@ -79,7 +94,6 @@ class Triclustering(object):
         self.conv_threshold = conv_threshold
         self.max_iterations = max_iterations
         self.nruns = nruns
-        self.epsilon = epsilon
         self.output_filename = output_filename
         self.row_clusters_init = row_clusters_init
         self.col_clusters_init = col_clusters_init
@@ -92,12 +106,12 @@ class Triclustering(object):
         assert Z.ndim == 3, 'Incorrect dimensionality for Z matrix'
         self.Z = Z
 
-        if all([cls is not None for cls in [row_clusters_init,
-                                            col_clusters_init,
-                                            bnd_clusters_init]]):
+        if all([
+                cls is not None for cls in
+                [row_clusters_init, col_clusters_init, bnd_clusters_init]
+        ]):
             assert nruns == 1, 'Only nruns = 1 for given initial clusters'
-            assert Z.shape == (len(bnd_clusters_init),
-                               len(row_clusters_init),
+            assert Z.shape == (len(bnd_clusters_init), len(row_clusters_init),
                                len(col_clusters_init))
 
         self.client = None
@@ -122,12 +136,10 @@ class Triclustering(object):
                                 self.nclusters_bnd,
                                 self.conv_threshold,
                                 self.max_iterations,
-                                self.epsilon,
                                 row_clusters_init=self.row_clusters_init,
                                 col_clusters_init=self.col_clusters_init,
-                                bnd_clusters_init=self.bnd_clusters_init
-                                ):
-                r for r in range(self.nruns)
+                                bnd_clusters_init=self.bnd_clusters_init): r
+                for r in range(self.nruns)
             }
             for future in concurrent.futures.as_completed(futures):
                 logger.info(f'Waiting for run {self.results.nruns_completed}')
@@ -135,6 +147,7 @@ class Triclustering(object):
                 logger.info(f'Error = {e}')
                 if converged:
                     logger.info(f'Run converged in {niters} iterations')
+                    self.results.nruns_converged += 1
                 else:
                     logger.warning(f'Run not converged in {niters} iterations')
                 if self.results.error is None or e < self.results.error:
@@ -173,7 +186,6 @@ class Triclustering(object):
                     self.nclusters_bnd,
                     self.conv_threshold,
                     self.max_iterations,
-                    self.epsilon,
                     row_clusters_init=self.row_clusters_init,
                     col_clusters_init=self.col_clusters_init,
                     bnd_clusters_init=self.bnd_clusters_init

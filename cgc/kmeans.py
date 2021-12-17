@@ -15,16 +15,23 @@ class KmeansResults(Results):
 
     :var k_value: Optimal K value (value with maximum Silhouette score).
     :type k_value: int
+    :var labels: Refined clusters labels. It is a 2D- (for coclustering)
+                 or 3D- (for triclustering) array, with the shape of
+                 `nclusters`. The value at location (band, row, column)
+                 represents the refined cluster label of the corresponding
+                 band/row/column cluster combination.
+    :type labels: np.ndarray
     :var measure_list: List of Silhouette coefficients for all tested k values.
     :type measure_list: np.ndarray
-    :var cl_mean_centroids: Refined cluster averages computed as the centroids
-        of the clusters resulting from the k-means analysis using `k=k_value`.
-        Initally empty clusters are assigned NaN values.
-    :type cl_mean_centroids: np.ndarray
+    :var cluster_averages: Refined cluster averages. They are computed as means
+        over all elements of the co-/tri-clusters assigned to the refined
+        clusters. Initially empty clusters are assigned NaN values.
+    :type cluster_averages: np.ndarray
     """
     k_value = None
+    labels = None
     measure_list = None
-    cl_mean_centroids = None
+    cluster_averages = None
 
 
 class Kmeans(object):
@@ -53,6 +60,18 @@ class Kmeans(object):
     :type kmean_max_iter: int, optional
     :param output_filename: Name of the file where to write the results.
     :type output_filename: str, optional
+
+    :Example:
+
+    >>> import numpy as np
+    >>> Z = np.array([[4, 4, 1, 1], [4, 4, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
+                   [2, 2, 3, 3]])
+    >>> clusters = [np.array([0, 0, 1, 1, 1]), np.array([0, 0, 1, 1])]
+    >>> km = Kmeans(Z=Z,
+                clusters=clusters,
+                nclusters=[2, 2],
+                k_range= range(2, 4),
+                kmean_max_iter=2)
     """
     def __init__(self,
                  Z,
@@ -126,9 +145,8 @@ class Kmeans(object):
         self._compute_statistic_measures()
 
         # Search for value k
-        silhouette_avg_list = np.array(
-            [])  # List of average silhouette measure of each k value
-        kmean_cluster_list = []
+        silhouette_avg_list = np.array([])  # average silhouette measure vs k
+        kmean_label_list = []
         for k in self.k_range:
             # Compute Kmean
             kmean_cluster = KMeans(n_clusters=k,
@@ -138,7 +156,7 @@ class Kmeans(object):
                                               kmean_cluster.labels_)
             silhouette_avg_list = np.append(silhouette_avg_list,
                                             silhouette_avg)
-            kmean_cluster_list.append(kmean_cluster)
+            kmean_label_list.append(kmean_cluster.labels_)
         idx_k = np.argmax(silhouette_avg_list)
         if np.sum(silhouette_avg_list == silhouette_avg_list[idx_k]) > 1:
             idx_k_list = np.argwhere(
@@ -146,33 +164,38 @@ class Kmeans(object):
                     -1).tolist()
             logger.warning(
                 "Multiple k values with the same silhouette score: {},"
-                "picking the smallest one: {}".
-                format([self.k_range[i] for i in idx_k_list],
-                       self.k_range[idx_k]))
+                "picking the smallest one: {}".format(
+                    [self.k_range[i] for i in idx_k_list],
+                    self.k_range[idx_k]))
         self.results.measure_list = silhouette_avg_list
         self.results.k_value = self.k_range[idx_k]
-        self.kmean_cluster = kmean_cluster_list[idx_k]
-        del kmean_cluster_list
+        labels = kmean_label_list[idx_k]
 
-        # Scale back centroids of the "mean" dimension
-        centroids_norm = self.kmean_cluster.cluster_centers_[:, 0]
-        stat_max = np.nanmax(self.stat_measures[:, 0])
-        stat_min = np.nanmin(self.stat_measures[:, 0])
-        mean_centroids = centroids_norm * (stat_max - stat_min) + stat_min
-
-        # Assign centroids to each cluster cell
-        cl_mean_centroids = mean_centroids[self.kmean_cluster.labels_]
-
-        # Reshape the centroids of means to the shape of cluster matrix,
-        # taking into account non-constructive clusters
-        self.results.cl_mean_centroids = np.full(self.nclusters, np.nan)
-        indices = np.meshgrid(
-            *[np.unique(cl) for cl in self.clusters],
-            indexing='ij'
-        )
-        mask = np.zeros_like(self.results.cl_mean_centroids, dtype=bool)
+        indices = np.meshgrid(*[np.unique(cl) for cl in self.clusters],
+                              indexing='ij')
+        mask = np.zeros(self.nclusters, dtype=bool)
         mask[tuple(indices)] = True
-        self.results.cl_mean_centroids[mask] = cl_mean_centroids
+
+        # Make a lookup matrix from un-refined clusters to Kmean clusters
+        km_labels = np.full(self.nclusters, np.nan)
+        km_labels[mask] = labels
+        self.results.labels = km_labels
+
+        # Calculate the means over the refined clusters
+        cluster_averages = np.full(self.nclusters, np.nan)
+        for label in range(self.results.k_value):
+            label_sum = 0.
+            label_n_elements = 0
+            # Loop over all co-/tri-clusters in the selected refined cluster
+            clusters = np.where(km_labels == label)
+            for cluster in zip(*clusters):
+                idx = [np.where(self.clusters[i] == cluster[i])[0]
+                       for i in range(self.Z.ndim)]
+                label_n_elements += np.prod([len(idx_x) for idx_x in idx])
+                idx = np.meshgrid(*idx, indexing='ij')
+                label_sum += self.Z[tuple(idx)].sum()
+            cluster_averages[clusters] = label_sum / label_n_elements
+        self.results.cluster_averages = cluster_averages
 
         self.results.write(filename=self.output_filename)
         return self.results
@@ -185,12 +208,14 @@ class Kmeans(object):
         """
 
         features = np.zeros((*self.nclusters, 6))
-        features[...,
-                 0] = calculate_cluster_feature(self.Z, np.mean, self.clusters,
-                                                self.nclusters)
-        features[...,
-                 1] = calculate_cluster_feature(self.Z, np.std, self.clusters,
-                                                self.nclusters)
+        features[..., 0] = calculate_cluster_feature(self.Z,
+                                                     np.mean,
+                                                     self.clusters,
+                                                     self.nclusters)
+        features[..., 1] = calculate_cluster_feature(self.Z,
+                                                     np.std,
+                                                     self.clusters,
+                                                     self.nclusters)
         features[..., 2] = calculate_cluster_feature(self.Z,
                                                      np.percentile,
                                                      self.clusters,
@@ -201,20 +226,21 @@ class Kmeans(object):
                                                      self.clusters,
                                                      self.nclusters,
                                                      q=95)
-        features[...,
-                 4] = calculate_cluster_feature(self.Z, np.max, self.clusters,
-                                                self.nclusters)
-        features[...,
-                 5] = calculate_cluster_feature(self.Z, np.min, self.clusters,
-                                                self.nclusters)
+        features[..., 4] = calculate_cluster_feature(self.Z,
+                                                     np.max,
+                                                     self.clusters,
+                                                     self.nclusters)
+        features[..., 5] = calculate_cluster_feature(self.Z,
+                                                     np.min,
+                                                     self.clusters,
+                                                     self.nclusters)
 
-        self.stat_measures = features[~np.isnan(features)].reshape((-1, 6))
+        stat_measures = features[~np.isnan(features)].reshape((-1, 6))
 
         # Normalize all statistics to [0, 1]
-        minimum = self.stat_measures.min(axis=0)
-        maximum = self.stat_measures.max(axis=0)
-        self.stat_measures_norm = np.divide((self.stat_measures - minimum),
-                                            (maximum - minimum))
-
-        # Set statistics to zero if all its values are identical (max == min)
-        self.stat_measures_norm[np.isnan(self.stat_measures_norm)] = 0.
+        minimum = stat_measures.min(axis=0)
+        maximum = stat_measures.max(axis=0)
+        self.stat_measures_norm = np.divide((stat_measures - minimum),
+                                            (maximum - minimum),
+                                            out=np.zeros_like(stat_measures),
+                                            where=(maximum - minimum) != 0)

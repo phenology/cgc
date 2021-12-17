@@ -41,7 +41,6 @@ the co-clustering analysis is setup by initializing a ``Coclustering`` object:
         max_iterations=100,  # maximum number of iterations
         conv_threshold=1.e-5,  # error convergence threshold 
         nruns=10,  # number of differently-initialized runs
-        epsilon=1.e-8,  # numerical parameter
         output_filename='results.json'  # JSON file where to write output
     )
 
@@ -85,13 +84,8 @@ with the optional flag ``low_memory``:
 
     results = cc.run_with_threads(nthreads=4, low_memory=True)
 
-The reduced memory requirement comes at the cost of performance. However, the performance loss of the low-memory
-algorithm can be significantly reduced by using `Numba`_'s just-in-time compilation feature, which can be activated with
-a second optional flag, ``numba_jit``:
-
-.. code-block:: python
-
-    results = cc.run_with_threads(nthreads=4, low_memory=True, numba_jit=True)
+The reduced memory requirement comes at a certain cost of performance. Fortunately, we also applied `Numba`_'s just-in-time
+compilation feature in the ``low_memory`` option. Thanks to this feature, the performance cost is significantly reduced.
 
 .. _Numba: https://numba.pydata.org
 

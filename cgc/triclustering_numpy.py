@@ -5,9 +5,8 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def _distance(Z, Y, epsilon):
+def _distance(Z, Y):
     """ Distance function """
-    Y = Y + epsilon
     return Y.sum(axis=(1, 2)) - np.einsum('ijk,ljk->il', Z, np.log(Y))
 
 
@@ -17,14 +16,14 @@ def _initialize_clusters(n_el, n_clusters):
     return np.random.permutation(cluster_idx)
 
 
-def _setup_cluster_matrix(n_clusters, cluster_idx):
+def _setup_cluster_matrix(cluster_labels, cluster_idx):
     """ Set cluster occupation matrix """
-    return np.eye(n_clusters, dtype=np.bool)[cluster_idx]
+    return np.equal.outer(cluster_idx, cluster_labels)
 
 
 def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
-                  niters, epsilon, row_clusters_init=None,
-                  col_clusters_init=None, bnd_clusters_init=None):
+                  niters, row_clusters_init=None, col_clusters_init=None,
+                  bnd_clusters_init=None):
     """
     Run the tri-clustering analysis, Numpy-based implementation.
 
@@ -41,9 +40,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
     :type errobj: float, optional
     :param niters: Maximum number of iterations.
     :type niters: int, optional
-    :param epsilon: Numerical parameter, avoids zero arguments in the
-        logarithm that appears in the expression of the objective function.
-    :type epsilon: float, optional
     :param row_clusters_init: Initial row cluster assignment.
     :type row_clusters_init: numpy.ndarray or array_like, optional
     :param col_clusters_init: Initial column cluster assignment.
@@ -56,9 +52,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
     """
     [d, m, n] = Z.shape
 
-    # Calculate average
-    Gavg = Z.mean()
-
     # Initialize cluster assignments
     row_clusters = row_clusters_init if row_clusters_init is not None \
         else _initialize_clusters(m, nclusters_row)
@@ -66,9 +59,6 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         else _initialize_clusters(n, nclusters_col)
     bnd_clusters = bnd_clusters_init if bnd_clusters_init is not None \
         else _initialize_clusters(d, nclusters_bnd)
-    R = _setup_cluster_matrix(nclusters_row, row_clusters)
-    C = _setup_cluster_matrix(nclusters_col, col_clusters)
-    B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 0
@@ -80,49 +70,65 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         nel_row_clusters = np.bincount(row_clusters, minlength=nclusters_row)
         nel_col_clusters = np.bincount(col_clusters, minlength=nclusters_col)
         nel_bnd_clusters = np.bincount(bnd_clusters, minlength=nclusters_bnd)
+        row_cluster_labels, = nel_row_clusters.nonzero()
+        col_cluster_labels, = nel_col_clusters.nonzero()
+        bnd_cluster_labels, = nel_bnd_clusters.nonzero()
         logger.debug(
             'num of populated clusters: row {}, col {}, bnd {}'.format(
-                np.sum(nel_row_clusters > 0),
-                np.sum(nel_col_clusters > 0),
-                np.sum(nel_bnd_clusters > 0)
+                len(row_cluster_labels),
+                len(col_cluster_labels),
+                len(bnd_cluster_labels),
             )
         )
-        nel_clusters = np.einsum('i,j->ij', nel_row_clusters, nel_col_clusters)
-        nel_clusters = np.einsum('i,jk->ijk', nel_bnd_clusters, nel_clusters)
+        nel_clusters = np.einsum(
+            'i,j->ij',
+            nel_row_clusters[row_cluster_labels],
+            nel_col_clusters[col_cluster_labels]
+        )
+        nel_clusters = np.einsum(
+            'i,jk->ijk',
+            nel_bnd_clusters[bnd_cluster_labels],
+            nel_clusters
+        )
 
-        # calculate tri-cluster averages (epsilon takes care of empty clusters)
+        R = _setup_cluster_matrix(row_cluster_labels, row_clusters)
+        C = _setup_cluster_matrix(col_cluster_labels, col_clusters)
+        B = _setup_cluster_matrix(bnd_cluster_labels, bnd_clusters)
+
+        # calculate tri-cluster averages
         # first sum values in each tri-cluster ..
         TriCavg = np.einsum('ij,ilm->jlm', B, Z)  # .. along band axis
         TriCavg = np.einsum('ij,kim->kjm', R, TriCavg)  # .. along row axis
         TriCavg = np.einsum('ij,kli->klj', C, TriCavg)  # .. along col axis
         # finally divide by number of elements in each tri-cluster
-        TriCavg = (TriCavg + Gavg * epsilon) / (nel_clusters + epsilon)
+        TriCavg = TriCavg / nel_clusters
 
         # unpack tri-cluster averages ..
         avg_unpck = np.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
         avg_unpck = np.einsum('ij,klj->kli', C, avg_unpck)  # .. along col axis
         # use these for the row cluster assignment
         idx = (1, 0, 2)
-        d_row = _distance(Z.transpose(idx), avg_unpck.transpose(idx), epsilon)
+        d_row = _distance(Z.transpose(idx), avg_unpck.transpose(idx))
         row_clusters = np.argmin(d_row, axis=1)
-        R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
         # unpack tri-cluster averages ..
         avg_unpck = np.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
         avg_unpck = np.einsum('ij,kjl->kil', R, avg_unpck)  # .. along row axis
         # use these for the col cluster assignment
         idx = (2, 0, 1)
-        d_col = _distance(Z.transpose(idx), avg_unpck.transpose(idx), epsilon)
+        d_col = _distance(Z.transpose(idx), avg_unpck.transpose(idx))
         col_clusters = np.argmin(d_col, axis=1)
-        C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
         # unpack tri-cluster averages ..
         avg_unpck = np.einsum('ij,kjl->kil', R, TriCavg)  # .. along row axis
         avg_unpck = np.einsum('ij,klj->kli', C, avg_unpck)  # .. along col axis
         # use these for the band cluster assignment
-        d_bnd = _distance(Z, avg_unpck, epsilon)
+        d_bnd = _distance(Z, avg_unpck)
         bnd_clusters = np.argmin(d_bnd, axis=1)
-        B = _setup_cluster_matrix(nclusters_bnd, bnd_clusters)
+
+        row_clusters = np.take(row_cluster_labels, row_clusters)
+        col_clusters = np.take(col_cluster_labels, col_clusters)
+        bnd_clusters = np.take(bnd_cluster_labels, bnd_clusters)
 
         # Error value (actually just the band component really)
         old_e = e

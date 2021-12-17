@@ -8,12 +8,6 @@ The ``triclustering`` module provides a generalization of the co-clustering algo
 Ref. [#]_). For geospatial data, tri-clustering analyses allow extending the search for similarity patterns in
 data cubes, thus accounting for an extra dimension (the 'band' dimension) in addition to space and time.
 
-.. NOTE:: 
-    The search for 'blocks' in arrays with shape (``bands``, ``rows``, ``columns``) is carried out by iteratively
-    optimizing the assignment of clusters in ``rows``, ``columns`` and ``bands``, in this order. The procedure is
-    repeated until convergence. The final cluster assignment might, however, be influenced by the chosen order in
-    which the dimensions are considered. 
-
 Setup the Analysis
 ------------------
 
@@ -44,12 +38,12 @@ is setup by creating an instance of ``Triclustering``:
         max_iterations=100,  # maximum number of iterations
         conv_threshold=1.e-5,  # error convergence threshold 
         nruns=10,  # number of differently-initialized runs
-        epsilon=1.e-8  # numerical parameter
         output_filename='results.json'  # JSON file where to write output
     )
 
 The input arguments of ``Triclustering`` are identical to the ``Coclustering`` ones (see :doc:`coclustering`) -
-``nclusters_bnd`` is the only additional argument, which sets the maximum number of clusters along the 'band' dimension.
+``nclusters_bnd`` is the only additional argument, which sets the maximum number of clusters along the 'band' dimension. 
+Note that a lower number of clusters can be identified by the algorithm (some of the clusters may remain empty).
 
 .. NOTE::
     The first axis of ``Z`` is assumed to represent the 'band' dimension.
