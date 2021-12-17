@@ -84,7 +84,7 @@ with the optional flag ``low_memory``:
 
     results = cc.run_with_threads(nthreads=4, low_memory=True)
 
-The reduced memory requirement comes at a certain cost of performance. Fortunately, we also applied Numba`_'s just-in-time 
+The reduced memory requirement comes at a certain cost of performance. Fortunately, we also applied `Numba`_'s just-in-time
 compilation feature in the ``low_memory`` option. Thanks to this feature, the performance cost is significantly reduced.
 
 .. _Numba: https://numba.pydata.org
