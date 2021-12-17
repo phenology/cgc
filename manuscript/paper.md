@@ -28,7 +28,7 @@ authors:
 affiliations:
  - name: Netherlands eScience Center, Science Park 140, 1098 XG Amsterdam, The Netherlands
    index: 1
- - name: University of Natural Resources and Life Science (BOKU), 1190, Vienna, Austria
+ - name: Institute of Geomatics, University of Natural Resources and Life Science (BOKU), 1190, Vienna, Austria
    index: 2
  - name: Faculty of Geo-Information Science and Earth Observation (ITC), University of Twente, PO Box 217, 7500 AE, Enschede, the Netherlands
    index: 3
