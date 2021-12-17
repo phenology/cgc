@@ -9,22 +9,29 @@ def mem_estimate_coclustering_numpy(n_rows,
                                     nclusters_col,
                                     out_unit=None):
     """
-    Estimate maximum memory usage of cgc.coclustering_numpy, given the matrix
-    size(n_rows, n_cols) and number of row/column clusters (nclusters_row,
-    nclusters_col)
+    Estimate the maximum memory usage of `cgc.coclustering_numpy`, given the
+    matrix size (`n_rows`, `n_cols`) and the number of row/column clusters
+    (`nclusters_row`, `nclusters_col`).
 
-    The estimated memory usage is the sum of all major arrays in the process of
-    cgc.coclustering_numpy.coclustering.
+    The estimated memory usage is the sum of the size of all major arrays
+    simultaneously allocated in `cgc.coclustering_numpy.coclustering`.
 
-    Depending on the shape of Z, there are two possible memory peaks: the first
-    or the second call of cgc.coclustering_numpy._distance()
+    Depending on the shape of the data matrix, there are two possible memory
+    peaks, corresponding to either the first or the second call to
+    `cgc.coclustering_numpy._distance()`.
 
-    :param n_rows: Number of rows of matrix Z
-    :param n_cols: Number of columns of matrix Z
-    :param nclusters_row: Number of row clusters
-    :param nclusters_col: Number of column clusters
-    :param out_unit: Output unit, defaults to None
-    :return: Estimated memory usage, unit, peak
+    :param n_rows: Number of rows in the data matrix.
+    :type n_rows: int
+    :param n_cols: Number of columns in the data matrix.
+    :type n_cols: int
+    :param nclusters_row: Number of row clusters.
+    :type nclusters_row: int
+    :param nclusters_col: Number of column clusters.
+    :type nclusters_col: int
+    :param out_unit: Output units, choose between "B", "KB", "MB", "GB"
+    :type out_unit: str
+    :return: Estimated memory usage, unit, peak.
+    :type: tuple
     """
     logger = logging.getLogger(__name__)
 
@@ -103,37 +110,146 @@ def _human_size(size_bytes, out_unit=None):
 def calculate_cocluster_averages(Z, row_clusters, col_clusters,
                                  nclusters_row=None, nclusters_col=None):
     """
-    Calculate the co-cluster averages from the data matrix and the row-
-    and column-cluster assignment arrays.
+    Calculate the co-cluster averages from the data array and the row- and
+    column-cluster assignments.
 
-    :param Z: data matrix (m x n)
-    :param row_clusters: row clusters (array with size m)
-    :param col_clusters: column clusters (array with size n)
-    :param nclusters_row: number of row clusters. If not provided,
-        determined from the number of unique elements in row_clusters
-    :param nclusters_col: number of column clusters. If not provided,
-        determined from the number of unique elements in col_clusters
-    :return: cocluster averages (nclusters_row, nclusters_col). Co-clusters
-        which are not populated are assigned NaN values.
+    :param Z: Data matrix.
+    :type Z: numpy.ndarray or dask.array.Array
+    :param row_clusters: Row cluster assignment.
+    :type row_clusters: numpy.ndarray or array_like
+    :param col_clusters: Column cluster assignment.
+    :type col_clusters: numpy.ndarray or array_like
+    :param nclusters_row: Number of row clusters. If not provided, it is set as
+        the number of unique elements in `row_clusters`.
+    :type nclusters_row: int, optional
+    :param nclusters_col: Number of column clusters. If not provided, it is set
+        as the number of unique elements in `col_clusters`.
+    :type nclusters_col: int, optional
+    :return: Array with co-cluster averages, shape
+        (`nclusters_row`, `nclusters_col`). Elements corresponding to empty
+        co-clusters are set as NaN.
+    :type: numpy.ndarray
     """
-    row_clusters = np.array(row_clusters)
-    col_clusters = np.array(col_clusters)
+    return calculate_cluster_feature(
+        Z,
+        np.mean,
+        (row_clusters, col_clusters),
+        (nclusters_row, nclusters_col)
+    )
 
-    _row_clusters = np.unique(row_clusters)
-    _col_clusters = np.unique(col_clusters)
 
-    nclusters_row = len(_row_clusters) if nclusters_row is None \
-        else nclusters_row
-    nclusters_col = len(_col_clusters) if nclusters_col is None \
-        else nclusters_col
+def calculate_tricluster_averages(Z, row_clusters, col_clusters, bnd_clusters,
+                                  nclusters_row=None, nclusters_col=None,
+                                  nclusters_bnd=None):
+    """
+    Calculate the tri-cluster averages from the data array and the band-,
+    row- and column-cluster assignments.
 
-    avg = np.full((nclusters_row, nclusters_col), np.nan)
+    :param Z: Data array, with shape (`bands`, `rows`, `columns`).
+    :type Z: numpy.ndarray or dask.array.Array
+    :param row_clusters: Row cluster assignment.
+    :type row_clusters: numpy.ndarray or array_like
+    :param col_clusters: Column cluster assignment.
+    :type col_clusters: numpy.ndarray or array_like
+    :param bnd_clusters: Band cluster assignment.
+    :type bnd_clusters: numpy.ndarray or array_like
+    :param nclusters_row: Number of row clusters. If not provided, it is set as
+        the number of unique elements in `row_clusters`.
+    :type nclusters_row: int, optional
+    :param nclusters_col: Number of column clusters. If not provided, it is set
+        as the number of unique elements in `col_clusters`.
+    :type nclusters_col: int, optional
+    :param nclusters_bnd: Number of band clusters. If not provided, it is set
+        as the number of unique elements in `col_clusters`.
+    :type nclusters_bnd: int, optional
+    :return: Array with tri-cluster averages, shape
+        (`nclusters_bnd`, `nclusters_row`, `nclusters_col`). Elements
+        corresponding to empty tri-clusters are set as NaN.
+    :type: numpy.ndarray
+    """
+    return calculate_cluster_feature(
+        Z,
+        np.mean,
+        (bnd_clusters, row_clusters, col_clusters),
+        (nclusters_bnd, nclusters_row, nclusters_col)
+    )
 
-    # Loop over co-clusters
-    for r in _row_clusters:
-        idx_rows, = np.where(row_clusters == r)
-        for c in _col_clusters:
-            idx_cols, = np.where(col_clusters == c)
-            ir, ic = np.meshgrid(idx_rows, idx_cols)
-            avg[r, c] = Z[ir, ic].mean()
-    return avg
+
+def calculate_cluster_feature(Z, function, clusters, nclusters=None, **kwargs):
+    """
+    Calculate features for clusters. This function works in N dimensions
+    (N=2, 3, ...) making it suitable to calculate features for both co-clusters
+    and tri-clusters.
+
+    :param Z: Data array (N dimensions).
+    :type Z: numpy.ndarray or dask.array.Array
+    :param function: Function to run over the cluster elements to calculate the
+        desidered feature. Should take as an input a N-dimensional array and
+        return a scalar.
+    :type function: Callable
+    :param clusters: Iterable with length N. It should contain the cluster
+        labels for each dimension, following the same ordering as for Z
+    :type clusters: tuple, list, or numpy.ndarray
+    :param nclusters: Iterable with length N. It should contains the number of
+        clusters in each dimension, following the same ordering as for Z.  If
+        not provided, it is set as the number of unique elements in each
+        dimension.
+    :type nclusters: tuple, list, or numpy.ndarray, optional
+    :param kwargs: keyword arguments to be passed to the input function
+        together with the input data array for each cluster
+    :type kwargs: dict, optional
+    :return: the desired feature is computed for each cluster and added to an
+        array with N dimensions. It has dimension N and shape equal to
+        nclusters.
+    :type: numpy.ndarray
+    """
+
+    assert len(clusters) == Z.ndim
+
+    labels = [np.unique(c) for c in clusters]
+
+    if nclusters is None:
+        nclusters = [None for _ in labels]
+    else:
+        nclusters = [ncl for ncl in nclusters]
+
+    assert len(nclusters) == Z.ndim
+
+    nclusters = [ncl if ncl is not None else len(lab)
+                 for ncl, lab in zip(nclusters, labels)]
+
+    # sort dimensions from largest to smallest
+    sorted_dims = np.argsort(nclusters)[::-1]
+    features = _calculate_feature(
+        Z,
+        function,
+        labels,
+        clusters,
+        nclusters,
+        sorted_dims,
+        **kwargs
+    )
+    # need to reorder dimensions
+    return features.transpose(np.argsort(sorted_dims))
+
+
+def _calculate_feature(Z, function, labels, clusters, nclusters, axis_order,
+                       **kwargs):
+    features = np.full([nclusters[ax] for ax in axis_order], np.nan)
+    ax, *axis = axis_order
+    for label in labels[ax]:
+        idx, = np.where(clusters[ax] == label)
+        _Z = np.take(Z, idx, axis=ax)
+        if axis:
+            features[label, ...] = _calculate_feature(
+                _Z,
+                function,
+                labels,
+                clusters,
+                nclusters,
+                axis,
+                **kwargs
+            )
+        else:
+            features[label] = function(_Z, **kwargs)
+    return features

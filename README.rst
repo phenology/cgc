@@ -2,7 +2,7 @@
    :widths: 25 25
    :header-rows: 1
 
-   * - fair-software.nl recommendations
+   * - `fair-software.nl <https://fair-software.nl>`_ recommendations
      - Badges
    * - \1. Code repository
      - |GitHub Badge|
@@ -53,18 +53,15 @@
    :target: https://cgc.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-################################################################################
 CGC: Clustering Geo-Data Cubes
-################################################################################
+==============================
 
-Clustering Geo-Data Cubes (CGC) is a Python package to perform clustering analysis for multidimensional geospatial data.
-The included tools allow the user to efficiently run tasks in parallel on local and distributed systems.
-
+The Clustering Geo-Data Cubes (CGC) package focuses on the needs of geospatial data scientists who require tools to make sense of multi-dimensional data cubes. It provides the functionality to perform **co-cluster** and **tri-cluster** analyses on both local and distributed systems.
 
 Installation
 ------------
 
-To install cgc, do:
+To install CGC, do:
 
 .. code-block:: console
 
@@ -85,22 +82,38 @@ Run tests (including coverage) with:
 
   python setup.py test
 
-
 Documentation
-*************
+-------------
 
-The project's full documentation can be found `here <https://cgc.readthedocs.io/en/latest/>`_.
+The project's full API documentation can be found `online <https://cgc.readthedocs.io/en/latest/>`_. Including:
+
+- `Co-clustering <https://cgc.readthedocs.io/en/latest/coclustering.html>`_
+- `Tri-clustering <https://cgc.readthedocs.io/en/latest/triclustering.html>`_
+- `K-means refinement <https://cgc.readthedocs.io/en/latest/kmeans.html>`_
+- `Utility Functions <https://cgc.readthedocs.io/en/latest/utils.html>`_
+
+Examples of CGC applications on real geo-spatial data:
+
+- `Co-clustering application <https://cgc-tutorial.readthedocs.io/en/latest/notebooks/coclustering.html>`_
+- `Tri-clustering application <https://cgc-tutorial.readthedocs.io/en/latest/notebooks/triclustering.html>`_
+
+Tutorial
+--------
+
+The tutorial of CGC can be found  `here <https://cgc-tutorial.readthedocs.io/en/latest/index.html>`_.
+
 
 Contributing
-************
+------------
 
-If you want to contribute to the development of cgc,
-have a look at the `contribution guidelines <CONTRIBUTING.rst>`_.
+If you want to contribute to the development of cgc, have a look at the `contribution guidelines`_.
+
+.. _contribution guidelines: https://github.com/phenology/cgc/tree/master/CONTRIBUTING.rst
 
 License
-*******
+-------
 
-Copyright (c) 2020,
+Copyright (c) 2020-2021,
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -114,9 +127,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-
-
 Credits
-*******
+-------
 
-This package was created with `Cookiecutter <https://github.com/audreyr/cookiecutter>`_ and the `NLeSC/python-template <https://github.com/NLeSC/python-template>`_.
+The code has been developed as a collaborative effort between the `ITC, University of Twente`_ and
+`the Netherlands eScience Center`_ within the generalization of the project
+`High spatial resolution phenological modelling at continental scales`_.
+
+.. _ITC, University of Twente: https://www.itc.nl
+.. _High spatial resolution phenological modelling at continental scales: https://research-software.nl/projects/1334
+.. _the Netherlands eScience Center: https://www.esciencecenter.nl
+
+This package was created with `Cookiecutter <https://github.com/audreyr/cookiecutter>`_ and the
+`NLeSC/python-template <https://github.com/NLeSC/python-template>`_.

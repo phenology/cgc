@@ -1,16 +1,13 @@
 import logging
 
-import numpy as np
-
 import dask.array as da
 from dask.distributed import get_client, rejoin, secede
 
 logger = logging.getLogger(__name__)
 
 
-def _distance(Z, Y, epsilon):
+def _distance(Z, Y):
     """ Distance function """
-    Y = Y + epsilon
     # The first term below is equal to one row of: da.dot(da.ones(m, n), Y)
     # with Z.shape = (m, n) and Y.shape = (n, k)
     return Y.sum(axis=0, keepdims=True) - da.matmul(Z, da.log(Y))
@@ -22,28 +19,36 @@ def _initialize_clusters(n_el, n_clusters, chunks=None):
     return da.random.permutation(cluster_idx)
 
 
-def _setup_cluster_matrix(n_clusters, cluster_idx):
+def _setup_cluster_matrix(cluster_labels, cluster_idx):
     """ Set cluster occupation matrix """
-    return da.eye(n_clusters, dtype=np.bool, chunks=n_clusters)[cluster_idx]
+    return da.equal.outer(cluster_idx, cluster_labels)
 
 
-def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
+def coclustering(Z, nclusters_row, nclusters_col, errobj, niters,
                  col_clusters_init=None, row_clusters_init=None,
                  run_on_worker=False):
     """
-    Run the co-clustering, Dask implementation
+    Run the co-clustering analysis, Dask implementation.
 
-    :param Z: m x n data matrix
-    :param nclusters_row: num row clusters
-    :param nclusters_col: number of column clusters
-    :param errobj: convergence threshold for the objective function
-    :param niters: maximum number of iterations
-    :param epsilon: numerical parameter, avoids zero arguments in log
-    :param row_clusters_init: initial row cluster assignment
-    :param col_clusters_init: initial column cluster assignment
-    :param run_on_worker: whether the function is submitted to a Dask worker
-    :return: has converged, number of iterations performed. final row and
-    column clustering, error value
+    :param Z: Data matrix for which to run the co-clustering analysis
+    :type Z: dask.array.Array or array_like
+    :param nclusters_row: Number of row clusters.
+    :type nclusters_row: int
+    :param nclusters_col: Number of column clusters.
+    :type nclusters_col: int
+    :param errobj: Convergence threshold for the objective function.
+    :type errobj: float, optional
+    :param niters: Maximum number of iterations.
+    :type niters: int, optional
+    :param row_clusters_init: Initial row cluster assignment.
+    :type row_clusters_init: numpy.ndarray or array_like, optional
+    :param col_clusters_init: Initial column cluster assignment.
+    :type col_clusters_init: numpy.ndarray or array_like, optional
+    :param run_on_worker: Whether the function is submitted to a Dask worker
+    :type run_on_worker: bool, optional
+    :return: Has converged, number of iterations performed, final row and
+    column clustering, approximation error of the co-clustering.
+    :type: tuple
     """
     client = get_client()
 
@@ -58,14 +63,10 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
     col_clusters = da.array(col_clusters_init) \
         if col_clusters_init is not None \
         else _initialize_clusters(n, nclusters_col, chunks=col_chunks)
-    R = _setup_cluster_matrix(nclusters_row, row_clusters)
-    C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
     e, old_e = 2 * errobj, 0
     s = 0
     converged = False
-
-    Gavg = Z.mean()
 
     while (not converged) & (s < niters):
         logger.debug(f'Iteration # {s} ..')
@@ -74,33 +75,37 @@ def coclustering(Z, nclusters_row, nclusters_col, errobj, niters, epsilon,
         # originally computed as:  da.dot(da.dot(R.T, da.ones((m, n))), C)
         nel_row_clusters = da.bincount(row_clusters, minlength=nclusters_row)
         nel_col_clusters = da.bincount(col_clusters, minlength=nclusters_col)
+        row_cluster_labels = nel_row_clusters.nonzero()[0].compute()
+        col_cluster_labels = nel_col_clusters.nonzero()[0].compute()
         logger.debug('num of populated clusters: row {}, col {}'.format(
-                        da.sum(nel_row_clusters > 0).compute(),
-                        da.sum(nel_col_clusters > 0).compute()))
-        nel_clusters = da.outer(nel_row_clusters, nel_col_clusters)
-        CoCavg = (da.matmul(da.matmul(R.T, Z), C) + Gavg * epsilon) / \
-                 (nel_clusters + epsilon)
+                        len(row_cluster_labels),
+                        len(col_cluster_labels)))
+        R = _setup_cluster_matrix(row_cluster_labels, row_clusters)
+        C = _setup_cluster_matrix(col_cluster_labels, col_clusters)
+        nel_clusters = da.outer(nel_row_clusters[row_cluster_labels],
+                                nel_col_clusters[col_cluster_labels])
+        CoCavg = da.matmul(da.matmul(R.T, Z), C) / nel_clusters
 
         # Calculate distance based on row approximation
-        d_row = _distance(Z, da.matmul(C, CoCavg.T), epsilon)
+        d_row = _distance(Z, da.matmul(C, CoCavg.T))
         # Assign to best row cluster
         row_clusters = da.argmin(d_row, axis=1)
-        R = _setup_cluster_matrix(nclusters_row, row_clusters)
 
         # Calculate distance based on column approximation
-        d_col = _distance(Z.T, da.matmul(R, CoCavg), epsilon)
+        d_col = _distance(Z.T, da.matmul(R, CoCavg))
         # Assign to best column cluster
         col_clusters = da.argmin(d_col, axis=1)
-        C = _setup_cluster_matrix(nclusters_col, col_clusters)
 
         # Error value (actually just the column components really)
         old_e = e
         minvals = da.min(d_col, axis=1)
         # power 1 divergence, power 2 euclidean
         e = da.sum(da.power(minvals, 1))
-        row_clusters, R, col_clusters, C, e = client.persist([row_clusters, R,
-                                                              col_clusters, C,
-                                                              e])
+        row_clusters, col_clusters, e = client.persist([
+            da.take(row_cluster_labels, row_clusters),
+            da.take(col_cluster_labels, col_clusters),
+            e
+        ])
         if run_on_worker:
             # this is workaround for e.compute() for a function that runs
             # on a worker with multiple threads

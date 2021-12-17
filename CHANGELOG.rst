@@ -8,6 +8,43 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.6.1] - 2021-12-17
+********************
+
+Fixed
+-----
+* Fixing README - to be used as long_description on PyPI
+
+[0.6.0] - 2021-12-17
+********************
+
+Added
+-----
+* k-means refinement also return refined-cluster labels
+
+Fixed
+-----
+* Fixed bug in calculate_cluster_features, affecting kmeans and the calculation of the tri-cluster averages for particular ordering of the dimensions
+* Number of converged runs in tri-cluster is updated
+
+Changed
+-------
+* Numerical parameter epsilon is removed, which should lead to some improvement in the algorithm when empty clusters are present
+* The refined cluster averages are not computed anymore over co-/tri-cluster averages but over all corresponding elements
+* Dropped non-Numba powered low-mem version of co-clustering
+
+[0.5.0] - 2021-09-23
+********************
+
+Added
+-----
+* k-means implementation for tri-clustering
+* utility functions to calculate cluster-based averages for tri-clustering
+
+Changed
+-------
+* Best k value in k-means is now selected automatically using the Silhouette score
+
 [0.4.0] - 2021-07-29
 ********************
 
