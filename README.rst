@@ -85,7 +85,7 @@ Run tests (including coverage) with:
 Documentation
 -------------
 
-The project's full API documentation can be found `here <https://cgc.readthedocs.io/en/latest/>`_. Including:
+The project's full API documentation can be found `online <https://cgc.readthedocs.io/en/latest/>`_. Including:
 
 - `Co-clustering <https://cgc.readthedocs.io/en/latest/coclustering.html>`_
 - `Tri-clustering <https://cgc.readthedocs.io/en/latest/triclustering.html>`_
