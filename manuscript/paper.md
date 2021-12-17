@@ -37,7 +37,7 @@ bibliography: paper.bib
 ---
 # Summary
 
-Multidimensional data cubes are increasingly ubiquitous, in particular in the geosciences. Clustering techniques encompassing their full dimensionality are necessary to identify patterns "hidden" within these cubes. Clustering Geodata Cubes (CGC) is a Python package designed for partitional clustering, identifying groups of similar data across two (e.g., spatial and temporal) or three (e.g., spatial, temporal, and thematic) dimensions. CGC provides efficient and scalable co- and tri-clustering functionality appropriate to analyze  both small and large datasets as well as the cluster refinement and visualization functionality that support users in their quest to make sense of complex datasets.   
+Multidimensional data cubes are increasingly ubiquitous, in particular in the geosciences. Clustering techniques encompassing their full dimensionality are necessary to identify patterns "hidden" within these cubes. Clustering Geodata Cubes (CGC) is a Python package designed for partitional clustering, which identifies groups of similar data across two (e.g., spatial and temporal) or three (e.g., spatial, temporal, and thematic) dimensions. CGC provides efficient and scalable co- and tri-clustering functionality appropriate to analyze both small and large datasets as well as a cluster refinement functionality that supports users in their quest to make sense of complex datasets.   
 
 
 # Introduction
@@ -46,12 +46,11 @@ Faced with the increasing ubiquity of large datasets, data mining techniques hav
 
 Traditional clustering techniques focus on a single dimension and may therefore obfuscate relevant groups [@Hartigan:1972;@Cheng:2000]. Therefore, clustering techniques capable of simultaneously grouping data along multiple dimensions are needed. These techniques - referred to as co- or bi-clustering and tri-clustering in the case of two and three dimensions, respectively - have seen significant development and adoption in fields ranging from bioinformatics [@Cheng:2000] to finance [@Shi:2018] and natural language processing [@Dhillon:2001].
 
-The recent exponential growth of multidimensional data referring to geographical features (e.g., time series of satellite images) has resulted in a wide variety of geo-data cubes, which can benefit from co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geo-information science [@Wu:2015], as well as an extension of that method to three dimensions [@Wu:2018], with these advanced clustering methods becoming increasingly essential to tackling complex multidimensional data cubes. 
+The exponential growth of multidimensional data referring to geographical features (e.g., time series of satellite images) has resulted in a wide variety of geo-data cubes, which can benefit from co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geo-data [@Wu:2015], as well as its extension to three dimensions [@Wu:2018]. 
 
-In light of the eminent employability of partitional co- and tri-clustering to geospatial disciplines like geo-information science and Earth observation, and the transferability to other (geo)scientific domains, this paper presents the Clustering Geo-data Cubes (CGC) package, which facilitates the efficient use of the co-clustering and tri-clustering methods presented in @Wu:2015 and @Wu:2018. 
+In light of the eminent employability of co- and tri-clustering approaches to geospatial disciplines like geo-information science and Earth observation, and the transferability to other (geo)scientific domains, this paper presents the Clustering Geo-data Cubes (CGC) package. 
 
-As outlined below, the package aims to meet the needs of the geospatial data scientists, including the ability to 
-handle 'big (geo)-data' and to readily interface with the wider open-source software ecosystem specialized in geospatial data analysis. A case in point is the use of CGC in the (on-going) anlysis of spring on-set and bloom at high spatial resolution (1km) across continental scales in Europe and North America (RZM & EIV in prep.).   
+As outlined below, the package aims to meet the needs of geospatial data scientists. As an example applications, we are working on the analysis of spring onset datasets at high spatial resolution and continental scale, a preview of which is presented in the CGC tutorial.    
 Nevertheless, the methods implemented in the CGC package remain widely applicable and can easily be applied in other domains.
 
 
@@ -60,7 +59,7 @@ Nevertheless, the methods implemented in the CGC package remain widely applicabl
 The CGC package focuses on the needs of geospatial data scientists who require tools to make sense of multi-dimensional data cubes by providing the following features and functionalities:
 
 - **Partitional co- and tri-clustering methods suitable for spatiotemporal (multi-dimensional) data.** 
-  CGC includes clustering methods designed to simultaneously group elements into disjoint clusters along two or three dimensions. These methods are advantageous over single-sided clustering in that they provide a strategy to identify patterns that unfold across multiple dimensions (e.g. space and time). In addition, CGC provides functionality to refine the identified co- and tri-clusters. This post-processing step reduces the number of clusters to facilitate the identification and visualization of patterns.
+  CGC includes clustering methods designed to simultaneously group elements into disjoint clusters along two or three dimensions. These methods are advantageous over one-dimensional clustering in that they provide a strategy to identify patterns that unfold across multiple dimensions (e.g. space and time). In addition, CGC provides functionality to refine the identified co- and tri-clusters. This post-processing step reduces the number of clusters to facilitate the identification and visualization of patterns.
  
 - **Scalable clustering of small and big data sets.**
   CGG offers functionality to efficiently utilize available computational resources (ranging from single machines to computing clusters) and to tackle a wide range of data set sizes. For single machine execution the package offers optimized support of multi-core CPUs and/or system memory. For large data sets GCC supports the use of distributed data and computation on computing clusters
@@ -81,7 +80,7 @@ The CGC package focuses on the needs of geospatial data scientists who require t
 CGC implements the Bregman block average co-clustering (BBAC) algorithm from @Banerjee:2007 as inspired by the MATLAB code of [@Merugu:2004].
 Briefly, the BBAC algorithm iteratively optimizes the clustering of rows and columns of a data matrix starting from a random initial assignment until convergence. The information loss from the original matrix to the clustered one, which is constructed as the matrix of the co-cluster means, is minimized using a loss function that is based on the I-divergence. CGC also supports a user defined convergence threshold. To limit the influence of the initial conditions on the final clustering and to avoid local minima several runs are carried out, with the cluster assignments from the lowest loss function value ultimately being selected.
 
-Note that in the CGC implementation of the algorithm, the update in the row- and column-cluster assignments is computed only from the previous iteration’s row and column. Contrarily to the original MATLAB implementation [@Merugu:2004], this makes the algorithm independent of the order in which the dimensions are considered, while still leading to a (locally) optimal clustering solution. 
+Note that in the CGC implementation of the algorithm, the update in the row- and column-cluster assignments is computed only from the previous iteration’s row and column. Contrarily to the original MATLAB implementation [@Merugu:2004], this makes the algorithm independent of the order in which the dimensions are considered, while still leading to an optimal clustering solution. 
 
 
 ## Tri-clustering
@@ -97,7 +96,7 @@ The CGC package implements an optional, secondary cluster refinement step based 
 # Related Software
 
 Within the Python ecosystem a number of co-/bi-clustering implementations based on a range of algorithms exist. However, prominent examples are often focused on very specific applications, such as the CoClust package [@Role:2019], designed for term document clustering. More general packages such as, e.g. the spectral co-clustering implementation in scikit-learn [@Pedregosa:2011] are often focussed on specific classes of problems, i.e. those of block-diagonal form, or make use of Euclidean distances applied to the constructed cluster values in determining and evaluating these.
-In comparison, CGC makes use of an information theory based distance metric which considers the global information content of the matrix. Furthermore, CGC is also uniquely designed from the outset for performant use with 'big data'. 
+In comparison, CGC makes use of an information theory based distance metric which considers the global information content of the matrix. Furthermore, CGC is also uniquely designed from the outset for performant use with 'big data' and to analyze more complex data cubes via tri-clustering. 
 
 
 # Software package overview 
