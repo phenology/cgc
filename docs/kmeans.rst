@@ -65,13 +65,13 @@ The ``compute`` function is then called to run the k-means refinement:
 Results
 -------
 
-The optimal ``k`` value and the k-means-based centroids computed over the co- and tri-cluster averages are stored in the
-KmeansResults object:
+The optimal ``k`` value and the refined cluster averages computed over all elements assigned to the co- and tri-clusters
+are stored in the ``KmeansResults`` object:
 
 .. code-block:: python
 
     results.k_value
-    results.cl_mean_centroids
+    results.cluster_averages
 
 
 .. _k-means clustering: https://en.wikipedia.org/wiki/K-means_clustering

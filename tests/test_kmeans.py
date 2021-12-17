@@ -37,6 +37,29 @@ def init_cocluster_km():
     return km
 
 
+def init_cocluster_km_with_noise():
+    Z = np.array([
+        [0.0, 0.2, 1.0, 1.1],
+        [0.2, 0.0, 1.1, 1.0],
+        [1.0, 1.0, 0.0, 0.0],
+        [1.2, 1.2, 0.1, 0.1],
+        [1.0, 1.2, 0.0, 0.1]
+    ])
+    row_clusters = np.array([0, 0, 1, 1, 1])
+    col_clusters = np.array([0, 0, 1, 1])
+    nrow_clusters, ncol_clusters = 3, 2  # 1 non populated row/col cluster
+    clusters = [row_clusters, col_clusters]
+    nclusters = [nrow_clusters, ncol_clusters]
+    k_range = range(2, 4)
+    kmean_max_iter = 2
+    km = Kmeans(Z=Z,
+                clusters=clusters,
+                nclusters=nclusters,
+                k_range=k_range,
+                kmean_max_iter=kmean_max_iter)
+    return km
+
+
 def init_tricluster_km():
     Z1 = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [1, 1, 0, 0]])
     Z = np.full((4, 3, 4), 0)
@@ -107,14 +130,13 @@ class TestKmeans(unittest.TestCase):
         results = np.array([[0., 0., 0., 0., 0., 0.], [1., 0., 1., 1., 1., 1.],
                             [1., 0., 1., 1., 1., 1.], [0., 0., 0., 0., 0.,
                                                        0.]])
-        self.assertTrue(
-            np.all(results == km.stat_measures))  # First colummn is mean
+        self.assertTrue(np.all(results == km.stat_measures_norm))
 
     def test_kmean_labels_coclustering(self):
         km = init_cocluster_km()
         km.compute()
 
-        cl_km_labels = km.results.km_labels  # Refined labels in clusters
+        cl_km_labels = km.results.labels  # Refined labels in clusters
         row_clusters, col_clusters = np.meshgrid(km.clusters[0],
                                                  km.clusters[1],
                                                  indexing='ij')
@@ -129,13 +151,15 @@ class TestKmeans(unittest.TestCase):
     def test_statistic_triclustering(self):
         km = init_tricluster_km()
         km._compute_statistic_measures()
-        results = np.array([[0., 0., 0., 0., 0., 0.], [1., 0., 1., 1., 1., 1.],
-                            [1., 0., 1., 1., 1., 1.], [0., 0., 0., 0., 0., 0.],
-                            [1., 0., 1., 1., 1., 1.], [2., 0., 2., 2., 2., 2.],
-                            [2., 0., 2., 2., 2., 2.], [1., 0., 1., 1., 1.,
-                                                       1.]])
-        self.assertTrue(
-            np.all(results == km.stat_measures))  # First colummn is mean
+        results = np.array([[0.,   0., 0., 0., 0., 0.],
+                            [0.5, 0., 0.5, 0.5, 0.5, 0.5],
+                            [0.5, 0., 0.5, 0.5, 0.5, 0.5],
+                            [0., 0., 0., 0., 0., 0.],
+                            [0.5, 0., 0.5, 0.5, 0.5, 0.5],
+                            [1., 0., 1., 1., 1., 1.],
+                            [1., 0., 1., 1., 1., 1.],
+                            [0.5, 0., 0.5, 0.5, 0.5, 0.5]])
+        self.assertTrue(np.all(results == km.stat_measures_norm))
 
     def test_kvalues_triclustering(self):
         km = init_tricluster_km()
@@ -146,7 +170,7 @@ class TestKmeans(unittest.TestCase):
         km = init_tricluster_km()
         km.compute()
 
-        cl_km_labels = km.results.km_labels  # Refined labels in clusters
+        cl_km_labels = km.results.labels  # Refined labels in clusters
         band_clusters, row_clusters, col_clusters = np.meshgrid(km.clusters[0],
                                                                 km.clusters[1],
                                                                 km.clusters[2],
@@ -159,15 +183,44 @@ class TestKmeans(unittest.TestCase):
             vk = km.Z[np.where(Z_km_labels == k)]
             self.assertTrue(np.all(vk == vk[0]))
 
-    def test_statistic_centroids_shape(self):
+    def test_centroid_values(self):
         km = init_cocluster_km()
         km.compute()
-        self.assertEqual((3, 2), km.results.cl_mean_centroids.shape)
+        self.assertEqual((3, 2), km.results.cluster_averages.shape)
+        target_centroids = np.array([
+            [0., 1.],
+            [1., 0.],
+            [np.nan, np.nan]
+        ])
+        self.assertTrue(
+            np.allclose(
+                target_centroids,
+                km.results.cluster_averages,
+                equal_nan=True
+            )
+        )
+
+    def test_centroid_values_for_km_with_noise(self):
+        km = init_cocluster_km_with_noise()
+        km.compute()
+        self.assertEqual((3, 2), km.results.cluster_averages.shape)
+        target_centroids = np.array([
+            [0.07, 1.08],
+            [1.08, 0.07],
+            [np.nan, np.nan]
+        ])
+        self.assertTrue(
+            np.allclose(
+                target_centroids,
+                km.results.cluster_averages,
+                equal_nan=True
+            )
+        )
 
     def test_centroids_nan(self):
         km = init_cocluster_km()
         km.compute()
-        self.assertTrue(all(np.isnan(km.results.cl_mean_centroids[2, :])))
+        self.assertTrue(all(np.isnan(km.results.cluster_averages[2, :])))
 
     def test_kvalue_does_not_depend_on_krange_order(self):
         # 4 co-clusters, 2 clusters
