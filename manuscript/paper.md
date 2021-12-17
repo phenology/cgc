@@ -108,7 +108,7 @@ The CGC software is structured in the following main modules, details of which a
 
     - The [Numpy-based, vectorized single machine implementation with threading support for optimal usage of multi-core CPUs.](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based)
 
-      - The [Numpy-based single machine implementation with a reduced memory footprint](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based-low-memory-footprint). This implementation trades performance for low memory usage, but uses Numba's
+    - The [Numpy-based single machine implementation with a reduced memory footprint](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based-low-memory-footprint). This implementation trades performance for low memory usage, but uses Numba's
        just-in-time compilation to mitigate performance loss.
 
     - The [Dask-library-based implementation](https://cgc.readthedocs.io/en/latest/coclustering.html#distributed-dask-based). This 
