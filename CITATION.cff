@@ -42,5 +42,5 @@ keywords:
 license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
 title: "Clustering Geo-Data Cubes (CGC): A Clustering Tool for Geospatial Applications"
-version: "0.6.0"
+version: "0.6.1"
 ...

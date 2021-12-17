@@ -8,6 +8,13 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.6.1] - 2021-12-17
+********************
+
+Fixed
+-----
+* Fixing README - to be used as long_description on PyPI
+
 [0.6.0] - 2021-12-17
 ********************
 
