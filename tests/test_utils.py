@@ -10,8 +10,8 @@ def test_size_list():
     mat_size_list = [(300000, 50), (500000000, 50), (100, 600000000),
                      (5000, 5000)]
     cls_num_list = [(100, 5), (250, 5), (10, 300), (40, 40)]
-    expect_res_list = [(600.85, 'MB', 1), (2165.32, 'GB', 1), (3296.88, 'GB', 2),
-                       (195.69, 'MB', 1)]
+    expect_res_list = [(600.85, 'MB', 1), (2165.32, 'GB', 1),
+                       (3296.88, 'GB', 2), (195.69, 'MB', 1)]
     test_size = []
     for nrowcol, nrowcol_cls, expect_res in zip(mat_size_list, cls_num_list,
                                                 expect_res_list):
