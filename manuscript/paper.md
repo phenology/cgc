@@ -95,8 +95,29 @@ The CGC package implements an optional, secondary cluster refinement step based 
 
 # Related Software
 
-Within the Python ecosystem a number of co-/bi-clustering implementations based on a range of algorithms exist. However, prominent examples are often focused on very specific applications, such as the CoClust package [@Role:2019], designed for term document clustering. More general packages such as, e.g. the spectral co-clustering implementation in scikit-learn [@Pedregosa:2011] are often focussed on specific classes of problems, i.e. those of block-diagonal form, or make use of Euclidean distances applied to the constructed cluster values in determining and evaluating these.
-In comparison, CGC makes use of an information theory based distance metric which considers the global information content of the matrix. Furthermore, CGC is also uniquely designed from the outset for performant use with 'big data' and to analyze more complex data cubes via tri-clustering. 
+A number of co-/bi-clustering implementations based on a range of algorithms exist. While some of the available packages
+focus on specific applications, like gene expression data [@Barkow:2006;@Eren:2012], generic co-clustering tools include biclust 
+(R) and CoClust (Python) [@Role:2019]. The scikit-learn Python library [@Pedregosa:2011] also offers two co-clustering 
+implementations. However, most of the available algorithms target tabular data with a hidden blocked-diagonal structure, 
+where each row and column of the input matrix is assigned to only one co-cluster. In contrast, CGC's algorithm aims at 
+discovering a checkerboard-like pattern [Kluger:2003] in the input data matrix, thus assigning each row and column of the 
+input data to all column and row clusters, respectively. Partitioning algorithms of this kind are suitable to 
+applications where a subset taken along one dimension is associated to multiple subsets taken along the other dimension. 
+This is often the case in spatio-temporal data, where a set of spatial elements exhibit the same behaviour within 
+multiple time windows. 
+
+Within the Python ecosystem, prominent implementations targeting checkerboard-like structures like CGC are the 
+scikit-learn SpectralBiclustering algorithm, which implements the method from [Kluger:2003], and the CoclustInfo 
+algorithm from CoClust, also based on information-theoretic co-clustering [@Dhillon:2003;@Govaert:2018]. However, both 
+approaches differ from CGC in the field of applicability. Spectral methods like the former are fast, but their accuracy 
+has been shown to be limited [@Ailem:2015;@Role:2019]. The latter focuses on datasets representing joint-probability 
+distributions, preserving statistics other than the co-cluster average (the row and column averages) in the search for 
+the optimal clustering solution [@Banerjee:2007]. This requirement does not generally apply to the geospatial datasets
+which CGC is targeting.
+
+Finally, to the best of our knowledge, CGC is unique in being designed from the outset for use with 'big data' (e.g. by 
+including an implementation that supports distributed data) and in being able to analyze more complex data cubes via 
+tri-clustering.
 
 
 # Software package overview 
