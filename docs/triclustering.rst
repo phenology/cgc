@@ -80,6 +80,21 @@ the tri-clustering analysis is carried out as:
 
     results = tc.run_with_dask(client)
 
+
+Performance Comparison
+**********************
+
+`This notebook`_ presents a performance comparison of the two tri-clustering implementations for varying input data size
+and number of clusters. To test the Dask implementation, we have used a local thread-based cluster with four workers.
+As for :doc:`co-clustering <coclustering>`, we find the Numpy implementation to be much faster (~2 orders of magnitude)
+than the Dask implementation for small datasets, where the Dask overhead dominates. However, when the system size
+becomes sufficiently large and/or the number of clusters is increased, the Dask implementation leads to shorter timings.
+It is important to stress here as well how the Dask implementation was not designed for improved performances, but to
+handle large datasets that could not be otherwise tackled due to memory limitations.
+
+.. _This notebook: https://github.com/phenology/cgc/blob/master/notebooks/time_profile/time_profile_triclustering.ipynb
+
+
 Results
 -------
 
