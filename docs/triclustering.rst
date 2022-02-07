@@ -61,6 +61,9 @@ efficiently computed in parallel using threads. In order to run the tri-clusteri
 
     results = tc.run_with_threads(nthreads=4)
 
+
+As for co-clustering, only one thread is spawned if the ``nthreads`` argument is not provided.
+
 Distributed (Dask-based)
 ************************
 
@@ -79,6 +82,11 @@ the tri-clustering analysis is carried out as:
 .. code-block:: python
 
     results = tc.run_with_dask(client)
+
+
+If no client is provided as argument, a default ``LocalCluster`` is instantiated and made use of (see `Dask docs`_).
+
+.. _Dask docs: http://distributed.dask.org/en/stable/api.html#distributed.LocalCluster
 
 
 Performance Comparison
