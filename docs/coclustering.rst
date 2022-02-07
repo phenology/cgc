@@ -116,6 +116,21 @@ In a second Dask-based implementation, the various co-clustering runs are submit
 distributes them across the cluster. This implementation, which is activated by setting ``low_memory=False``, is
 experimental and it typically leads to very large memory usages.
 
+Performance Comparison
+**********************
+
+`This notebook`_ presents a performance comparison of the various co-clustering implementations for varying input
+data size and number of clusters. For the system sizes considered, the default Numpy implementation is found to be x2-5
+times faster that its low-memory counterpart, with exception of the smallest dataset sizes (similar timings are obtained
+there). The comparison also includes timings obtained with the Dask implementation, which was tested with a local
+thread-based cluster and four workers. While the overhead linked to using Dask is found to be significant for small
+datasets, the gap between the Dask and the Numpy implementations narrows with increasing datasets and number of
+clusters. Only for sufficiently large matrices and clusters the former is projected to become faster than the latter.
+It is important to stress, however, that the Dask implementation was not designed for improved performances, but to
+handle large datasets that could not be tackled due to memory limitations.
+
+.. _This notebook: https://github.com/phenology/cgc/blob/master/notebooks/time_profile/time_profile_coclustering.ipynb
+
 Results
 -------
 
