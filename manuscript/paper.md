@@ -149,6 +149,9 @@ The CGC software is structured in the following main modules, details of which a
 
 - [`utils`](https://https://cgc.readthedocs.io/en/latest/utils.html), which includes a collection of utility functions e.g., memory consumption estimation and cluster averaging. 
  
+Performance comparisons between the various [co-clustering](https://cgc.readthedocs.io/en/latest/coclustering.html#performance-comparison) 
+and [tri-clustering](https://cgc.readthedocs.io/en/latest/triclustering.html#performance-comparison) implementations are 
+also briefly discussed in the package documentation. 
 
 # Tutorial 
 	
