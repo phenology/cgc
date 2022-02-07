@@ -50,8 +50,7 @@ The exponential growth of multidimensional data referring to geographical featur
 
 In light of the eminent employability of co- and tri-clustering approaches to geospatial disciplines like geo-information science and Earth observation, and the transferability to other (geo)scientific domains, this paper presents the Clustering Geo-data Cubes (CGC) package. 
 
-As outlined below, the package aims to meet the needs of geospatial data scientists. As an example applications, we are working on the analysis of spring onset datasets at high spatial resolution and continental scale, a preview of which is presented in the CGC tutorial.    
-Nevertheless, the methods implemented in the CGC package remain widely applicable and can easily be applied in other domains.
+As outlined below, the package aims to meet the needs of geospatial data scientists. As an example applications, we are working on the analysis of spring onset datasets at high spatial resolution and continental scale, a preview of which is presented in the CGC tutorial. While the algorithms implemented in the CGC package are limited to positive data matrices and designed to best tackle datasets with a hidden "checkerboard" structure [@Kluger:2003], they remain widely applicable and can easily be applied in other domains.
 
 
 # Statement of need 
@@ -100,7 +99,7 @@ focus on specific applications, like gene expression data [@Barkow:2006;@Eren:20
 (R) and CoClust (Python) [@Role:2019]. The scikit-learn Python library [@Pedregosa:2011] also offers two co-clustering 
 implementations. However, most of the available algorithms target tabular data with a hidden blocked-diagonal structure, 
 where each row and column of the input matrix is assigned to only one co-cluster. In contrast, CGC's algorithm aims at 
-discovering a checkerboard-like pattern [@Kluger:2003] in the input data matrix, thus assigning each row and column of the 
+discovering a checkerboard-like pattern in the input data matrix, thus assigning each row and column of the 
 input data to all column and row clusters, respectively. Partitioning algorithms of this kind are suitable to 
 applications where a subset taken along one dimension is associated to multiple subsets taken along the other dimension. 
 This is often the case in spatio-temporal data, where a set of spatial elements exhibit the same behaviour within 
