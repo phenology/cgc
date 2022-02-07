@@ -100,14 +100,14 @@ focus on specific applications, like gene expression data [@Barkow:2006;@Eren:20
 (R) and CoClust (Python) [@Role:2019]. The scikit-learn Python library [@Pedregosa:2011] also offers two co-clustering 
 implementations. However, most of the available algorithms target tabular data with a hidden blocked-diagonal structure, 
 where each row and column of the input matrix is assigned to only one co-cluster. In contrast, CGC's algorithm aims at 
-discovering a checkerboard-like pattern [Kluger:2003] in the input data matrix, thus assigning each row and column of the 
+discovering a checkerboard-like pattern [@Kluger:2003] in the input data matrix, thus assigning each row and column of the 
 input data to all column and row clusters, respectively. Partitioning algorithms of this kind are suitable to 
 applications where a subset taken along one dimension is associated to multiple subsets taken along the other dimension. 
 This is often the case in spatio-temporal data, where a set of spatial elements exhibit the same behaviour within 
 multiple time windows. 
 
 Within the Python ecosystem, prominent implementations targeting checkerboard-like structures like CGC are the 
-scikit-learn SpectralBiclustering algorithm, which implements the method from [Kluger:2003], and the CoclustInfo 
+scikit-learn SpectralBiclustering algorithm, which implements the method from [@Kluger:2003], and the CoclustInfo 
 algorithm from CoClust, also based on information-theoretic co-clustering [@Dhillon:2003;@Govaert:2018]. However, both 
 approaches differ from CGC in the field of applicability. Spectral methods like the former are fast, but their accuracy 
 has been shown to be limited [@Ailem:2015;@Role:2019]. The latter focuses on datasets representing joint-probability 
