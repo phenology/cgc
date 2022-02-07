@@ -76,11 +76,14 @@ Alternatively, you can clone this repository and install it using `pip`:
   pip install .
 
 
-Run tests (including coverage) with:
+In order to run tests (including coverage) install the `dev` package version:
 
 .. code-block:: console
 
-  python setup.py test
+  git clone https://github.com/phenology/cgc.git
+  cd cgc
+  pip install .[dev]
+  pytest -v
 
 Documentation
 -------------
