@@ -42,13 +42,11 @@ setup(
     ],
     test_suite='tests',
     install_requires=requirements,
-    setup_requires=[
-        # dependency for `python setup.py test`
-        'pytest-runner',
-    ],
-    tests_require=[
-        'pytest',
-        'pytest-cov',
-        'pycodestyle',
-    ]
+    extras_require={
+        'dev': [
+            'pytest',
+            'pytest-cov',
+            'pycodestyle',
+        ]
+    }
 )
