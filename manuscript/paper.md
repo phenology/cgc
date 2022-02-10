@@ -50,7 +50,7 @@ The exponential growth of multidimensional data referring to geographical featur
 
 In light of the eminent employability of co- and tri-clustering approaches to geospatial disciplines like geo-information science and Earth observation, and the transferability to other (geo)scientific domains, this paper presents the Clustering Geo-data Cubes (CGC) package. 
 
-As outlined below, the package aims to meet the needs of geospatial data scientists. As an example applications, we are working on the analysis of spring onset datasets at high spatial resolution and continental scale, a preview of which is presented in the CGC tutorial. While the algorithms implemented in the CGC package are limited to positive data matrices and designed to best tackle datasets with a hidden "checkerboard" structure [@Kluger:2003], they remain widely applicable and can easily be applied in other domains.
+As outlined below, the package aims to meet the needs of geospatial data scientists. An example of its application is the ongoing work on the analysis of spring onset datasets at high spatial resolution and continental scale, a preview of which is presented in the CGC tutorial. Nevertheless, the algorithms implemented in the CGC package - performing partitional clustering of positive data matrices - remain widely applicable and can easily be applied in other domains.
 
 
 # Statement of need 
@@ -89,35 +89,35 @@ For tri-clustering CGC implements the so-called Bregman cube average tri-cluster
 
 ## Cluster refinement
 
-The CGC package implements an optional, secondary cluster refinement step based on the k-means method [@Wu:2016] and optimized using the Silhouette metric [@Rousseeuw:1987] as implemented in the scikit-learn package [@Pedregosa:2011]. This secondary grouping is based on statistical properties of the co- or tri-clusters (see the [package documentation](https://cgc.readthedocs.io)) and helps to better capture patterns in the data.   
+The CGC package implements an optional, secondary cluster refinement step based on the k-means method [@Wu:2016] and optimized using the Silhouette metric [@Rousseeuw:1987] as implemented in the scikit-learn package [@Pedregosa:2011]. This secondary grouping is based on statistical properties of the co- or tri-clusters (see the [package documentation](https://cgc.readthedocs.io)) and helps to better capture patterns in the data by combining clusters and going beyond strict checkerboard structures.  
 
 
 # Related Software
 
 A number of co-/bi-clustering implementations based on a range of algorithms exist. While some of the available packages
 focus on specific applications, like gene expression data [@Barkow:2006;@Eren:2012], generic co-clustering tools include biclust 
-(R) and CoClust (Python) [@Role:2019]. The scikit-learn Python library [@Pedregosa:2011] also offers two co-clustering 
-implementations. However, most of the available algorithms target tabular data with a hidden blocked-diagonal structure, 
-where each row and column of the input matrix is assigned to only one co-cluster. In contrast, CGC's algorithm aims at 
-discovering a checkerboard-like pattern in the input data matrix, thus assigning each row and column of the 
-input data to all column and row clusters, respectively. Partitioning algorithms of this kind are suitable to 
-applications where a subset taken along one dimension is associated to multiple subsets taken along the other dimension. 
-This is often the case in spatio-temporal data, where a set of spatial elements exhibit the same behaviour within 
-multiple time windows. 
+(R) and CoClust (Python) [@Role:2019], as well as two implementations from the scikit-learn Python library [@Pedregosa:2011]. 
+However, most of the available algorithms target tabular data with a hidden blocked-diagonal structure, 
+where each row and column of the input matrix is assigned to only one co-cluster. In contrast, in spatio-temporal data a
+set of spatial elements often exhibits the same behaviour within multiple time windows and vice versa. This type of data 
+requires algorithms where a subset taken along one dimension can be associated to multiple subsets taken along the other
+dimension. Partitioning algorithms of this type, such as the BBAC and BCAT algorithms implemented in CGC, can discover 
+checkerboard-like patterns in the input data matrix, although the CGC package additionally enables the user to recover 
+more of the intrinsic structure of the data in a second step, going beyond the limits on structure imposed 
 
-Within the Python ecosystem, prominent implementations targeting checkerboard-like structures like CGC are the 
+Within the Python ecosystem, prominent implementations targeting checkerboard-like structures akin to CGC's intial step are the 
 scikit-learn SpectralBiclustering algorithm, which implements the method from [@Kluger:2003], and the CoclustInfo 
 algorithm from CoClust, also based on information-theoretic co-clustering [@Dhillon:2003;@Govaert:2018]. However, both 
 approaches differ from CGC in the field of applicability. Spectral methods like the former are fast, but their accuracy 
 has been shown to be limited [@Ailem:2015;@Role:2019]. The latter focuses on datasets representing joint-probability 
 distributions, preserving statistics other than the co-cluster average (the row and column averages) in the search for 
 the optimal clustering solution [@Banerjee:2007]. This requirement does not generally apply to the geospatial datasets
-which CGC is targeting.
+which CGC is targeting. Neither, however, offers the ability to "break out" of the algorithmically-imposed checkerboard 
+pattern.
 
 Finally, to the best of our knowledge, CGC is unique in being designed from the outset for use with 'big data' (e.g. by 
-including an implementation that supports distributed data), in being able to analyze more complex data cubes via 
-tri-clustering, and in implementing a post-processing cluster refinement step to identify and merge similar 
-co-/tri-clusters.
+including an implementation that supports distributed data) and in being able to analyze more complex data cubes via 
+tri-clustering.
 
 # Software package overview 
 
