@@ -6,7 +6,12 @@ Introduction
 
 The ``coclustering`` module provides the functionality to perform the co-clustering analysis of a positive data matrix
 with real-valued elements. The code implements the Bregman block-average co-clustering (BBAC) algorithm from Ref. [#]_
-and it was inspired by the Matlab `code`_ by Srujana Merugu and Arindam Banerjee.
+and it was inspired by the Matlab `code`_ by Srujana Merugu and Arindam Banerjee. Algorithmic differences include:
+
+* The current implementation is independent of the order in which dimensions are provided (the column clustering
+  followed the row clustering in the Matlab code).
+* Empty (co-)clusters are handled without the need of an additional numerical parameters.
+
 
 .. _code: http://www.ideal.ece.utexas.edu/software.html
 
@@ -68,9 +73,10 @@ co-clustering analysis is run using e.g. 4 threads as:
 
     results = cc.run_with_threads(nthreads=4)
 
-This first implementation makes use of (fast) matrix multiplications to calculate cluster-based properties, such as
-averages and distances. However, if ``Z``'s dimensions are large, large auxiliary matrices need to be stored into
-memory, so that the memory requirement of this implementation quickly becomes a bottleneck.
+Only one thread is spawned if the ``nthreads`` argument is not provided. This first implementation makes use of (fast)
+matrix multiplications to calculate cluster-based properties, such as averages and distances. However, if ``Z``'s
+dimensions are large, large auxiliary matrices need to be stored into memory, so that the memory requirement of this
+implementation quickly becomes a bottleneck. This is the default Numpy-based implementation.
 
 .. _Numpy: https://numpy.org
 
@@ -84,8 +90,10 @@ with the optional flag ``low_memory``:
 
     results = cc.run_with_threads(nthreads=4, low_memory=True)
 
-The reduced memory requirement comes at a certain cost of performance. Fortunately, we also applied `Numba`_'s just-in-time
-compilation feature in the ``low_memory`` option. Thanks to this feature, the performance cost is significantly reduced.
+
+Also here, only one thread is spawned if the ``nthreads`` argument is not provided. The reduced memory requirement
+comes at a certain cost of performance. Fortunately, we also applied `Numba`_'s just-in-time compilation feature in the
+``low_memory`` option. Thanks to this feature, the performance cost is significantly reduced.
 
 .. _Numba: https://numba.pydata.org
 
@@ -110,11 +118,29 @@ If a Dask cluster is already running, we can connect to it and run the co-cluste
 
 Dask clusters can be run on different types of distributed systems: clusters of nodes connected by SSH, HPC systems,
 Kubernetes clusters on cloud services. A local Dask cluster (``LocalCluster``) allows one to make use of the same
-framework but using the local (multi-core) CPU(s).
+framework but using the local (multi-core) CPU(s). If no client is provided as argument, a default ``LocalCluster``
+is instantiated and made use of (see `Dask docs`_).
+
+.. _Dask docs: http://distributed.dask.org/en/stable/api.html#distributed.LocalCluster
 
 In a second Dask-based implementation, the various co-clustering runs are submitted to the Dask scheduler, which
 distributes them across the cluster. This implementation, which is activated by setting ``low_memory=False``, is
 experimental and it typically leads to very large memory usages.
+
+Performance Comparison
+**********************
+
+`This notebook`_ presents a performance comparison of the various co-clustering implementations for varying input
+data size and number of clusters. For the system sizes considered, the default Numpy implementation is found to be x2-5
+times faster that its low-memory counterpart, with exception of the smallest dataset sizes (similar timings are obtained
+there). The comparison also includes timings obtained with the Dask implementation, which was tested with a local
+thread-based cluster and four workers. While the overhead linked to using Dask is found to be significant for small
+datasets, the gap between the Dask and the Numpy implementations narrows with increasing datasets and number of
+clusters. Only for sufficiently large matrices and clusters the former is projected to become faster than the latter.
+It is important to stress, however, that the Dask implementation was not designed for improved performances, but to
+handle large datasets that could not be tackled due to memory limitations.
+
+.. _This notebook: https://github.com/phenology/cgc/blob/master/notebooks/time_profile/time_profile_coclustering.ipynb
 
 Results
 -------
