@@ -8,6 +8,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+Fixed
+-----
+* Fix `mem_estimate_coclustering_numpy` on Windows: default int to 32 bit could easily overflow (`#82 <https://github.com/phenology/cgc/pull/82>`_).
+
 [0.6.1] - 2021-12-17
 ********************
 

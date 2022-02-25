@@ -81,7 +81,7 @@ def _est_arr_size(shape, nbytes=8):
     :return: Size of the array in bytes
     """
 
-    return np.prod(shape) * nbytes
+    return np.prod(shape, dtype="int64") * nbytes
 
 
 def _human_size(size_bytes, out_unit=None):
