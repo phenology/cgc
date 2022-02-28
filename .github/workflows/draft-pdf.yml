@@ -1,7 +1,4 @@
-on:
-  push:
-    branches:
-    - joss_paper 
+on: push
 
 jobs:
   paper:

@@ -1,4 +1,21 @@
 
+@inproceedings{Ailem:2015,
+	author = {Ailem, Melissa and Role, Fran\c{c}ois and Nadif, Mohamed},
+	title = {Co-Clustering Document-Term Matrices by Direct Maximization of Graph Modularity},
+	year = {2015},
+	isbn = {9781450337946},
+	publisher = {Association for Computing Machinery},
+	address = {New York, NY, USA},
+	url = {https://doi.org/10.1145/2806416.2806639},
+	doi = {10.1145/2806416.2806639},
+	abstract = {We present Coclus, a novel diagonal co-clustering algorithm which is able to effectively co-cluster binary or contingency matrices by directly maximizing an adapted version of the modularity measure traditionally used for networks. While some effective co-clustering algorithms already exist that use network-related measures (normalized cut, modularity), they do so by using spectral relaxations of the discrete optimization problems. In contrast, Coclus allows to get even better co-clusters by directly maximizing modularity using an iterative alternating optimization procedure. Extensive comparative experiments performed on various document-term datasets demonstrate that our algorithm is very effective, stable and outperforms other co-clustering algorithms.},
+	booktitle = {Proceedings of the 24th ACM International on Conference on Information and Knowledge Management},
+	pages = {1807–1810},
+	numpages = {4},
+	keywords = {modularity, co-clustering},
+	location = {Melbourne, Australia},
+	series = {CIKM '15}}
+
 @inproceedings{Andrienko:2009,
 	Address = {Atlantic City, NJ, USA},
 	Author = {Andrienko, Gennady and Andrienko, Natalia and Rinzivillo, Salvatore and Nanni, Mirco and Pedreschi, Dino and Giannotti, Fosca},
@@ -24,6 +41,21 @@
   	number  = {67},
   	pages   = {1919-1986},
   	url     = {http://jmlr.org/papers/v8/banerjee07a.html}}
+
+@article{Barkow:2006,
+    author = {Barkow, Simon and Bleuler, Stefan and Prelić, Amela and Zimmermann, Philip and Zitzler, Eckart},
+    title = "{BicAT: a biclustering analysis toolbox}",
+    journal = {Bioinformatics},
+    volume = {22},
+    number = {10},
+    pages = {1282-1283},
+    year = {2006},
+    month = {03},
+    abstract = "{Summary: Besides classical clustering methods such as hierarchical clustering, in recent years biclustering has become a popular approach to analyze biological data sets, e.g. gene expression data. The Biclustering Analysis Toolbox (BicAT) is a software platform for clustering-based data analysis that integrates various biclustering and clustering techniques in terms of a common graphical user interface. Furthermore, BicAT provides different facilities for data preparation, inspection and postprocessing such as discretization, filtering of biclusters according to specific criteria or gene pair analysis for constructing gene interconnection graphs. The possibility to use different biclustering algorithms inside a single graphical tool allows the user to compare clustering results and choose the algorithm that best fits a specific biological scenario. The toolbox is described in the context of gene expression analysis, but is also applicable to other types of data, e.g. data from proteomics or synthetic lethal experiments.Availability: The BicAT toolbox is freely available at  and runs on all operating systems. The Java source code of the program and a developer's guide is provided on the website as well. Therefore, users may modify the program and add further algorithms or extensions.Contact:barkow@tik.ee.ethz.ch}",
+    issn = {1367-4803},
+    doi = {10.1093/bioinformatics/btl099},
+    url = {https://doi.org/10.1093/bioinformatics/btl099},
+    eprint = {https://academic.oup.com/bioinformatics/article-pdf/22/10/1282/651164/btl099.pdf}}
 
 @inproceedings{Cheng:2000,
 	url = {https://www.aaai.org/Library/ISMB/2000/ismb00-010.php},
@@ -74,6 +106,37 @@
 	Bdsk-Url-1 = {http://portal.acm.org/citation.cfm?doid=956750.956764},
 	Bdsk-Url-2 = {https://doi.org/10.1145/956750.956764}}
 
+@article{Eren:2012,
+    author = {Eren, Kemal and Deveci, Mehmet and Küçüktunç, Onur and Çatalyürek, Ümit V.},
+    title = "{A comparative analysis of biclustering algorithms for gene expression data}",
+    journal = {Briefings in Bioinformatics},
+    volume = {14},
+    number = {3},
+    pages = {279-292},
+    year = {2012},
+    month = {07},
+    abstract = "{The need to analyze high-dimension biological data is driving the development of new data mining methods. Biclustering algorithms have been successfully applied to gene expression data to discover local patterns, in which a subset of genes exhibit similar expression levels over a subset of conditions. However, it is not clear which algorithms are best suited for this task. Many algorithms have been published in the past decade, most of which have been compared only to a small number of algorithms. Surveys and comparisons exist in the literature, but because of the large number and variety of biclustering algorithms, they are quickly outdated. In this article we partially address this problem of evaluating the strengths and weaknesses of existing biclustering methods. We used the BiBench package to compare 12 algorithms, many of which were recently published or have not been extensively studied. The algorithms were tested on a suite of synthetic data sets to measure their performance on data with varying conditions, such as different bicluster models, varying noise, varying numbers of biclusters and overlapping biclusters. The algorithms were also tested on eight large gene expression data sets obtained from the Gene Expression Omnibus. Gene Ontology enrichment analysis was performed on the resulting biclusters, and the best enrichment terms are reported. Our analyses show that the biclustering method and its parameters should be selected based on the desired model, whether that model allows overlapping biclusters, and its robustness to noise. In addition, we observe that the biclustering algorithms capable of finding more than one model are more successful at capturing biologically relevant clusters.}",
+    issn = {1467-5463},
+    doi = {10.1093/bib/bbs032},
+    url = {https://doi.org/10.1093/bib/bbs032},
+    eprint = {https://academic.oup.com/bib/article-pdf/14/3/279/709239/bbs032.pdf}}
+
+@article{Govaert:2018,
+	title = {Mutual information, phi-squared and model-based co-clustering for contingency tables},
+	volume = {12},
+	issn = {1862-5355},
+	url = {https://doi.org/10.1007/s11634-016-0274-6},
+	doi = {10.1007/s11634-016-0274-6},
+	abstract = {Many of the datasets encountered in statistics are two-dimensional in nature and can be represented by a matrix. Classical clustering procedures seek to construct separately an optimal partition of rows or, sometimes, of columns. In contrast, co-clustering methods cluster the rows and the columns simultaneously and organize the data into homogeneous blocks (after suitable permutations). Methods of this kind have practical importance in a wide variety of applications such as document clustering, where data are typically organized in two-way contingency tables. Our goal is to offer coherent frameworks for understanding some existing criteria and algorithms for co-clustering contingency tables, and to propose new ones. We look at two different frameworks for the problem of co-clustering. The first involves minimizing an objective function based on measures of association and in particular on phi-squared and mutual information. The second uses a model-based co-clustering approach, and we consider two models: the block model and the latent block model. We establish connections between different approaches, criteria and algorithms, and we highlight a number of implicit assumptions in some commonly used algorithms. Our contribution is illustrated by numerical experiments on simulated and real-case datasets that show the relevance of the presented methods in the document clustering field.},
+	language = {en},
+	number = {3},
+	urldate = {2022-02-05},
+	journal = {Advances in Data Analysis and Classification},
+	author = {Govaert, Gérard and Nadif, Mohamed},
+	month = sep,
+	year = {2018},
+	pages = {455--488}}
+
 @article{Grubesic:2014,
 	Author = {Grubesic, Tony H. and Wei, Ran and Murray, Alan T.},
 	Doi = {10.1080/00045608.2014.958389},
@@ -108,6 +171,20 @@
 	Year = {2013},
 	Bdsk-Url-1 = {http://www.tandfonline.com/doi/abs/10.1080/13658816.2013.788249},
 	Bdsk-Url-2 = {https://doi.org/10.1080/13658816.2013.788249}}
+
+@article{Harris:2020,
+   title={Array programming with NumPy},
+   volume={585},
+   ISSN={1476-4687},
+   url={http://dx.doi.org/10.1038/s41586-020-2649-2},
+   DOI={10.1038/s41586-020-2649-2},
+   number={7825},
+   journal={Nature},
+   publisher={Springer Science and Business Media LLC},
+   author={Harris, Charles R. and Millman, K. Jarrod and van der Walt, Stéfan J. and Gommers, Ralf and Virtanen, Pauli and Cournapeau, David and Wieser, Eric and Taylor, Julian and Berg, Sebastian and Smith, Nathaniel J. and Kern, Robert and Picus, Matti and Hoyer, Stephan and van Kerkwijk, Marten H. and Brett, Matthew and Haldane, Allan and del Río, Jaime Fernández and Wiebe, Mark and Peterson, Pearu and Gérard-Marchant, Pierre and Sheppard, Kevin and Reddy, Tyler and Weckesser, Warren and Abbasi, Hameer and Gohlke, Christoph and Oliphant, Travis E.},
+   year={2020},
+   month={Sep},
+   pages={357–362}}
 
 @article{Hartigan:1972,
 	Author = {Hartigan, J. A.},
@@ -155,6 +232,24 @@
 	Bdsk-Url-1 = {https://conference.scipy.org/proceedings/scipy2018/project_jupyter.html},
 	Bdsk-Url-2 = {https://doi.org/10.25080/Majora-4af1f417-011}}
 
+@article{Kluger:2003,
+	title = {Spectral {Biclustering} of {Microarray} {Data}: {Coclustering} {Genes} and {Conditions}},
+	volume = {13},
+	issn = {1088-9051},
+	shorttitle = {Spectral {Biclustering} of {Microarray} {Data}},
+	url = {https://www.ncbi.nlm.nih.gov/pmc/articles/PMC430175/},
+	doi = {10.1101/gr.648603},
+	abstract = {Global analyses of RNA expression levels are useful for classifying genes and overall phenotypes. Often these classification problems are linked, and one wants to find “marker genes” that are differentially expressed in particular sets of “conditions.” We have developed a method that simultaneously clusters genes and conditions, finding distinctive “checkerboard” patterns in matrices of gene expression data, if they exist. In a cancer context, these checkerboards correspond to genes that are markedly up- or downregulated in patients with particular types of tumors. Our method, spectral biclustering, is based on the observation that checkerboard structures in matrices of expression data can be found in eigenvectors corresponding to characteristic expression patterns across genes or conditions. In addition, these eigenvectors can be readily identified by commonly used linear algebra approaches, in particular the singular value decomposition (SVD), coupled with closely integrated normalization steps. We present a number of variants of the approach, depending on whether the normalization over genes and conditions is done independently or in a coupled fashion. We then apply spectral biclustering to a selection of publicly available cancer expression data sets, and examine the degree to which the approach is able to identify checkerboard structures. Furthermore, we compare the performance of our biclustering methods against a number of reasonable benchmarks (e.g., direct application of SVD or normalized cuts to raw data).},
+	number = {4},
+	urldate = {2022-02-05},
+	journal = {Genome Research},
+	author = {Kluger, Yuval and Basri, Ronen and Chang, Joseph T. and Gerstein, Mark},
+	month = apr,
+	year = {2003},
+	pmid = {12671006},
+	pmcid = {PMC430175},
+	pages = {703--716}}
+
 @inproceedings{Kluyver:2016,
 	booktitle = {Positioning and Power in Academic Publishing: Players, Agents and Agendas},
 	editor = {Fernando Loizides and Birgit Scmidt},
@@ -165,6 +260,38 @@
 	pages = {87--90},
 	url = {https://eprints.soton.ac.uk/403913/},
 	abstract = {It is increasingly necessary for researchers in all fields to write computer code, and in order to reproduce research results, it is important that this code is published. We present Jupyter notebooks, a document format for publishing code, results and explanations in a form that is both readable and executable. We discuss various tools and use cases for notebook documents.}}
+
+@article{Kullback:1951,
+	title = {On {Information} and {Sufficiency}},
+	volume = {22},
+	issn = {0003-4851},
+	url = {http://projecteuclid.org/euclid.aoms/1177729694},
+	doi = {10.1214/aoms/1177729694},
+	language = {en},
+	number = {1},
+	urldate = {2022-02-15},
+	journal = {The Annals of Mathematical Statistics},
+	author = {Kullback, S. and Leibler, R. A.},
+	month = mar,
+	year = {1951},
+	pages = {79--86}}
+
+@inproceedings{Lam:2015,
+	author = {Lam, Siu Kwan and Pitrou, Antoine and Seibert, Stanley},
+	title = {Numba: A LLVM-Based Python JIT Compiler},
+	year = {2015},
+	isbn = {9781450340052},
+	publisher = {Association for Computing Machinery},
+	address = {New York, NY, USA},
+	url = {https://doi.org/10.1145/2833157.2833162},
+	doi = {10.1145/2833157.2833162},
+	abstract = {Dynamic, interpreted languages, like Python, are attractive for domain-experts and scientists experimenting with new ideas. However, the performance of the interpreter is often a barrier when scaling to larger data sets. This paper presents a just-in-time compiler for Python that focuses in scientific and array-oriented computing. Starting with the simple syntax of Python, Numba compiles a subset of the language into efficient machine code that is comparable in performance to a traditional compiled language. In addition, we share our experience in building a JIT compiler using LLVM[1].},
+	booktitle = {Proceedings of the Second Workshop on the LLVM Compiler Infrastructure in HPC},
+	articleno = {7},
+	numpages = {6},
+	keywords = {compiler, LLVM, Python},
+	location = {Austin, Texas},
+	series = {LLVM '15}}
 
  @misc{Merugu:2004,
 	year = {2004},
