@@ -32,7 +32,7 @@ authors:
     family-names: Zurita-Milla
     given-names: Raul
     orcid: https://orcid.org/0000-0002-1769-6310
-cff-version: "1.0.3"
+cff-version: "1.2.0"
 date-released: 2022-03-09
 doi: "10.5281/zenodo.3979172"
 keywords:

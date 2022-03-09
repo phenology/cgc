@@ -1,46 +1,48 @@
 {
-    "creators": [
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Nattino, Francesco",
-            "orcid": "0000-0003-3286-0139"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Ku, Ou",
-            "orcid": "0000-0002-5373-5209"
-        },
-        {
-            "affiliation": "Netherlands eScience Center",
-            "name": "Grootes, Meiert W.",
-            "orcid": "0000-0002-5733-4795"
-        },
-        {
-            "affiliation": "Institute of Geomatics, Vienna BOKU",
-            "name": "Izquierdo-Verdiguier, Emma",
-            "orcid": "0000-0003-2179-1262"
-        },
-        {
-            "affiliation": "Faculty ITC - University of Twente",
-            "name": "Girgin, Serkan",
-            "orcid": "0000-0002-0156-185X"
-        },
-        {
-            "affiliation": "Faculty ITC - University of Twente",
-            "name": "Zurita-Milla, Raul",
-            "orcid": "0000-0002-1769-6310"
-        }
-    ],
-    "description": "Clustering Geo-Data Cubes (CGC) is a Python package to perform clustering analysis for multidimensional geospatial data. The included tools allow the user to efficiently run tasks in parallel on local and distributed systems. ",
-    "keywords": [
-        "clustering",
-        "co-clustering",
-        "tri-clustering",
-        "earth observation",
-        "distributed computing"
-    ],
-    "license": {
-        "id": "Apache-2.0"
+  "creators": [
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Nattino, Francesco",
+      "orcid": "0000-0003-3286-0139"
     },
-    "title": "CGC: a Scalable Python Package for Co- and Tri-Clustering of Geodata Cubes"
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Ku, Ou",
+      "orcid": "0000-0002-5373-5209"
+    },
+    {
+      "affiliation": "Netherlands eScience Center",
+      "name": "Grootes, Meiert W.",
+      "orcid": "0000-0002-5733-4795"
+    },
+    {
+      "affiliation": "Institute of Geomatics, Vienna BOKU",
+      "name": "Izquierdo-Verdiguier, Emma",
+      "orcid": "0000-0003-2179-1262"
+    },
+    {
+      "affiliation": "Faculty ITC - University of Twente",
+      "name": "Girgin, Serkan",
+      "orcid": "0000-0002-0156-185X"
+    },
+    {
+      "affiliation": "Faculty ITC - University of Twente",
+      "name": "Zurita-Milla, Raul",
+      "orcid": "0000-0002-1769-6310"
+    }
+  ],
+  "description": "Clustering Geo-Data Cubes (CGC) is a Python package to perform clustering analysis for multidimensional geospatial data. The included tools allow the user to efficiently run tasks in parallel on local and distributed systems. ",
+  "keywords": [
+    "clustering",
+    "co-clustering",
+    "tri-clustering",
+    "earth observation",
+    "distributed computing"
+  ],
+  "license": {
+    "id": "Apache-2.0"
+  },
+  "publication_date": "2022-03-09",
+  "title": "CGC: a Scalable Python Package for Co- and Tri-Clustering of Geodata Cubes",
+  "version": "0.6.2"
 }
