@@ -8,9 +8,17 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.6.2] - 2022-03-09
+********************
+
 Fixed
 -----
 * Fix `mem_estimate_coclustering_numpy` on Windows: default int to 32 bit could easily overflow (`#82 <https://github.com/phenology/cgc/pull/82>`_).
+
+Changed
+-------
+* Test instructions have been updated, dropping the deprecated use of setuptools' test (`#80 <https://github.com/phenology/cgc/pull/80>`_)
+* Docs improvements (`#78 <https://github.com/phenology/cgc/pull/78>`_ and `#79 <https://github.com/phenology/cgc/pull/79>`_)
 
 [0.6.1] - 2021-12-17
 ********************
