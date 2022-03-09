@@ -44,12 +44,12 @@ Multidimensional data cubes are increasingly ubiquitous, in particular in the ge
 
 Faced with the increasing ubiquity of large datasets, data mining techniques have become essential to extracting patterns and generating insights. In this regard, clustering techniques, which aim to identify groups or subgroups with similar properties within a larger dataset, are becoming ever more popular.
 
-Traditional clustering techniques focus on a single dimension and may therefore obfuscate relevant groups [@Hartigan:1972;@Cheng:2000]. Hence, clustering techniques capable of simultaneously grouping data along multiple dimensions are needed. These techniques - referred to as co- or bi-clustering and tri-clustering in the case of two and three dimensions, respectively - have seen significant development and adoption in fields ranging from bioinformatics [@Cheng:2000] to finance [@Shi:2018] and natural language processing [@Dhillon:2001].
+Traditional clustering techniques focus on a single dimension and may therefore obfuscate relevant groups [@Hartigan:1972;@Cheng:2000]. Hence, clustering techniques capable of simultaneously grouping data along multiple dimensions are needed. These techniques -- referred to as co- or bi-clustering and tri-clustering in the case of two and three dimensions, respectively -- have seen significant development and adoption in fields ranging from bioinformatics [@Cheng:2000] to finance [@Shi:2018] and natural language processing [@Dhillon:2001].
 
 The exponential growth of multidimensional data referring to geographical features (e.g., time series of satellite images) has resulted in a wide variety of geodata cubes, which can benefit from co- and tri-clustering. Indeed, following the development of a general information-theoretical approach [@Dhillon:2003] to partitional co-clustering [@Banerjee:2007], Wu et al. presented an application of co-clustering to geodata [@Wu:2015], as well as its extension to three dimensions [@Wu:2018]. 
 
 In light of the eminent employability of co- and tri-clustering approaches to geospatial disciplines like geo-information science and Earth observation, and the transferability to other (geo)scientific domains, this paper presents the Clustering Geodata Cubes (CGC) package.
-CGC provides efficient and scalable co- and tri-clustering methods to analyze both small and large datasets on single or multiple computing node systems. It also features a cluster refinement functionality that allows users to make sense of complex datasets more easily. An example of its application is the ongoing work on the analysis of spring onset datasets at high spatial resolution and continental scale, a preview of which is presented in the CGC tutorial. Although the package aims to meet the needs of geospatial data scientists, the algorithms implemented remain widely applicable and can easily be applied in other domains, which require performing partitional clustering of positive data matrices.
+CGC provides efficient and scalable co- and tri-clustering methods to analyze both small and large datasets on single or multiple computing node systems. It also features a cluster refinement functionality that allows users to make sense of complex datasets more easily. An example of its application is the ongoing work on the analysis of spring onset datasets at high spatial resolution and continental scale, a preview of which is presented in the CGC tutorial. Although the package aims to meet the needs of geospatial data scientists, the algorithms implemented remain widely applicable and can easily be applied in other domains that require performing partitional clustering of positive data matrices.
 
 
 # Statement of need 
@@ -63,7 +63,7 @@ The CGC package focuses on the needs of geospatial data scientists who require t
   CGC offers functionality to efficiently utilize available computational resources (ranging from single machines to computing clusters) and to tackle a wide range of dataset sizes. For single machine execution the package offers optimized support of multi-core CPUs and/or limited system memory. For large datasets CGC supports the use of distributed data and computation on computing clusters
 
 - **Easy integration into geospatial analysis workflows.** 
-  CGC is written in Python, which is widely used for geospatial scripting and applications, and employs Numpy [@Harris:2020] and Dask [@Dask:2016] arrays as input and output data types, guaranteeing seamless integration to the Python ecosystem and interoperability with the libraries prevalent in the field of big (geo)data. This furthermore ensures the interoperability of CGC with the Xarray package [@Hoyer:2017], so that this versatile 
+  CGC is written in Python, which is widely used for geospatial scripting and applications, and employs NumPy [@Harris:2020] and Dask [@Dask:2016] arrays as input and output data types, guaranteeing seamless integration to the Python ecosystem and interoperability with the libraries prevalent in the field of big (geo)data. This furthermore ensures the interoperability of CGC with the Xarray package [@Hoyer:2017], so that this versatile 
   and popular tool can be used for data loading and manipulation before and after analyses with CGC.
 
 - **Ease of use and reproducibility.**
@@ -125,9 +125,9 @@ The CGC software is structured in the following main modules, details of which a
 
 - [`coclustering`](https://cgc.readthedocs.io/en/latest/coclustering.html#), containing the following implementations of the co-clustering algorithm:
 
-    - The [Numpy-based, vectorized single machine implementation with threading support for optimal usage of multi-core CPUs.](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based)
+    - The [NumPy-based, vectorized single machine implementation with threading support for optimal usage of multi-core CPUs.](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based)
 
-    - The [Numpy-based single machine implementation with a reduced memory footprint](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based-low-memory-footprint). This implementation trades performance for low memory usage, but uses Numba's
+    - The [NumPy-based single machine implementation with a reduced memory footprint](https://cgc.readthedocs.io/en/latest/coclustering.html#local-numpy-based-low-memory-footprint). This implementation trades performance for low memory usage, but uses Numba's
        just-in-time compilation [@Lam:2015] to mitigate performance loss.
 
     - The [Dask-based implementation](https://cgc.readthedocs.io/en/latest/coclustering.html#distributed-dask-based). This 
@@ -137,7 +137,7 @@ The CGC software is structured in the following main modules, details of which a
 - [`triclustering`](https://cgc.readthedocs.io/en/latest/triclustering.html), containing the following tri-clustering 
   implementations:
 
-    - A [Numpy-based implementation](https://cgc.readthedocs.io/en/latest/triclustering.html#local-numpy-based) 
+    - A [NumPy-based implementation](https://cgc.readthedocs.io/en/latest/triclustering.html#local-numpy-based) 
       analogous to the co-clustering one described above (note that the low-memory version is currently not available).
     - A [Dask-based implementation](https://cgc.readthedocs.io/en/latest/triclustering.html#distributed-dask-based), 
       also analogous to the corresponding co-clustering version described above. 
