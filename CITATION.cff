@@ -6,32 +6,34 @@ authors:
     affiliation: "Netherlands eScience Center"
     family-names: Nattino
     given-names: Francesco
+    orcid: https://orcid.org/0000-0003-3286-0139
   -
     affiliation: "Netherlands eScience Center"
     family-names: Ku
     given-names: Ou
+    orcid: https://orcid.org/0000-0002-5373-5209
   -
     affiliation: "Netherlands eScience Center"
     family-names: Grootes
     given-names: "Meiert W."
-  -
-    affiliation: "Netherlands eScience Center"
-    family-names: Goncalves
-    given-names: Romulo
+    orcid: https://orcid.org/0000-0002-5733-4795
   -
     affiliation: "Institute of Geomatics, Vienna BOKU"
     family-names: Izquierdo-Verdiguier
     given-names: Emma
+    orcid: https://orcid.org/0000-0003-2179-1262
   -
     affiliation: "Faculty ITC - University of Twente"
     family-names: Girgin
     given-names: Serkan
+    orcid: https://orcid.org/0000-0002-0156-185X
   -
     affiliation: "Faculty ITC - University of Twente"
     family-names: Zurita-Milla
     given-names: Raul
+    orcid: https://orcid.org/0000-0002-1769-6310
 cff-version: "1.0.3"
-date-released: 2021-12-17
+date-released: 2022-03-09
 doi: "10.5281/zenodo.3979172"
 keywords:
   - "clustering"
@@ -41,6 +43,6 @@ keywords:
   - "distributed computing"
 license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
-title: "Clustering Geo-Data Cubes (CGC): A Clustering Tool for Geospatial Applications"
-version: "0.6.1"
+title: "CGC: a Scalable Python Package for Co- and Tri-Clustering of Geodata Cubes"
+version: "0.6.2"
 ...
