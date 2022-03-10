@@ -1,5 +1,5 @@
 ---
-title: 'CGC: a scalable Python package for co- and tri-clustering of geodata cubes'
+title: 'CGC: a Scalable Python Package for Co- and Tri-Clustering of Geodata Cubes'
 tags:
   - Python
   - clustering
