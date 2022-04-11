@@ -11,7 +11,7 @@
    * - \3. Community Registry
      - |PyPI Badge|
    * - \4. Enable Citation
-     - |Zenodo Badge|
+     - |Zenodo Badge| |JOSS Badge|
    * - \5. Checklist
      - |CII Best Practices Badge|
    * - **Other best practices**
@@ -52,6 +52,10 @@
 .. |Documentation Status| image:: https://readthedocs.org/projects/cgc/badge/?version=latest
    :target: https://cgc.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
+
+.. |JOSS Badge| image:: https://joss.theoj.org/papers/10.21105/joss.04032/status.svg
+   :target: https://doi.org/10.21105/joss.04032
+   :alt: JOSS Badge
 
 CGC: Clustering Geo-Data Cubes
 ==============================
