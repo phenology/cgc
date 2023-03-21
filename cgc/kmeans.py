@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import logging
 from sklearn.cluster import KMeans
@@ -198,7 +199,7 @@ class Kmeans(object):
         self.results.cluster_averages = cluster_averages
 
         self.results.write(filename=self.output_filename)
-        return self.results
+        return copy.copy(self.results)
 
     def _compute_statistic_measures(self):
         """
