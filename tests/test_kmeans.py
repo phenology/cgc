@@ -28,7 +28,7 @@ def init_cocluster_km():
     clusters = [row_clusters, col_clusters]
     nclusters = [nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
-    kmean_max_iter = 2
+    kmean_max_iter = 100
     km = Kmeans(Z=Z,
                 clusters=clusters,
                 nclusters=nclusters,
@@ -131,6 +131,15 @@ class TestKmeans(unittest.TestCase):
                             [1., 0., 1., 1., 1., 1.], [0., 0., 0., 0., 0.,
                                                        0.]])
         self.assertTrue(np.all(results == km.stat_measures_norm))
+
+    def test_smaller_number_of_actual_clusters(self):
+        # should not fail even if the number of identified clusters is smaller
+        # than the number of required clusters
+        km = init_cocluster_km()
+        # there are 2 actual clusters
+        km.k_range = [3]
+        results = km.compute()
+        assert results.k_value == 3
 
     def test_kmean_labels_coclustering(self):
         km = init_cocluster_km()

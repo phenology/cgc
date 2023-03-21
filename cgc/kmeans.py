@@ -192,14 +192,15 @@ class Kmeans(object):
             label_sum = 0.
             label_n_elements = 0
             # Loop over all co-/tri-clusters in the selected refined cluster
-            clusters = np.where(km_labels == label)
-            for cluster in zip(*clusters):
-                idx = [np.where(self.clusters[i] == cluster[i])[0]
-                       for i in range(self.Z.ndim)]
-                label_n_elements += np.prod([len(idx_x) for idx_x in idx])
-                idx = np.meshgrid(*idx, indexing='ij')
-                label_sum += self.Z[tuple(idx)].sum()
-            cluster_averages[clusters] = label_sum / label_n_elements
+            clusters = np.nonzero(km_labels == label)
+            if all(len(c) > 0 for c in clusters):
+                for cluster in zip(*clusters):
+                    idx = [np.where(self.clusters[i] == cluster[i])[0]
+                           for i in range(self.Z.ndim)]
+                    label_n_elements += np.prod([len(idx_x) for idx_x in idx])
+                    idx = np.meshgrid(*idx, indexing='ij')
+                    label_sum += self.Z[tuple(idx)].sum()
+                cluster_averages[clusters] = label_sum / label_n_elements
         self.results.cluster_averages = cluster_averages
 
         self.results.write(filename=self.output_filename)
