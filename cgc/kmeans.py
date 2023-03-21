@@ -1,7 +1,8 @@
 import copy
 import numpy as np
 import logging
-from sklearn.cluster import KMeans
+import sklearn.cluster
+
 from sklearn.metrics import silhouette_score
 
 from .results import Results
@@ -10,7 +11,7 @@ from .utils import calculate_cluster_feature
 logger = logging.getLogger(__name__)
 
 
-class KmeansResults(Results):
+class KMeansResults(Results):
     """
     Contains results and metadata of a k-means refinement calculation.
 
@@ -35,7 +36,7 @@ class KmeansResults(Results):
     cluster_averages = None
 
 
-class Kmeans(object):
+class KMeans(object):
     """
     Perform a clustering refinement using k-means.
 
@@ -57,8 +58,8 @@ class Kmeans(object):
         to `max_k_ratio*max_k`, where `max_k` is the number of non-empty co- or
         tri-clusters. It will be ignored if `k_range` is given. Default to 0.8.
     :type max_k_ratio: float, optional
-    :param kmean_max_iter: Maximum number of iterations of k-means.
-    :type kmean_max_iter: int, optional
+    :param kmeans_max_iter: Maximum number of iterations of k-means.
+    :type kmeans_max_iter: int, optional
     :param output_filename: Name of the file where to write the results.
     :type output_filename: str, optional
 
@@ -68,11 +69,11 @@ class Kmeans(object):
     >>> Z = np.array([[4, 4, 1, 1], [4, 4, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
                    [2, 2, 3, 3]])
     >>> clusters = [np.array([0, 0, 1, 1, 1]), np.array([0, 0, 1, 1])]
-    >>> km = Kmeans(Z=Z,
+    >>> km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=[2, 2],
                 k_range= range(2, 4),
-                kmean_max_iter=2)
+                kmeans_max_iter=2)
     """
     def __init__(self,
                  Z,
@@ -80,12 +81,12 @@ class Kmeans(object):
                  nclusters,
                  k_range=None,
                  max_k_ratio=0.8,
-                 kmean_max_iter=100,
+                 kmeans_max_iter=100,
                  output_filename=''):
         # Input parameters -----------------
         self.clusters = clusters
         self.nclusters = nclusters
-        self.kmean_max_iter = kmean_max_iter
+        self.kmeans_max_iter = kmeans_max_iter
         self.output_filename = output_filename
 
         max_k = np.prod(self.nclusters)
@@ -97,7 +98,7 @@ class Kmeans(object):
         # Input parameters end -------------
 
         # Store input parameters in results object
-        self.results = KmeansResults(**self.__dict__)
+        self.results = KMeansResults(**self.__dict__)
 
         self.Z = Z
 
@@ -140,24 +141,25 @@ class Kmeans(object):
         k value. Finally select the k with the maximum Silhouette measure.
 
         :return: K-means results.
-        :type: cgc.kmeans.KmeansResults
+        :type: cgc.kmeans.KMeansResults
         """
         # Get statistic measures
         self._compute_statistic_measures()
 
         # Search for value k
         silhouette_avg_list = np.array([])  # average silhouette measure vs k
-        kmean_label_list = []
+        kmeans_label_list = []
         for k in self.k_range:
             # Compute Kmean
-            kmean_cluster = KMeans(n_clusters=k,
-                                   max_iter=self.kmean_max_iter).fit(
-                                       self.stat_measures_norm)
+            km = sklearn.cluster.KMeans(
+                n_clusters=k, max_iter=self.kmeans_max_iter
+            )
+            kmeans_cluster = km.fit(self.stat_measures_norm)
             silhouette_avg = silhouette_score(self.stat_measures_norm,
-                                              kmean_cluster.labels_)
+                                              kmeans_cluster.labels_)
             silhouette_avg_list = np.append(silhouette_avg_list,
                                             silhouette_avg)
-            kmean_label_list.append(kmean_cluster.labels_)
+            kmeans_label_list.append(kmeans_cluster.labels_)
         idx_k = np.argmax(silhouette_avg_list)
         if np.sum(silhouette_avg_list == silhouette_avg_list[idx_k]) > 1:
             idx_k_list = np.argwhere(
@@ -170,7 +172,7 @@ class Kmeans(object):
                     self.k_range[idx_k]))
         self.results.measure_list = silhouette_avg_list
         self.results.k_value = self.k_range[idx_k]
-        labels = kmean_label_list[idx_k]
+        labels = kmeans_label_list[idx_k]
 
         indices = np.meshgrid(*[np.unique(cl) for cl in self.clusters],
                               indexing='ij')

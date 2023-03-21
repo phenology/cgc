@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from cgc.kmeans import Kmeans
+from cgc.kmeans import KMeans
 
 
 def init_cocluster_km():
@@ -28,12 +28,12 @@ def init_cocluster_km():
     clusters = [row_clusters, col_clusters]
     nclusters = [nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
-    kmean_max_iter = 2
-    km = Kmeans(Z=Z,
+    kmeans_max_iter = 2
+    km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=nclusters,
                 k_range=k_range,
-                kmean_max_iter=kmean_max_iter)
+                kmeans_max_iter=kmeans_max_iter)
     return km
 
 
@@ -51,12 +51,12 @@ def init_cocluster_km_with_noise():
     clusters = [row_clusters, col_clusters]
     nclusters = [nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
-    kmean_max_iter = 2
-    km = Kmeans(Z=Z,
+    kmeans_max_iter = 2
+    km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=nclusters,
                 k_range=k_range,
-                kmean_max_iter=kmean_max_iter)
+                kmeans_max_iter=kmeans_max_iter)
     return km
 
 
@@ -72,43 +72,43 @@ def init_tricluster_km():
     clusters = [band_clusters, row_clusters, col_clusters]
     nclusters = [nband_clusters, nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
-    kmean_max_iter = 2
-    km = Kmeans(Z=Z,
+    kmeans_max_iter = 2
+    km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=nclusters,
                 k_range=k_range,
-                kmean_max_iter=kmean_max_iter)
+                kmeans_max_iter=kmeans_max_iter)
     return km
 
 
-class TestKmeans(unittest.TestCase):
+class TestKMeans(unittest.TestCase):
     def test_Z_and_cluster_shape_not_match(self):
         with self.assertRaises(ValueError):
-            Kmeans(Z=np.random.random((5, 5)),
+            KMeans(Z=np.random.random((5, 5)),
                    clusters=[[0, 0, 1, 1, 2], [0, 0, 1, 1]],
                    nclusters=[3, 2])
 
     def test_Z_and_cluster_dimension_not_match(self):
         with self.assertRaises(ValueError):
-            Kmeans(Z=np.random.random((5, 4)),
+            KMeans(Z=np.random.random((5, 4)),
                    clusters=[[0, 0, 1, 1, 2], [0, 0, 1, 1], [0, 0, 1, 1]],
                    nclusters=[3, 2, 2])
 
     def test_max_label_equal_ncluster(self):
         with self.assertRaises(ValueError):
-            Kmeans(Z=np.random.random((5, 4, 4)),
+            KMeans(Z=np.random.random((5, 4, 4)),
                    clusters=[[0, 0, 1, 1, 2], [0, 0, 1, 1], [0, 0, 1, 1]],
                    nclusters=[3, 2, 1])
 
     def test_max_label_exceeds_ncluster(self):
         with self.assertRaises(ValueError):
-            Kmeans(Z=np.random.random((5, 4, 4)),
+            KMeans(Z=np.random.random((5, 4, 4)),
                    clusters=[[0, 0, 1, 1, 2], [0, 0, 1, 1], [0, 0, 1, 1]],
                    nclusters=[2, 2, 2])
 
     def test_kvalues_exceed_number_of_coclusters(self):
         with self.assertRaises(ValueError):
-            Kmeans(
+            KMeans(
                 Z=np.random.random((6, 4)),
                 clusters=[[0, 0, 1, 1, 2, 2], [0, 0, 1, 1]],
                 nclusters=[3, 2],
@@ -117,7 +117,7 @@ class TestKmeans(unittest.TestCase):
 
     def test_kvalues_exceed_number_of_coclusters_populated(self):
         with self.assertRaises(ValueError):
-            Kmeans(
+            KMeans(
                 Z=np.random.random((6, 4)),
                 clusters=[[0, 0, 1, 1, 2, 2], [0, 0, 1, 1]],
                 nclusters=[4, 2],
@@ -132,7 +132,7 @@ class TestKmeans(unittest.TestCase):
                                                        0.]])
         self.assertTrue(np.all(results == km.stat_measures_norm))
 
-    def test_kmean_labels_coclustering(self):
+    def test_kmeans_labels_coclustering(self):
         km = init_cocluster_km()
         km.compute()
 
@@ -166,7 +166,7 @@ class TestKmeans(unittest.TestCase):
         km.compute()
         self.assertEqual(km.results.k_value, 3)
 
-    def test_kmean_labels_triclustering(self):
+    def test_kmeans_labels_triclustering(self):
         km = init_tricluster_km()
         km.compute()
 
@@ -229,13 +229,13 @@ class TestKmeans(unittest.TestCase):
         Z = Z + np.random.rand(*Z.shape) * 0.1
         row_cluseters = np.array([0, 0, 1, 1])
         col_clusters = np.array([0, 0, 0, 1, 1])
-        km = Kmeans(Z=Z,
+        km = KMeans(Z=Z,
                     clusters=[row_cluseters, col_clusters],
                     nclusters=[2, 2],
                     k_range=range(2, 4))
         res1 = km.compute()
         self.assertEqual(res1.k_value, 2)
-        km = Kmeans(Z=Z,
+        km = KMeans(Z=Z,
                     clusters=[row_cluseters, col_clusters],
                     nclusters=[2, 2],
                     k_range=range(3, 1, -1))
