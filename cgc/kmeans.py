@@ -8,6 +8,15 @@ from .utils import calculate_cluster_feature
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_STATISTICS = [
+    (np.mean, None),
+    (np.std, None),
+    (np.percentile, {"q": 5}),
+    (np.percentile, {"q": 95}),
+    (np.max, None),
+    (np.min, None),
+]
+
 
 class KmeansResults(Results):
     """
@@ -38,8 +47,10 @@ class Kmeans(object):
     """
     Perform a clustering refinement using k-means.
 
-    K-means clustering is performed for multiple k values, then the optimal
-    value is selected on the basis of the Silhouette coefficient.
+    A set of statistics is computed for all co- or tri-clusters, then these
+    clusters are in turned grouped using k-means. K-means clustering is
+    performed for multiple k values, then the optimal value is selected on the
+    basis of the Silhouette coefficient.
 
     :param Z: Data array (N dimensions).
     :type Z: numpy.ndarray or dask.array.Array
@@ -58,6 +69,13 @@ class Kmeans(object):
     :type max_k_ratio: float, optional
     :param kmean_max_iter: Maximum number of iterations of k-means.
     :type kmean_max_iter: int, optional
+    :param statistics: Statistics to be computed over the clusters, which are
+        then used to refine these. These are provided as an iterable of
+        callable functions, with optional keyword arguments. For example:
+        [(func1, {'kwarg1': val1, ...}), (func2, {'kwarg2': val2, ...}, ...] .
+        See cgc.kmeans.DEFAULT_STATISTICS for the default statistics, and
+        cgc.utils.calculate_cluster_feature for input function requirements.
+    :type statistics: tuple or list, optional
     :param output_filename: Name of the file where to write the results.
     :type output_filename: str, optional
 
@@ -80,6 +98,7 @@ class Kmeans(object):
                  k_range=None,
                  max_k_ratio=0.8,
                  kmean_max_iter=100,
+                 statistics=None,
                  output_filename=''):
         # Input parameters -----------------
         self.clusters = clusters
@@ -93,10 +112,27 @@ class Kmeans(object):
         else:
             self.k_range = list(k_range)
         self.k_range.sort()
+
+        statistics = DEFAULT_STATISTICS if statistics is None else statistics
+        self.statistics = []
+        for el in statistics:
+            if hasattr(el, "__call__"):
+                func, kwargs = el, dict()
+            else:
+                func, kwargs = el
+                kwargs = kwargs if kwargs is not None else dict()
+            self.statistics.append((func, kwargs))
         # Input parameters end -------------
 
         # Store input parameters in results object
-        self.results = KmeansResults(**self.__dict__)
+        self.results = KmeansResults(
+            clusters=self.clusters,
+            nclusters=self.nclusters,
+            kmean_max_iter=self.kmean_max_iter,
+            output_filename=self.output_filename,
+            k_range=self.k_range,
+            statistics=[(func.__name__, kw) for func, kw in self.statistics],
+        )
 
         self.Z = Z
 
@@ -208,40 +244,18 @@ class Kmeans(object):
 
     def _compute_statistic_measures(self):
         """
-        Compute 6 statistics: Mean, STD, 5 percentile, 95 percentile, maximum
-        and minimum values, for each cluster group.
-        Normalize them to [0, 1].
+        Compute statistics for each cluster group and normalize them to [0, 1].
         """
+        nstats = len(self.statistics)
+        features = np.zeros((*self.nclusters, nstats))
+        for nstat, (func, kwargs) in enumerate(self.statistics):
+            features[..., nstat] = calculate_cluster_feature(self.Z,
+                                                             func,
+                                                             self.clusters,
+                                                             self.nclusters,
+                                                             **kwargs)
 
-        features = np.zeros((*self.nclusters, 6))
-        features[..., 0] = calculate_cluster_feature(self.Z,
-                                                     np.mean,
-                                                     self.clusters,
-                                                     self.nclusters)
-        features[..., 1] = calculate_cluster_feature(self.Z,
-                                                     np.std,
-                                                     self.clusters,
-                                                     self.nclusters)
-        features[..., 2] = calculate_cluster_feature(self.Z,
-                                                     np.percentile,
-                                                     self.clusters,
-                                                     self.nclusters,
-                                                     q=5)
-        features[..., 3] = calculate_cluster_feature(self.Z,
-                                                     np.percentile,
-                                                     self.clusters,
-                                                     self.nclusters,
-                                                     q=95)
-        features[..., 4] = calculate_cluster_feature(self.Z,
-                                                     np.max,
-                                                     self.clusters,
-                                                     self.nclusters)
-        features[..., 5] = calculate_cluster_feature(self.Z,
-                                                     np.min,
-                                                     self.clusters,
-                                                     self.nclusters)
-
-        stat_measures = features[~np.isnan(features)].reshape((-1, 6))
+        stat_measures = features[~np.isnan(features)].reshape((-1, nstats))
 
         # Normalize all statistics to [0, 1]
         minimum = stat_measures.min(axis=0)
