@@ -132,17 +132,22 @@ class Kmeans(object):
             logger.warning("k_range includes large k-values (80% "
                            "of the number of clusters or more)")
 
-    def compute(self):
+        self.stat_measures_norm = None
+
+    def compute(self, recalc_statistics=False):
         """
         Compute statistics for each clustering group. Then loop through the
         range of k values, and compute the averaged Silhouette measure of each
         k value. Finally select the k with the maximum Silhouette measure.
 
+        :param recalc_statistics: If True, always recompute statistics.
+        :type recalc_statistics: bool, optional
         :return: K-means results.
         :type: cgc.kmeans.KmeansResults
         """
-        # Get statistic measures
-        self._compute_statistic_measures()
+        # Compute statistics
+        if self.stat_measures_norm is None or recalc_statistics:
+            self._compute_statistic_measures()
 
         # Search for value k
         silhouette_avg_list = np.array([])  # average silhouette measure vs k
