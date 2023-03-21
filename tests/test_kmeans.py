@@ -305,4 +305,3 @@ class TestKmeans(unittest.TestCase):
 
         assert run_kmeans() == 3
         assert run_kmeans((np.min,)) == 2
-
