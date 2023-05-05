@@ -4,7 +4,7 @@ K-means refinement
 Introduction
 ------------
 
-The `Kmeans` module is an implementation of the `k-means clustering`_ to refine the results of a co-clustering or
+The `kmeans` module is an implementation of the `k-means clustering`_ to refine the results of a co-clustering or
 tri-clustering calculation. This k-mean refinement allows identifying similarity patterns between co- or tri-clusters.
 The following pre-defined features, computed over all elements belonging to the same co- or tri-cluster, are employed
 for the k-means clustering:
@@ -37,24 +37,24 @@ The k-means refinement should be based on existing co- or tri-clustering results
     row_clusters = np.array([0, 0, 1, 2])  # 3 clusters
     col_cluster = np.array([0, 0, 1])  # 2 clusters
 
-One can then setup ``Kmeans`` in the following way:
+One can then setup ``KMeans`` in the following way:
 
 .. code-block:: python
 
-    from cgc.kmeans import Kmeans
+    from cgc.kmeans import KMeans
 
-    km = Kmeans(
+    km = KMeans(
         Z,
         clusters=(row_clusters, col_cluster),
         nclusters=(3, 2)
         k_range=range(2, 5),
-        kmean_max_iter=100,
+        kmeans_max_iter=100,
         output_filename='results.json' # JSON file where to write output
     )
 
 Here ``k_range`` is the range of ``k`` values to investigate. If not provided, a sensible range will be setup (from 2 to
 a fraction of the number of co- or tri-clusters - the optional `max_k_ratio` argument allows for additional control, see
-:ref:`API<API>`). ``kmean_max_iter`` is the maximum number of iterations employed for the k-means clustering.
+:ref:`API<API>`). ``kmeans_max_iter`` is the maximum number of iterations employed for the k-means clustering.
 
 The ``compute`` function is then called to run the k-means refinement:
 
@@ -66,7 +66,7 @@ Results
 -------
 
 The optimal ``k`` value and the refined cluster averages computed over all elements assigned to the co- and tri-clusters
-are stored in the ``KmeansResults`` object:
+are stored in the ``KMeansResults`` object:
 
 .. code-block:: python
 
@@ -83,8 +83,8 @@ API
 
 .. currentmodule:: cgc.kmeans
 
-.. autoclass:: Kmeans
+.. autoclass:: KMeans
     :members:
     :undoc-members:
 
-.. autoclass:: KmeansResults
+.. autoclass:: KMeansResults

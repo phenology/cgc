@@ -68,7 +68,7 @@ def mem_estimate_coclustering_numpy(n_rows,
     logger.info('Estimated memory usage: {:.2f}{}, peak number: {}'.format(
         mem_usage, unit, peak))
 
-    return (mem_usage, unit, peak)
+    return mem_usage, unit, peak
 
 
 def _est_arr_size(shape, nbytes=8):
@@ -184,7 +184,7 @@ def calculate_cluster_feature(Z, function, clusters, nclusters=None, **kwargs):
     :param Z: Data array (N dimensions).
     :type Z: numpy.ndarray or dask.array.Array
     :param function: Function to run over the cluster elements to calculate the
-        desidered feature. Should take as an input a N-dimensional array and
+        desired feature. Should take as an input a N-dimensional array and
         return a scalar.
     :type function: Callable
     :param clusters: Iterable with length N. It should contain the cluster

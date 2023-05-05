@@ -1,3 +1,4 @@
+import copy
 import concurrent.futures
 import logging
 
@@ -157,7 +158,7 @@ class Triclustering(object):
                     self.results.error = e
                 self.results.nruns_completed += 1
         self.results.write(filename=self.output_filename)
-        return self.results
+        return copy.copy(self.results)
 
     def run_with_dask(self, client=None):
         """
@@ -172,7 +173,7 @@ class Triclustering(object):
         self.client = client if client is not None else Client()
         self._dask_runs_memory()
         self.results.write(filename=self.output_filename)
-        return self.results
+        return copy.copy(self.results)
 
     def _dask_runs_memory(self):
         """ Memory efficient Dask implementation: sequential runs """
