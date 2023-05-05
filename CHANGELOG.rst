@@ -25,6 +25,7 @@ Fixed
 -----
 
 * result objects are now copied on return, so running more iterations does not modify previous results
+* initial cluster assignment can now be provided as dask array
 
 [0.6.2] - 2022-03-09
 ********************
