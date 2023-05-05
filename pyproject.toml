@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clustering-geodata-cubes"
+version = "0.7.0"
+dependencies = [
+    "dask[complete]",
+    "matplotlib",
+    "numba",
+    "numpy",
+    "scikit-learn",
+]
+description = "CGC: a Scalable Python Package for Co- and Tri-Clustering of Geodata Cubes"
+readme = "README.rst"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Francesco Nattino", email = "f.nattino@esciencecenter.nl"},
+    {name = "Ou Ku"},
+    {name = "Meiert W. Grootes"},
+    {name = "Emma Izquierdo-Verdiguier"},
+    {name = "Serkan Girgin"},
+    {name = "Raul Zurita-Milla"},
+]
+keywords = ["clustering", "co-clustering", "tri-clustering", "earth observation", "distributed computing"]
+classifiers=[
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+]
+
+[project.urls]
+repository = "https://github.com/phenology/cgc"
+documentation = "https://cgc.readthedocs.io"
+changelog = "https://github.com/phenology/cgc/blob/master/CHANGELOG.rst"
+doi = "https://doi.org/10.5281/zenodo.3979172"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "pycodestyle",
+]
+docs = [
+    "sphinx",
+    "docutils==0.16",
+    "sphinx_rtd_theme==0.5.2",
+    "recommonmark",
+]
+
+[tool.setuptools]
+packages = ["cgc"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--cov --cov-report term"
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["cgc"]

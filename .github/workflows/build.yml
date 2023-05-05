@@ -5,8 +5,8 @@ on:
     paths:
       - 'cgc/**'
       - 'tests/**'
-      - requirements.txt
-      - 'setup.*'
+      - 'pyproject.toml'
+      - 'setup.py'
   pull_request:
     branches:
       - master
