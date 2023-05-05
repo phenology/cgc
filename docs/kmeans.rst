@@ -5,8 +5,8 @@ Introduction
 ------------
 
 The `kmeans` module is an implementation of the `k-means clustering`_ to refine the results of a co-clustering or
-tri-clustering calculation. This k-mean refinement allows identifying similarity patterns between co- or tri-clusters.
-The following pre-defined features, computed over all elements belonging to the same co- or tri-cluster, are employed
+tri-clustering calculation. This k-means refinement allows identifying similarity patterns between co- or tri-clusters.
+The following features, computed over all elements belonging to the same co- or tri-cluster, are employed by default
 for the k-means clustering:
 
 #. Mean value;
@@ -16,6 +16,7 @@ for the k-means clustering:
 #. 5th percentile;
 #. 95th percentile;
 
+However, the user can customize the set of statistics computed over the clusters.
 The implementation, which is based on the `scikit-learn`_ package, tests a range of k values and select the optimal one
 based on the `Silhouette coefficient`_.
 
@@ -53,8 +54,10 @@ One can then setup ``KMeans`` in the following way:
     )
 
 Here ``k_range`` is the range of ``k`` values to investigate. If not provided, a sensible range will be setup (from 2 to
-a fraction of the number of co- or tri-clusters - the optional `max_k_ratio` argument allows for additional control, see
-:ref:`API<API>`). ``kmeans_max_iter`` is the maximum number of iterations employed for the k-means clustering.
+a fraction of the number of co- or tri-clusters - the optional ``max_k_ratio`` argument allows for additional control,
+see :ref:`API<API>`). ``kmeans_max_iter`` is the maximum number of iterations employed for the k-means clustering. By
+using the optional argument ``statistics``, the user can define a custom set of statistics employed for the k-means
+refinement (see the :ref:`API<API>`).
 
 The ``compute`` function is then called to run the k-means refinement:
 
