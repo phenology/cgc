@@ -6,10 +6,10 @@ import numpy as np
 from . import __version__
 
 
-class NumpyEncoder(json.JSONEncoder):
+class ArrayEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
+        if hasattr(obj, '__array__'):
+            return np.asarray(obj).tolist()
         return json.JSONEncoder.default(self, obj)
 
 
@@ -36,7 +36,7 @@ class Results(object):
         """
         if filename:
             with open(filename, 'w') as f:
-                json.dump(self.__dict__, f, indent=4, cls=NumpyEncoder)
+                json.dump(self.__dict__, f, indent=4, cls=ArrayEncoder)
 
     def __setattr__(self, name, value):
         self.__dict__['time_updated'] = datetime.datetime.now().isoformat()

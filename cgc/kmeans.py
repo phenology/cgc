@@ -1,6 +1,8 @@
+import copy
 import numpy as np
 import logging
-from sklearn.cluster import KMeans
+import sklearn.cluster
+
 from sklearn.metrics import silhouette_score
 
 from .results import Results
@@ -8,8 +10,17 @@ from .utils import calculate_cluster_feature
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_STATISTICS = [
+    (np.mean, None),
+    (np.std, None),
+    (np.percentile, {"q": 5}),
+    (np.percentile, {"q": 95}),
+    (np.max, None),
+    (np.min, None),
+]
 
-class KmeansResults(Results):
+
+class KMeansResults(Results):
     """
     Contains results and metadata of a k-means refinement calculation.
 
@@ -34,12 +45,14 @@ class KmeansResults(Results):
     cluster_averages = None
 
 
-class Kmeans(object):
+class KMeans(object):
     """
     Perform a clustering refinement using k-means.
 
-    K-means clustering is performed for multiple k values, then the optimal
-    value is selected on the basis of the Silhouette coefficient.
+    A set of statistics is computed for all co- or tri-clusters, then these
+    clusters are in turned grouped using k-means. K-means clustering is
+    performed for multiple k values, then the optimal value is selected on the
+    basis of the Silhouette coefficient.
 
     :param Z: Data array (N dimensions).
     :type Z: numpy.ndarray or dask.array.Array
@@ -56,8 +69,15 @@ class Kmeans(object):
         to `max_k_ratio*max_k`, where `max_k` is the number of non-empty co- or
         tri-clusters. It will be ignored if `k_range` is given. Default to 0.8.
     :type max_k_ratio: float, optional
-    :param kmean_max_iter: Maximum number of iterations of k-means.
-    :type kmean_max_iter: int, optional
+    :param kmeans_max_iter: Maximum number of iterations of k-means.
+    :type kmeans_max_iter: int, optional
+    :param statistics: Statistics to be computed over the clusters, which are
+        then used to refine these. These are provided as an iterable of
+        callable functions, with optional keyword arguments. For example:
+        [(func1, {'kwarg1': val1, ...}), (func2, {'kwarg2': val2, ...}, ...] .
+        See cgc.kmeans.DEFAULT_STATISTICS for the default statistics, and
+        cgc.utils.calculate_cluster_feature for input function requirements.
+    :type statistics: tuple or list, optional
     :param output_filename: Name of the file where to write the results.
     :type output_filename: str, optional
 
@@ -67,11 +87,11 @@ class Kmeans(object):
     >>> Z = np.array([[4, 4, 1, 1], [4, 4, 1, 1], [2, 2, 3, 3], [2, 2, 3, 3],
                    [2, 2, 3, 3]])
     >>> clusters = [np.array([0, 0, 1, 1, 1]), np.array([0, 0, 1, 1])]
-    >>> km = Kmeans(Z=Z,
+    >>> km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=[2, 2],
                 k_range= range(2, 4),
-                kmean_max_iter=2)
+                kmeans_max_iter=2)
     """
     def __init__(self,
                  Z,
@@ -79,12 +99,13 @@ class Kmeans(object):
                  nclusters,
                  k_range=None,
                  max_k_ratio=0.8,
-                 kmean_max_iter=100,
+                 kmeans_max_iter=100,
+                 statistics=None,
                  output_filename=''):
         # Input parameters -----------------
         self.clusters = clusters
         self.nclusters = nclusters
-        self.kmean_max_iter = kmean_max_iter
+        self.kmeans_max_iter = kmeans_max_iter
         self.output_filename = output_filename
 
         max_k = np.prod(self.nclusters)
@@ -93,10 +114,27 @@ class Kmeans(object):
         else:
             self.k_range = list(k_range)
         self.k_range.sort()
+
+        statistics = DEFAULT_STATISTICS if statistics is None else statistics
+        self.statistics = []
+        for el in statistics:
+            if hasattr(el, "__call__"):
+                func, kwargs = el, dict()
+            else:
+                func, kwargs = el
+                kwargs = kwargs if kwargs is not None else dict()
+            self.statistics.append((func, kwargs))
         # Input parameters end -------------
 
         # Store input parameters in results object
-        self.results = KmeansResults(**self.__dict__)
+        self.results = KMeansResults(
+            clusters=self.clusters,
+            nclusters=self.nclusters,
+            kmean_max_iter=self.kmeans_max_iter,
+            output_filename=self.output_filename,
+            k_range=self.k_range,
+            statistics=[(func.__name__, kw) for func, kw in self.statistics],
+        )
 
         self.Z = Z
 
@@ -132,31 +170,37 @@ class Kmeans(object):
             logger.warning("k_range includes large k-values (80% "
                            "of the number of clusters or more)")
 
-    def compute(self):
+        self.stat_measures_norm = None
+
+    def compute(self, recalc_statistics=False):
         """
         Compute statistics for each clustering group. Then loop through the
         range of k values, and compute the averaged Silhouette measure of each
         k value. Finally select the k with the maximum Silhouette measure.
 
+        :param recalc_statistics: If True, always recompute statistics.
+        :type recalc_statistics: bool, optional
         :return: K-means results.
-        :type: cgc.kmeans.KmeansResults
+        :type: cgc.kmeans.KMeansResults
         """
-        # Get statistic measures
-        self._compute_statistic_measures()
+        # Compute statistics
+        if self.stat_measures_norm is None or recalc_statistics:
+            self._compute_statistic_measures()
 
         # Search for value k
         silhouette_avg_list = np.array([])  # average silhouette measure vs k
-        kmean_label_list = []
+        kmeans_label_list = []
         for k in self.k_range:
             # Compute Kmean
-            kmean_cluster = KMeans(n_clusters=k,
-                                   max_iter=self.kmean_max_iter).fit(
-                                       self.stat_measures_norm)
+            km = sklearn.cluster.KMeans(
+                n_clusters=k, max_iter=self.kmeans_max_iter
+            )
+            kmeans_cluster = km.fit(self.stat_measures_norm)
             silhouette_avg = silhouette_score(self.stat_measures_norm,
-                                              kmean_cluster.labels_)
+                                              kmeans_cluster.labels_)
             silhouette_avg_list = np.append(silhouette_avg_list,
                                             silhouette_avg)
-            kmean_label_list.append(kmean_cluster.labels_)
+            kmeans_label_list.append(kmeans_cluster.labels_)
         idx_k = np.argmax(silhouette_avg_list)
         if np.sum(silhouette_avg_list == silhouette_avg_list[idx_k]) > 1:
             idx_k_list = np.argwhere(
@@ -169,7 +213,7 @@ class Kmeans(object):
                     self.k_range[idx_k]))
         self.results.measure_list = silhouette_avg_list
         self.results.k_value = self.k_range[idx_k]
-        labels = kmean_label_list[idx_k]
+        labels = kmeans_label_list[idx_k]
 
         indices = np.meshgrid(*[np.unique(cl) for cl in self.clusters],
                               indexing='ij')
@@ -187,55 +231,34 @@ class Kmeans(object):
             label_sum = 0.
             label_n_elements = 0
             # Loop over all co-/tri-clusters in the selected refined cluster
-            clusters = np.where(km_labels == label)
-            for cluster in zip(*clusters):
-                idx = [np.where(self.clusters[i] == cluster[i])[0]
-                       for i in range(self.Z.ndim)]
-                label_n_elements += np.prod([len(idx_x) for idx_x in idx])
-                idx = np.meshgrid(*idx, indexing='ij')
-                label_sum += self.Z[tuple(idx)].sum()
-            cluster_averages[clusters] = label_sum / label_n_elements
+            clusters = np.nonzero(km_labels == label)
+            if all(len(c) > 0 for c in clusters):
+                for cluster in zip(*clusters):
+                    idx = [np.where(self.clusters[i] == cluster[i])[0]
+                           for i in range(self.Z.ndim)]
+                    label_n_elements += np.prod([len(idx_x) for idx_x in idx])
+                    idx = np.meshgrid(*idx, indexing='ij')
+                    label_sum += self.Z[tuple(idx)].sum()
+                cluster_averages[clusters] = label_sum / label_n_elements
         self.results.cluster_averages = cluster_averages
 
         self.results.write(filename=self.output_filename)
-        return self.results
+        return copy.copy(self.results)
 
     def _compute_statistic_measures(self):
         """
-        Compute 6 statistics: Mean, STD, 5 percentile, 95 percentile, maximum
-        and minimum values, for each cluster group.
-        Normalize them to [0, 1].
+        Compute statistics for each cluster group and normalize them to [0, 1].
         """
+        nstats = len(self.statistics)
+        features = np.zeros((*self.nclusters, nstats))
+        for nstat, (func, kwargs) in enumerate(self.statistics):
+            features[..., nstat] = calculate_cluster_feature(self.Z,
+                                                             func,
+                                                             self.clusters,
+                                                             self.nclusters,
+                                                             **kwargs)
 
-        features = np.zeros((*self.nclusters, 6))
-        features[..., 0] = calculate_cluster_feature(self.Z,
-                                                     np.mean,
-                                                     self.clusters,
-                                                     self.nclusters)
-        features[..., 1] = calculate_cluster_feature(self.Z,
-                                                     np.std,
-                                                     self.clusters,
-                                                     self.nclusters)
-        features[..., 2] = calculate_cluster_feature(self.Z,
-                                                     np.percentile,
-                                                     self.clusters,
-                                                     self.nclusters,
-                                                     q=5)
-        features[..., 3] = calculate_cluster_feature(self.Z,
-                                                     np.percentile,
-                                                     self.clusters,
-                                                     self.nclusters,
-                                                     q=95)
-        features[..., 4] = calculate_cluster_feature(self.Z,
-                                                     np.max,
-                                                     self.clusters,
-                                                     self.nclusters)
-        features[..., 5] = calculate_cluster_feature(self.Z,
-                                                     np.min,
-                                                     self.clusters,
-                                                     self.nclusters)
-
-        stat_measures = features[~np.isnan(features)].reshape((-1, 6))
+        stat_measures = features[~np.isnan(features)].reshape((-1, nstats))
 
         # Normalize all statistics to [0, 1]
         minimum = stat_measures.min(axis=0)

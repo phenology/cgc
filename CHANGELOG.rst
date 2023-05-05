@@ -8,6 +8,25 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.7.0] - 2023-05-05
+********************
+
+Added
+-----
+
+* k-means refinement now supports user-specified features
+
+Changed
+-------
+
+* minor naming changes in classes/parameters (kmeans vs kmean, and consistent capitalization)
+
+Fixed
+-----
+
+* result objects are now copied on return, so running more iterations does not modify previous results
+* initial cluster assignment can now be provided as dask array
+
 [0.6.2] - 2022-03-09
 ********************
 
