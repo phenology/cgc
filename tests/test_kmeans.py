@@ -28,7 +28,7 @@ def init_cocluster_km():
     clusters = [row_clusters, col_clusters]
     nclusters = [nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
-    kmeans_max_iter = 2
+    kmeans_max_iter = 100
     km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=nclusters,
@@ -131,6 +131,15 @@ class TestKMeans(unittest.TestCase):
                             [1., 0., 1., 1., 1., 1.], [0., 0., 0., 0., 0.,
                                                        0.]])
         self.assertTrue(np.all(results == km.stat_measures_norm))
+
+    def test_smaller_number_of_actual_clusters(self):
+        # should not fail even if the number of identified clusters is smaller
+        # than the number of required clusters
+        km = init_cocluster_km()
+        # there are 2 actual clusters
+        km.k_range = [3]
+        results = km.compute()
+        assert results.k_value == 3
 
     def test_kmeans_labels_coclustering(self):
         km = init_cocluster_km()
@@ -241,3 +250,58 @@ class TestKMeans(unittest.TestCase):
                     k_range=range(3, 1, -1))
         res2 = km.compute()
         self.assertEqual(res2.k_value, 2)
+
+    def test_user_defined_statistics(self):
+        # use optional parameters for one of the statistics function
+        Z = np.array([[0, 0, 1, 1],
+                      [0, 0, 1, 1],
+                      [1, 1, 2, 2],
+                      [1, 1, 2, 2],
+                      [1, 1, 2, 2]])
+        row_clusters = np.array([0, 0, 1, 1, 1])
+        col_clusters = np.array([0, 0, 1, 1])
+        nrow_clusters, ncol_clusters = 2, 2
+        clusters = [row_clusters, col_clusters]
+        nclusters = [nrow_clusters, ncol_clusters]
+        k_range = [2, 3]
+        kmean_max_iter = 100
+        km = Kmeans(Z=Z,
+                    clusters=clusters,
+                    nclusters=nclusters,
+                    k_range=k_range,
+                    kmean_max_iter=kmean_max_iter,
+                    statistics=(np.mean, (np.std, {'axis': None})))
+        res = km.compute()
+        assert res.input_parameters["statistics"][0][0] == "mean"
+        assert len(res.input_parameters["statistics"][0][1]) == 0
+        assert res.input_parameters["statistics"][1][0] == "std"
+        assert len(res.input_parameters["statistics"][1][1]) == 1
+        assert res.k_value == 3
+
+    def test_check_values_with_user_defined_statistics(self):
+        # the choice of the statistics affects the results
+        Z = np.array([[0, 0, 1, 1],
+                      [0, 0, 0.5, 1],
+                      [1, 1, 2, 2],
+                      [1, 1, 2, 2],
+                      [1, 0.5, 2, 0.5]])
+        row_clusters = np.array([0, 0, 1, 1, 1])
+        col_clusters = np.array([0, 0, 1, 1])
+        nrow_clusters, ncol_clusters = 2, 2
+        clusters = [row_clusters, col_clusters]
+        nclusters = [nrow_clusters, ncol_clusters]
+        k_range = [2, 3]
+        kmean_max_iter = 100
+
+        def run_kmeans(statistics=None):
+            km = Kmeans(Z=Z,
+                        clusters=clusters,
+                        nclusters=nclusters,
+                        k_range=k_range,
+                        kmean_max_iter=kmean_max_iter,
+                        statistics=statistics)
+            res = km.compute()
+            return res.k_value
+
+        assert run_kmeans() == 3
+        assert run_kmeans((np.min,)) == 2
