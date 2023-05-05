@@ -264,12 +264,12 @@ class TestKMeans(unittest.TestCase):
         clusters = [row_clusters, col_clusters]
         nclusters = [nrow_clusters, ncol_clusters]
         k_range = [2, 3]
-        kmean_max_iter = 100
-        km = Kmeans(Z=Z,
+        kmeans_max_iter = 100
+        km = KMeans(Z=Z,
                     clusters=clusters,
                     nclusters=nclusters,
                     k_range=k_range,
-                    kmean_max_iter=kmean_max_iter,
+                    kmeans_max_iter=kmeans_max_iter,
                     statistics=(np.mean, (np.std, {'axis': None})))
         res = km.compute()
         assert res.input_parameters["statistics"][0][0] == "mean"
@@ -291,14 +291,14 @@ class TestKMeans(unittest.TestCase):
         clusters = [row_clusters, col_clusters]
         nclusters = [nrow_clusters, ncol_clusters]
         k_range = [2, 3]
-        kmean_max_iter = 100
+        kmeans_max_iter = 100
 
         def run_kmeans(statistics=None):
-            km = Kmeans(Z=Z,
+            km = KMeans(Z=Z,
                         clusters=clusters,
                         nclusters=nclusters,
                         k_range=k_range,
-                        kmean_max_iter=kmean_max_iter,
+                        kmeans_max_iter=kmeans_max_iter,
                         statistics=statistics)
             res = km.compute()
             return res.k_value
