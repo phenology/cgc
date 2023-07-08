@@ -18,10 +18,10 @@ for the k-means clustering:
 
 However, the user can customize the set of statistics computed over the clusters.
 The implementation, which is based on the `scikit-learn`_ package, tests a range of k values and select the optimal one
-based on the `Silhouette coefficient`_.
+based on the `silhouette coefficient`_.
 
 .. _scikit-learn: https://scikit-learn.org/stable/index.html
-.. _Silhouette coefficient: https://en.wikipedia.org/wiki/Silhouette_(clustering)
+.. _silhouette coefficient: https://en.wikipedia.org/wiki/Silhouette_(clustering)
 
 Running the refinement
 ----------------------
@@ -49,15 +49,17 @@ One can then setup ``KMeans`` in the following way:
         clusters=(row_clusters, col_cluster),
         nclusters=(3, 2)
         k_range=range(2, 5),
-        kmeans_max_iter=100,
+        kmeans_kwargs={'init': 'random', 'n_init': 100},
         output_filename='results.json' # JSON file where to write output
     )
 
 Here ``k_range`` is the range of ``k`` values to investigate. If not provided, a sensible range will be setup (from 2 to
 a fraction of the number of co- or tri-clusters - the optional ``max_k_ratio`` argument allows for additional control,
-see :ref:`API<API>`). ``kmeans_max_iter`` is the maximum number of iterations employed for the k-means clustering. By
-using the optional argument ``statistics``, the user can define a custom set of statistics employed for the k-means
-refinement (see the :ref:`API<API>`).
+see :ref:`API<API>`). ``kmeans_kwargs`` contains input arguments passed on to the `scikit-learn KMeans object`_ upon
+initialization (here we define the initialization procedure). By using the optional argument ``statistics``, the user
+can define a custom set of statistics employed for the k-means refinement (see the :ref:`API<API>`).
+
+.. _scikit-learn KMeans object: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
 
 The ``compute`` function is then called to run the k-means refinement:
 
