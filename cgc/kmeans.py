@@ -69,8 +69,9 @@ class KMeans(object):
         to `max_k_ratio*max_k`, where `max_k` is the number of non-empty co- or
         tri-clusters. It will be ignored if `k_range` is given. Default to 0.8.
     :type max_k_ratio: float, optional
-    :param kmeans_max_iter: Maximum number of iterations of k-means.
-    :type kmeans_max_iter: int, optional
+    :param kmeans_kwargs: Arguments passed on when initializing the
+        scikit-learn's KMeans object.
+    :type kmeans_kwargs: dict, optional
     :param statistics: Statistics to be computed over the clusters, which are
         then used to refine these. These are provided as an iterable of
         callable functions, with optional keyword arguments. For example:
@@ -91,7 +92,7 @@ class KMeans(object):
                 clusters=clusters,
                 nclusters=[2, 2],
                 k_range= range(2, 4),
-                kmeans_max_iter=2)
+                kmeans_kwargs={"max_iter": 100})
     """
     def __init__(self,
                  Z,
@@ -99,13 +100,13 @@ class KMeans(object):
                  nclusters,
                  k_range=None,
                  max_k_ratio=0.8,
-                 kmeans_max_iter=100,
+                 kmeans_kwargs=None,
                  statistics=None,
                  output_filename=''):
         # Input parameters -----------------
         self.clusters = clusters
         self.nclusters = nclusters
-        self.kmeans_max_iter = kmeans_max_iter
+        self.kmeans_kwargs = {} if kmeans_kwargs is None else kmeans_kwargs
         self.output_filename = output_filename
 
         max_k = np.prod(self.nclusters)
@@ -130,7 +131,7 @@ class KMeans(object):
         self.results = KMeansResults(
             clusters=self.clusters,
             nclusters=self.nclusters,
-            kmean_max_iter=self.kmeans_max_iter,
+            kmeans_kwargs=self.kmeans_kwargs,
             output_filename=self.output_filename,
             k_range=self.k_range,
             statistics=[(func.__name__, kw) for func, kw in self.statistics],
@@ -191,9 +192,9 @@ class KMeans(object):
         silhouette_avg_list = np.array([])  # average silhouette measure vs k
         kmeans_label_list = []
         for k in self.k_range:
-            # Compute Kmean
+            # Compute k-means
             km = sklearn.cluster.KMeans(
-                n_clusters=k, max_iter=self.kmeans_max_iter
+                n_clusters=k, **self.kmeans_kwargs
             )
             kmeans_cluster = km.fit(self.stat_measures_norm)
             silhouette_avg = silhouette_score(self.stat_measures_norm,

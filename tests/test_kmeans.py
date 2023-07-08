@@ -28,12 +28,12 @@ def init_cocluster_km():
     clusters = [row_clusters, col_clusters]
     nclusters = [nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
-    kmeans_max_iter = 100
+    kmeans_kwargs = {"init": "k-means++", "n_init": "auto"}
     km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=nclusters,
                 k_range=k_range,
-                kmeans_max_iter=kmeans_max_iter)
+                kmeans_kwargs=kmeans_kwargs)
     return km
 
 
@@ -51,12 +51,12 @@ def init_cocluster_km_with_noise():
     clusters = [row_clusters, col_clusters]
     nclusters = [nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
-    kmeans_max_iter = 2
+    kmeans_kwargs = {"init": "k-means++", "n_init": "auto"}
     km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=nclusters,
                 k_range=k_range,
-                kmeans_max_iter=kmeans_max_iter)
+                kmeans_kwargs=kmeans_kwargs)
     return km
 
 
@@ -72,12 +72,12 @@ def init_tricluster_km():
     clusters = [band_clusters, row_clusters, col_clusters]
     nclusters = [nband_clusters, nrow_clusters, ncol_clusters]
     k_range = range(2, 4)
-    kmeans_max_iter = 2
+    kmeans_kwargs = {"init": "k-means++", "n_init": "auto"}
     km = KMeans(Z=Z,
                 clusters=clusters,
                 nclusters=nclusters,
                 k_range=k_range,
-                kmeans_max_iter=kmeans_max_iter)
+                kmeans_kwargs=kmeans_kwargs)
     return km
 
 
@@ -264,12 +264,10 @@ class TestKMeans(unittest.TestCase):
         clusters = [row_clusters, col_clusters]
         nclusters = [nrow_clusters, ncol_clusters]
         k_range = [2, 3]
-        kmeans_max_iter = 100
         km = KMeans(Z=Z,
                     clusters=clusters,
                     nclusters=nclusters,
                     k_range=k_range,
-                    kmeans_max_iter=kmeans_max_iter,
                     statistics=(np.mean, (np.std, {'axis': None})))
         res = km.compute()
         assert res.input_parameters["statistics"][0][0] == "mean"
@@ -291,14 +289,14 @@ class TestKMeans(unittest.TestCase):
         clusters = [row_clusters, col_clusters]
         nclusters = [nrow_clusters, ncol_clusters]
         k_range = [2, 3]
-        kmeans_max_iter = 100
+        kmeans_kwargs = {"init": "k-means++", "n_init": "auto"}
 
         def run_kmeans(statistics=None):
             km = KMeans(Z=Z,
                         clusters=clusters,
                         nclusters=nclusters,
                         k_range=k_range,
-                        kmeans_max_iter=kmeans_max_iter,
+                        kmeans_kwargs=kmeans_kwargs,
                         statistics=statistics)
             res = km.compute()
             return res.k_value
