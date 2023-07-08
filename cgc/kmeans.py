@@ -204,14 +204,16 @@ class KMeans(object):
             kmeans_label_list.append(kmeans_cluster.labels_)
         idx_k = np.argmax(silhouette_avg_list)
         if np.sum(silhouette_avg_list == silhouette_avg_list[idx_k]) > 1:
-            idx_k_list = np.argwhere(
-                silhouette_avg_list == silhouette_avg_list[idx_k]).reshape(
-                    -1).tolist()
+            idx_ks = np.argwhere(
+                silhouette_avg_list == silhouette_avg_list[idx_k]
+            )
             logger.warning(
                 "Multiple k values with the same silhouette score: {},"
                 "picking the smallest one: {}".format(
-                    [self.k_range[i] for i in idx_k_list],
-                    self.k_range[idx_k]))
+                    [self.k_range[i] for i in idx_ks.flatten()],
+                    self.k_range[idx_k]
+                )
+            )
         self.results.measure_list = silhouette_avg_list
         self.results.k_value = self.k_range[idx_k]
         labels = kmeans_label_list[idx_k]
