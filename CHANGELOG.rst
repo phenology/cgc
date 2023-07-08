@@ -8,6 +8,20 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [Unreleased]
 ************
 
+[0.8.0] - 2023-07-08
+********************
+
+Added
+-----
+
+* k-means refinement now reports inertia computed for all k values
+
+Changed
+-------
+
+* the parameters that can be used to configure k-means runs have been modified providing more flexibility
+
+
 [0.7.0] - 2023-05-05
 ********************
 

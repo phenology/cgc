@@ -42,7 +42,7 @@
   "license": {
     "id": "Apache-2.0"
   },
-  "publication_date": "2023-05-05",
+  "publication_date": "2023-07-08",
   "title": "CGC: a Scalable Python Package for Co- and Tri-Clustering of Geodata Cubes",
-  "version": "0.7.0"
+  "version": "0.8.0"
 }

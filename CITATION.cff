@@ -33,7 +33,7 @@ authors:
     given-names: Raul
     orcid: https://orcid.org/0000-0002-1769-6310
 cff-version: "1.2.0"
-date-released: 2022-05-05
+date-released: 2023-07-08
 doi: "10.5281/zenodo.3979172"
 keywords:
   - "clustering"
@@ -44,5 +44,5 @@ keywords:
 license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
 title: "CGC: a Scalable Python Package for Co- and Tri-Clustering of Geodata Cubes"
-version: "0.7.0"
+version: "0.8.0"
 ...
