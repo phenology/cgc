@@ -18,10 +18,10 @@ for the k-means clustering:
 
 However, the user can customize the set of statistics computed over the clusters.
 The implementation, which is based on the `scikit-learn`_ package, tests a range of k values and select the optimal one
-based on the `Silhouette coefficient`_.
+based on the `silhouette coefficient`_.
 
 .. _scikit-learn: https://scikit-learn.org/stable/index.html
-.. _Silhouette coefficient: https://en.wikipedia.org/wiki/Silhouette_(clustering)
+.. _silhouette coefficient: https://en.wikipedia.org/wiki/Silhouette_(clustering)
 
 Running the refinement
 ----------------------

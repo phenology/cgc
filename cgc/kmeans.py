@@ -24,7 +24,7 @@ class KMeansResults(Results):
     """
     Contains results and metadata of a k-means refinement calculation.
 
-    :var k_value: Optimal K value (value with maximum Silhouette score).
+    :var k_value: Optimal K value (value with maximum silhouette score).
     :type k_value: int
     :var labels: Refined clusters labels. It is a 2D- (for coclustering)
                  or 3D- (for triclustering) array, with the shape of
@@ -32,7 +32,7 @@ class KMeansResults(Results):
                  represents the refined cluster label of the corresponding
                  band/row/column cluster combination.
     :type labels: np.ndarray
-    :var measure_list: List of Silhouette coefficients for all tested k values.
+    :var measure_list: List of silhouette coefficients for all tested k values.
     :type measure_list: np.ndarray
     :var cluster_averages: Refined cluster averages. They are computed as means
         over all elements of the co-/tri-clusters assigned to the refined
@@ -52,7 +52,7 @@ class KMeans(object):
     A set of statistics is computed for all co- or tri-clusters, then these
     clusters are in turned grouped using k-means. K-means clustering is
     performed for multiple k values, then the optimal value is selected on the
-    basis of the Silhouette coefficient.
+    basis of the silhouette coefficient.
 
     :param Z: Data array (N dimensions).
     :type Z: numpy.ndarray or dask.array.Array
@@ -176,8 +176,8 @@ class KMeans(object):
     def compute(self, recalc_statistics=False):
         """
         Compute statistics for each clustering group. Then loop through the
-        range of k values, and compute the averaged Silhouette measure of each
-        k value. Finally select the k with the maximum Silhouette measure.
+        range of k values, and compute the averaged silhouette measure of each
+        k value. Finally select the k with the maximum silhouette measure.
 
         :param recalc_statistics: If True, always recompute statistics.
         :type recalc_statistics: bool, optional
