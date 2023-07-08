@@ -32,8 +32,10 @@ class KMeansResults(Results):
                  represents the refined cluster label of the corresponding
                  band/row/column cluster combination.
     :type labels: np.ndarray
+    :var inertia: List of inertia values for all tested k values.
+    :type inertia: list
     :var measure_list: List of silhouette coefficients for all tested k values.
-    :type measure_list: np.ndarray
+    :type measure_list: list
     :var cluster_averages: Refined cluster averages. They are computed as means
         over all elements of the co-/tri-clusters assigned to the refined
         clusters. Initially empty clusters are assigned NaN values.
@@ -41,6 +43,7 @@ class KMeansResults(Results):
     """
     k_value = None
     labels = None
+    inertia = None
     measure_list = None
     cluster_averages = None
 
@@ -189,7 +192,8 @@ class KMeans(object):
             self._compute_statistic_measures()
 
         # Search for value k
-        silhouette_avg_list = np.array([])  # average silhouette measure vs k
+        inertia_list = []
+        silhouette_list = []  # average silhouette score vs k
         kmeans_label_list = []
         for k in self.k_range:
             # Compute k-means
@@ -197,26 +201,27 @@ class KMeans(object):
                 n_clusters=k, **self.kmeans_kwargs
             )
             kmeans_cluster = km.fit(self.stat_measures_norm)
-            silhouette_avg = silhouette_score(self.stat_measures_norm,
-                                              kmeans_cluster.labels_)
-            silhouette_avg_list = np.append(silhouette_avg_list,
-                                            silhouette_avg)
-            kmeans_label_list.append(kmeans_cluster.labels_)
-        idx_k = np.argmax(silhouette_avg_list)
-        if np.sum(silhouette_avg_list == silhouette_avg_list[idx_k]) > 1:
-            idx_ks = np.argwhere(
-                silhouette_avg_list == silhouette_avg_list[idx_k]
+            silhouette = silhouette_score(
+                self.stat_measures_norm, kmeans_cluster.labels_
             )
+            silhouette_list.append(silhouette)
+            kmeans_label_list.append(kmeans_cluster.labels_)
+            inertia_list.append(kmeans_cluster.inertia_)
+        idx = np.argmax(silhouette_list)
+        max_silhouette_mask = np.array(silhouette_list) == silhouette_list[idx]
+        if np.sum(max_silhouette_mask) > 1:
+            idxs = np.argwhere(max_silhouette_mask)
             logger.warning(
                 "Multiple k values with the same silhouette score: {},"
                 "picking the smallest one: {}".format(
-                    [self.k_range[i] for i in idx_ks.flatten()],
-                    self.k_range[idx_k]
+                    [self.k_range[i] for i in idxs.flatten()],
+                    self.k_range[idx]
                 )
             )
-        self.results.measure_list = silhouette_avg_list
-        self.results.k_value = self.k_range[idx_k]
-        labels = kmeans_label_list[idx_k]
+        self.results.measure_list = silhouette_list
+        self.results.k_value = self.k_range[idx]
+        self.results.inertia = inertia_list
+        labels = kmeans_label_list[idx]
 
         indices = np.meshgrid(*[np.unique(cl) for cl in self.clusters],
                               indexing='ij')
