@@ -1,7 +1,5 @@
 import logging
 
-import numpy as np
-
 import dask.array as da
 
 from dask.distributed import get_client
