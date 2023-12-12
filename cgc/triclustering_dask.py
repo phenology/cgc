@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 
 def _distance(Z, Y):
     """ Distance function """
-    return Y.sum(axis=(1, 2)) - da.einsum('ijk,ljk->il', Z, da.log(Y))
+    return Y.sum(axis=(1, 2)) - da.einsum(
+        'ijk,ljk->il', Z, da.log(Y), optimize=True
+    )
 
 
 def _initialize_clusters(n_el, n_clusters, chunks=None):
@@ -92,12 +94,14 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
         nel_clusters = da.einsum(
             'i,j->ij',
             nel_row_clusters[row_cluster_labels],
-            nel_col_clusters[col_cluster_labels]
+            nel_col_clusters[col_cluster_labels],
+            optimize=True,
         )
         nel_clusters = da.einsum(
             'i,jk->ijk',
             nel_bnd_clusters[bnd_cluster_labels],
-            nel_clusters
+            nel_clusters,
+            optimize=True,
         )
 
         R = _setup_cluster_matrix(row_cluster_labels, row_clusters)
@@ -106,31 +110,31 @@ def triclustering(Z, nclusters_row, nclusters_col, nclusters_bnd, errobj,
 
         # calculate tri-cluster averages
         # first sum values in each tri-cluster ..
-        TriCavg = da.einsum('ij,ilm->jlm', B, Z)  # .. along band axis
-        TriCavg = da.einsum('ij,kim->kjm', R, TriCavg)  # .. along row axis
-        TriCavg = da.einsum('ij,kli->klj', C, TriCavg)  # .. along col axis
+        TriCavg = da.einsum('ij,ilm->jlm', B, Z, optimize=True)  # .. along band axis # noqa: E501
+        TriCavg = da.einsum('ij,kim->kjm', R, TriCavg, optimize=True)  # .. along row axis # noqa: E501
+        TriCavg = da.einsum('ij,kli->klj', C, TriCavg, optimize=True)  # .. along col axis # noqa: E501
         # finally divide by number of elements in each tri-cluster
         TriCavg = TriCavg / nel_clusters
 
         # unpack tri-cluster averages ..
-        avg_unpck = da.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
-        avg_unpck = da.einsum('ij,klj->kli', C, avg_unpck)  # .. along col axis
+        avg_unpck = da.einsum('ij,jkl->ikl', B, TriCavg, optimize=True)  # .. along band axis # noqa: E501
+        avg_unpck = da.einsum('ij,klj->kli', C, avg_unpck, optimize=True)  # .. along col axis # noqa: E501
         # use these for the row cluster assignment
         idx = (1, 0, 2)
         d_row = _distance(Z.transpose(idx), avg_unpck.transpose(idx))
         row_clusters = da.argmin(d_row, axis=1)
 
         # unpack tri-cluster averages ..
-        avg_unpck = da.einsum('ij,jkl->ikl', B, TriCavg)  # .. along band axis
-        avg_unpck = da.einsum('ij,kjl->kil', R, avg_unpck)  # .. along row axis
+        avg_unpck = da.einsum('ij,jkl->ikl', B, TriCavg, optimize=True)  # .. along band axis # noqa: E501
+        avg_unpck = da.einsum('ij,kjl->kil', R, avg_unpck, optimize=True)  # .. along row axis # noqa: E501
         # use these for the col cluster assignment
         idx = (2, 0, 1)
         d_col = _distance(Z.transpose(idx), avg_unpck.transpose(idx))
         col_clusters = da.argmin(d_col, axis=1)
 
         # unpack tri-cluster averages ..
-        avg_unpck = da.einsum('ij,kjl->kil', R, TriCavg)  # .. along row axis
-        avg_unpck = da.einsum('ij,klj->kli', C, avg_unpck)  # .. along col axis
+        avg_unpck = da.einsum('ij,kjl->kil', R, TriCavg, optimize=True)  # .. along row axis # noqa: E501
+        avg_unpck = da.einsum('ij,klj->kli', C, avg_unpck, optimize=True)  # .. along col axis # noqa: E501
         # use these for the band cluster assignment
         d_bnd = _distance(Z, avg_unpck)
         bnd_clusters = da.argmin(d_bnd, axis=1)
